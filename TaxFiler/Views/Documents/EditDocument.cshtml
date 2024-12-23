@@ -63,7 +63,7 @@
                 <label asp-for="TaxAmount" class="control-label"></label>
             </div>
             <div class="col-md-10">
-                <input asp-for="TaxAmount" class="form-control" type="number" />
+                <input asp-for="TaxAmount" class="form-control" type="number" step="any" />
                 <span asp-validation-for="TaxAmount" class="text-danger"></span>
             </div>
         </div>
@@ -72,7 +72,7 @@
                 <label asp-for="TaxRate" class="control-label"></label>
             </div>
             <div class="col-md-10">
-                <input asp-for="TaxRate" class="form-control" type="number"/>
+                <input asp-for="TaxRate" class="form-control" type="number" step="any" />
                 <span asp-validation-for="TaxRate" class="text-danger"></span>
             </div>
         </div>
@@ -81,7 +81,7 @@
                 <label asp-for="SubTotal" class="control-label"></label>
             </div>
             <div class="col-md-10">
-                <input asp-for="SubTotal" class="form-control" type="number"/>
+                <input asp-for="SubTotal" class="form-control" type="number"  step="any"/>
                 <span asp-validation-for="SubTotal" class="text-danger"></span>
             </div>
         </div>
@@ -90,7 +90,7 @@
                 <label asp-for="Total" class="control-label"></label>
             </div>
             <div class="col-md-10">
-                <input asp-for="Total" class="form-control" type="number"/>
+                <input asp-for="Total" class="form-control" type="number" step="any" />
                 <span asp-validation-for="Total" class="text-danger"></span>
             </div>
         </div>
