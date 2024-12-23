@@ -2,7 +2,7 @@
  * jQuery Validation Plugin v1.19.5
  *
  * https://jqueryvalidation.org/
- *
+ * 
  * Copyright (c) 2022 Jörn Zaefferer
  * Released under the MIT license
  */
