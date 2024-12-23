@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TaxFiler.Model.Dto;
 using TaxFiler.Service;
 
@@ -35,13 +34,8 @@ public class DocumentsController(IDocumentService documentService) : Controller
     
         
     [HttpGet("AddDocument")]
-    public async Task<ActionResult> AddDocument()
+    public ActionResult AddDocument()
     {
-
-        ViewBag.Document = new AddDocumentDto{
-        
-            };
-
         return View();
     }
     

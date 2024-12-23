@@ -3,7 +3,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
-using TaxFiler.DB.Model;
 using TaxFiler.Models;
 using TaxFiler.Service;
 
@@ -93,7 +92,7 @@ namespace TaxFiler.Controllers
         
         public async Task<IActionResult> IndexAsync()
         {
-            ViewBag.Error = TempData["Error"];
+            if(TempData["Error"] !=null) ViewBag.Error = TempData["Error"]!;
             
             var documents = await _documentService.GetDocumentsAsync();
             
