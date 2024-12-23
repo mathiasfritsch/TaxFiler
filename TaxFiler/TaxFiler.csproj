@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LlamaIndex.Core\LlamaIndex.Core.csproj" />
     <ProjectReference Include="..\LlamaParse\LlamaParse.csproj" />
-    <ProjectReference Include="..\TaxFiler.Service\TaxFiler.Service.csproj" />
+    <ProjectReference Include="..\TaxFiler.DB\TaxFiler.DB.csproj" />
+    <ProjectReference Include="..\TaxFiler.Model\TaxFiler.Model.csproj" />
   </ItemGroup>
 </Project>

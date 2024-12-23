@@ -7,9 +7,7 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:9090",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "Catalog__Name": "cat1",
-        "Catalog__Year": "1999"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

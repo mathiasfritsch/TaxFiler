@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TaxFiler.DB;
 using TaxFiler.Model;
-using TaxFiler.Service;
+
 
 namespace TaxFiler
 {
@@ -64,10 +64,10 @@ namespace TaxFiler
                 });
             });
             
-            builder.Services.AddScoped<ISyncService,SyncService>();
-            builder.Services.AddScoped<IParseService,ParseService>();
-            builder.Services.AddScoped<IGoogleDriveService,GoogleDriveService>();
-            builder.Services.AddScoped<IDocumentService,DocumenService>();
+            // builder.Services.AddScoped<ISyncService,SyncService>();
+            // builder.Services.AddScoped<IParseService,ParseService>();
+            // builder.Services.AddScoped<IGoogleDriveService,GoogleDriveService>();
+            // builder.Services.AddScoped<IDocumentService,DocumenService>();
             builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
             builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "EntraId");
             
