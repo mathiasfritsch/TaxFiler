@@ -1,0 +1,21 @@
+﻿@model TaxFiler.Models.HomeViewModel
+<div class="text-center">
+    <form asp-action="SyncFiles" method="post">
+        <button type="submit">Sync</button>
+    </form>
+</div>
+<div class="text-center">
+    @foreach (var file in Model.Files)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>@file.Name</h3>
+                        <div>@file.Id</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

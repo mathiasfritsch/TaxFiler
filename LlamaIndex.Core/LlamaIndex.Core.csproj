@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<PackageId>LlamaIndex.Core</PackageId>
+		<Company>LlamaIndex</Company>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="8.0.3" />
+	</ItemGroup>
+</Project>

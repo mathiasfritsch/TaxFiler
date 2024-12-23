@@ -1,0 +1,99 @@
+﻿@model TaxFiler.Model.Dto.DocumentDto
+<style>
+    .form-group {
+        margin-bottom: 10px;
+    }
+</style>
+<div class="text-center">
+    <form asp-action="AddDocument" method="post">
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="Name" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="Name" class="form-control"/>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="InvoiceDate" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="InvoiceDate" class="form-control" type="date"/>
+                <span asp-validation-for="InvoiceDate" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="InvoiceNumber" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="InvoiceNumber" class="form-control"/>
+                <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="ExternalRef" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="ExternalRef" class="form-control"/>
+                <span asp-validation-for="ExternalRef" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="Orphaned" class="control-label"></label>
+            </div>
+            <div class="col-md-10 text-left">
+                @Html.CheckBoxFor(m => m.Orphaned, new { @checked = "checked" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="Parsed" class="control-label"></label>
+            </div>
+            <div class="col-md-10 text-left">
+                @Html.CheckBoxFor(m => m.Parsed, new { @checked = "checked" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="TaxAmount" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="TaxAmount" class="form-control" type="number" />
+                <span asp-validation-for="TaxAmount" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="TaxRate" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="TaxRate" class="form-control" type="number"/>
+                <span asp-validation-for="TaxRate" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="SubTotal" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="SubTotal" class="form-control" type="number"/>
+                <span asp-validation-for="SubTotal" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="Total" class="control-label"></label>
+            </div>
+            <div class="col-md-10">
+                <input asp-for="Total" class="form-control" type="number"/>
+                <span asp-validation-for="Total" class="text-danger"></span>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+</div>

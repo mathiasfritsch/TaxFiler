@@ -1,0 +1,71 @@
+@model DocumentViewModel
+<div class="text-center">
+    <div>
+        @if(ViewBag.Error != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.Error
+            </div>
+        }
+    </div>
+    
+    <div class="text-left row">
+        <div  class="col-md-2" >
+            <form asp-action="SyncFiles" method="post">
+                <button type="submit" class="btn btn-primary  w-100">Sync Files</button>
+            </form>
+        </div>
+        <div  class="col-md-2" >
+            <a asp-action="AddDocument" asp-controller="Documents" class="btn btn-primary   w-100">Add Document</a>
+        </div>
+       
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Dateiname</th>
+            <th>Id</th>
+            <th>Orphaned</th>
+            <th>Parsed</th>
+            <th>Rechnungsnummer</th>
+            <th>Rechnungsdatum</th>
+            <th>Netto</th>
+            <th>Brutto</th>
+            <th>Mwst %</th>
+            <th>Mwst Betrag</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var document in Model.Documents)
+        {
+            <tr>
+                <td class="text-left">@document.Name</td>
+                <td>@document.Id</td>
+                <td>@document.Orphaned</td>
+                <td>@document.Parsed</td>
+                <td class="text-left" >@document.InvoiceNumber</td>
+                <td>@document.InvoiceDate</td>
+                <td>@document.SubTotal</td>
+                <td>@document.Total</td>
+                <td>@document.TaxRate</td>
+                <td>@document.TaxAmount</td>
+                <td>
+                    @Html.ActionLink("Edit", "EditDocument", "Documents", new { documentId = document.Id }, new { @class = "btn btn-secondary" })
+                </td>
+                <td>
+                    <form asp-action="Parse" method="post">
+                        <input type="hidden" name="fileId" value="@document.Id"/>
+                        <button type="submit" class="btn btn-secondary">Parse</button>
+                    </form>
+                </td>
+                <td>
+                    <form asp-action="DeleteDocument" asp-controller="Documents" method="post" asp-route-id="@document.Id">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
