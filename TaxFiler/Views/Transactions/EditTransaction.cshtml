@@ -1,0 +1,100 @@
+﻿@model TaxFiler.Model.Dto.TransactionDto
+
+<style>
+    .form-group {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    .form-group label {
+        margin-right: 10px;
+        width: 150px;
+    }
+    .form-group input {
+        flex: 1;
+    }
+</style>
+
+<div class="text-center">
+    <h2>Edit Transaction</h2>
+    <form asp-action="UpdateTransaction" method="post" asp-route-yearMonth="@ViewBag.YearMonth">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-group">
+            <label asp-for="NetAmount" class="control-label"></label>
+            <input asp-for="NetAmount" class="form-control" />
+            <span asp-validation-for="NetAmount" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="GrossAmount" class="control-label"></label>
+            <input asp-for="GrossAmount" class="form-control" />
+            <span asp-validation-for="GrossAmount" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TaxAmount" class="control-label"></label>
+            <input asp-for="TaxAmount" class="form-control" />
+            <span asp-validation-for="TaxAmount" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TaxRate" class="control-label"></label>
+            <input asp-for="TaxRate" class="form-control" />
+            <span asp-validation-for="TaxRate" class="text-danger"></span>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="IsIncomeTaxRelevant" class="control-label"></label>
+            </div>
+            <div class="col-md-10 text-left">
+                @Html.CheckBoxFor(m => m.IsIncomeTaxRelevant, new { @checked = "checked" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="IsOutgoing" class="control-label"></label>
+            </div>
+            <div class="col-md-10 text-left">
+                @Html.CheckBoxFor(m => m.IsOutgoing, new { @checked = "checked" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-2">
+                <label asp-for="IsSalesTaxRelevant" class="control-label"></label>
+            </div>
+            <div class="col-md-10 text-left">
+                @Html.CheckBoxFor(m => m.IsSalesTaxRelevant, new { @checked = "checked" })
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Counterparty" class="control-label"></label>
+            <input asp-for="Counterparty" class="form-control" />
+            <span asp-validation-for="Counterparty" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TransactionReference" class="control-label"></label>
+            <input asp-for="TransactionReference" class="form-control" />
+            <span asp-validation-for="TransactionReference" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TransactionDateTime" class="control-label"></label>
+            <input asp-for="TransactionDateTime" class="form-control" />
+            <span asp-validation-for="TransactionDateTime" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TransactionNote" class="control-label"></label>
+            <input asp-for="TransactionNote" class="form-control" />
+            <span asp-validation-for="TransactionNote" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</div>

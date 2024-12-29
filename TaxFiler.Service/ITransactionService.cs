@@ -8,4 +8,6 @@ public interface ITransactionService
     public Task AddTransactionsAsync(IEnumerable<csvModel.TransactionDto> transactions);
     public Task TruncateTransactionsAsync();
     Task<IEnumerable<dtoModel.TransactionDto>> GetTransactionsAsync();
+    Task<dtoModel.TransactionDto> GetTransactionAsync(int transactionid);
+    Task UpdateTransactionAsync(dtoModel.TransactionDto transactionDto);
 }

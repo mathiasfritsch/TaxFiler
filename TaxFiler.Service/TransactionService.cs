@@ -11,7 +11,6 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
 {
     public IEnumerable<TransactionDto> ParseTransactions(TextReader reader)
     {
-        //using var reader = new StreamReader("C:\\projects\\TaxFiler\\TaxFiler\\Finom_statement_25122024.csv");
         using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
         var transactions = csv.GetRecords<TransactionDto>();
         return transactions.ToArray();
@@ -28,7 +27,10 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
                     Counterparty = transaction.CounterPartyIBAN,
                     TransactionNote = transaction.Comment,
                     TransactionReference = transaction.TransactionID,
-                    TransactionDateTime = new DateTime(transaction.BookingDate,transaction.TimeCompleted)
+                    TransactionDateTime = new DateTime(transaction.BookingDate,transaction.TimeCompleted),
+                    IsOutgoing = transaction.Amount < 0,
+                    IsIncomeTaxRelevant = false,
+                    IsSalesTaxRelevant = false
                 }
             );
         }
@@ -54,6 +56,50 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
             TransactionNote = t.TransactionNote,
             TransactionReference = t.TransactionReference,
             TransactionDateTime = t.TransactionDateTime,
+            IsSalesTaxRelevant = t.IsSalesTaxRelevant,
+            IsOutgoing = t.IsOutgoing,
+            IsIncomeTaxRelevant = t.IsIncomeTaxRelevant,
+            TaxMonth = t.TaxMonth,
+            TaxYear = t.TaxYear,
+            DocumentId = t.DocumentId
         }).ToList();
+    }
+    
+    public async Task<modelDto.TransactionDto> GetTransactionAsync(int transactionId)
+    {
+        var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == transactionId);
+        return new modelDto.TransactionDto
+        {
+            Id = transaction.Id,
+            NetAmount = transaction.NetAmount,
+            GrossAmount = transaction.GrossAmount,
+            TaxAmount = transaction.TaxAmount,
+            TaxRate = transaction.TaxRate,
+            Counterparty = transaction.Counterparty,
+            TransactionNote = transaction.TransactionNote,
+            TransactionReference = transaction.TransactionReference,
+            TransactionDateTime = transaction.TransactionDateTime,
+            IsSalesTaxRelevant = transaction.IsSalesTaxRelevant,
+            IsOutgoing = transaction.IsOutgoing,
+            IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant
+        };
+    }
+    
+    public async Task UpdateTransactionAsync(modelDto.TransactionDto transactionDto)
+    {
+        var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == transactionDto.Id);
+        
+        transaction.IsIncomeTaxRelevant = transactionDto.IsIncomeTaxRelevant;
+        transaction.IsOutgoing  = transactionDto.IsOutgoing;
+        transaction.IsSalesTaxRelevant = transactionDto.IsSalesTaxRelevant;
+        transaction.NetAmount = transactionDto.NetAmount;
+        transaction.TaxAmount = transactionDto.TaxAmount;
+        transaction.TaxRate = transactionDto.TaxRate;
+        transaction.TransactionDateTime = transactionDto.TransactionDateTime;
+        transaction.TransactionNote = transactionDto.TransactionNote;
+        transaction.TransactionReference = transactionDto.TransactionReference;
+        transaction.Counterparty = transactionDto.Counterparty;
+        
+        await taxFilerContext.SaveChangesAsync();
     }
 }

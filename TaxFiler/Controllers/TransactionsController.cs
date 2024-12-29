@@ -6,15 +6,15 @@ using TaxFiler.Service;
 namespace TaxFiler.Controllers;
 
 [Authorize]
-[Route("transactions")]
 public class TransactionsController(ITransactionService transactionService) : Controller
 {
  
     
     [HttpGet("")]
     [HttpGet("Index")]
-    public async Task<ActionResult<IEnumerable<TransactionDto>>> IndexAsync()
+    public async Task<ActionResult<IEnumerable<TransactionDto>>> IndexAsync(string yearMonth)
     {
+        ViewBag.YearMonth = yearMonth;
         return View( await transactionService.GetTransactionsAsync());
     }
     
@@ -44,6 +44,27 @@ public class TransactionsController(ITransactionService transactionService) : Co
         
         TempData["Message"] = "File uploaded and processed successfully.";
         
+        return RedirectToAction("Index");
+    }
+
+    public IActionResult DeleteTransaction()
+    {
+        throw new NotImplementedException();
+    }
+    
+    [HttpGet("EditTransaction")]
+    public async Task<IActionResult> EditTransaction(string yearMonth, int transactionId)
+    {
+        var transaction = await transactionService.GetTransactionAsync(transactionId);
+        ViewBag.YearMonth = yearMonth;
+        return View(transaction);
+    }
+    
+    [HttpPost("UpdateTransaction")]
+    public async Task<IActionResult> UpdateTransaction(string yearMonth, Model.Dto.TransactionDto transactionDto)
+    {
+        await transactionService.UpdateTransactionAsync(transactionDto);
+        ViewBag.YearMonth = yearMonth;
         return RedirectToAction("Index");
     }
 }

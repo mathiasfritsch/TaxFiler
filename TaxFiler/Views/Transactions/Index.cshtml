@@ -28,6 +28,8 @@
         <th>Transaction Reference</th>
         <th>Transaction DateTime</th>
         <th>Transaction Note</th>
+        <th></th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -43,6 +45,17 @@
             <td>@transaction.TransactionReference</td>
             <td>@transaction.TransactionDateTime</td>
             <td>@transaction.TransactionNote</td>
+
+            <td>
+                @Html.ActionLink("Edit", "EditTransaction", "Transactions", 
+      new { transactionId = transaction.Id , yearMonth = ViewBag.YearMonth }, 
+    new { @class = "btn btn-secondary" })
+            </td>
+            <td>
+                <form asp-action="DeleteTransaction" asp-controller="Transactions" method="post" asp-route-id="@transaction.Id">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
         </tr>
     }
     </tbody>

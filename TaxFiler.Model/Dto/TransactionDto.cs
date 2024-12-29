@@ -11,4 +11,11 @@ public class TransactionDto
     public decimal NetAmount { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal TaxRate { get; set; }
+    public bool IsOutgoing { get; set; }
+    public bool IsIncomeTaxRelevant { get; set; }
+    public int TaxMonth { get; set; }
+    public int TaxYear { get; set; }
+    public int? DocumentId { get; set; }
+    public DocumentDto? Document { get; set; }
+    public bool IsSalesTaxRelevant { get; set; }
 }

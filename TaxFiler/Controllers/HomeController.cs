@@ -91,7 +91,7 @@ namespace TaxFiler.Controllers
             return RedirectToAction("Index", "Home");
         }
         
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> IndexAsync(string yearMonth)
         {
             if(TempData["Error"] !=null) ViewBag.Error = TempData["Error"]!;
             
@@ -102,6 +102,7 @@ namespace TaxFiler.Controllers
                 Documents = documents.ToArray()
             };
             
+            ViewBag.YearMonth = yearMonth;
             return View(documentViewModel);
         }
         

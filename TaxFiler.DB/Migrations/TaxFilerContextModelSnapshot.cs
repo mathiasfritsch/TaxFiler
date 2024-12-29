@@ -73,8 +73,14 @@ namespace TaxFiler.DB.Migrations
                     b.Property<decimal?>("TaxAmount")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TaxMonth")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal?>("TaxRate")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("TaxYear")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal?>("Total")
                         .HasColumnType("TEXT");
@@ -95,8 +101,20 @@ namespace TaxFiler.DB.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("GrossAmount")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsIncomeTaxRelevant")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsOutgoing")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSalesTaxRelevant")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("NetAmount")
                         .HasColumnType("TEXT");
@@ -104,8 +122,14 @@ namespace TaxFiler.DB.Migrations
                     b.Property<decimal>("TaxAmount")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TaxMonth")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("TaxRate")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("TaxYear")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("TransactionDateTime")
                         .HasColumnType("TEXT");
@@ -121,6 +145,8 @@ namespace TaxFiler.DB.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("Transactions");
                 });
@@ -138,6 +164,15 @@ namespace TaxFiler.DB.Migrations
                     b.Navigation("Document");
 
                     b.Navigation("Transaction");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
+                {
+                    b.HasOne("TaxFiler.DB.Model.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId");
+
+                    b.Navigation("Document");
                 });
 #pragma warning restore 612, 618
         }

@@ -94,10 +94,20 @@ namespace TaxFiler
                 c.OAuthUsePkce();
                 c.OAuthScopeSeparator(" ");
             });
-            
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/")
+                {
+                    context.Response.Redirect($"/{DateTime.Now.Year}-{DateTime.Now.Month}/Home/Index");
+                }
+                else
+                {
+                    await next();
+                }
+            });
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{yearMonth}/{controller=Home}/{action=Index}/{id?}");
        
             app.Run();
         }
