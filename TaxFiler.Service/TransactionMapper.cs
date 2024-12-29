@@ -35,7 +35,8 @@ public static class TransactionMapper
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
             TaxMonth = transaction.TaxMonth,
             TaxYear = transaction.TaxYear,
-            DocumentId = transaction.DocumentId
+            DocumentId = transaction.DocumentId,
+            Document = transaction.Document?.ToDto()
         };
 
     public static void UpdateTransaction( Transaction transaction, TransactionDto transactionDto)
@@ -50,5 +51,7 @@ public static class TransactionMapper
         transaction.TransactionNote = transactionDto.TransactionNote;
         transaction.TransactionReference = transactionDto.TransactionReference;
         transaction.Counterparty = transactionDto.Counterparty;
+        transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
+        
     }
 }

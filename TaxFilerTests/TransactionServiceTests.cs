@@ -35,7 +35,7 @@ public class TransactionServiceTests
         _context.Transactions.Count().ShouldBe(0);
         using var reader = new StreamReader("C:\\projects\\TaxFiler\\TaxFiler\\Finom_statement_25122024.csv");
         var transactions = transactionService.ParseTransactions(reader);
-        await transactionService.AddTransactionsAsync(transactions);
+        await transactionService.AddTransactionsAsync(transactions, new DateTime(2024,11,0));
         _context.Transactions.Count().ShouldBe(15);
     }
 }

@@ -10,7 +10,7 @@
         margin-right: 10px;
         width: 150px;
     }
-    .form-group input {
+    .form-group input, .form-group select {
         flex: 1;
     }
 </style>
@@ -94,7 +94,16 @@
             <input asp-for="TransactionNote" class="form-control" />
             <span asp-validation-for="TransactionNote" class="text-danger"></span>
         </div>
-
+        
+        <div class="form-group">
+            <label asp-for="DocumentId" class="control-label"></label>
+            <select class="form-control" 
+                    asp-for="@Model.DocumentId" 
+                    asp-items="@ViewBag.Documents">
+                <option value="-1">Select</option>
+            </select>
+            <span asp-validation-for="DocumentId" class="text-danger"></span>
+        </div>
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
 </div>

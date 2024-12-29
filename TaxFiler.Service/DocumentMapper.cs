@@ -5,7 +5,7 @@ namespace TaxFiler.Service;
 
 public static class DocumentMapper
 {
-    public static DocumentDto MapDocumentToDto(this Document document) =>
+    public static DocumentDto ToDto(this Document document) =>
         new()
         {
             Id = document.Id,
@@ -21,7 +21,7 @@ public static class DocumentMapper
             Parsed = document.Parsed
         };
 
-    public static Document MapAddDocumentDtoToDocument(this AddDocumentDto addDocumentDto)
+    public static Document ToDocument(this AddDocumentDto addDocumentDto)
     {
         return new Document(name: addDocumentDto.Name, 
             externalRef: addDocumentDto.ExternalRef,

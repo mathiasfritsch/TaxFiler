@@ -1,34 +1,43 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using TaxFiler.Mapper;
 using TaxFiler.Model.Dto;
+using TaxFiler.Models;
 using TaxFiler.Service;
 
 namespace TaxFiler.Controllers;
 
 [Authorize]
-public class TransactionsController(ITransactionService transactionService) : Controller
+public class TransactionsController(ITransactionService transactionService, 
+    IDocumentService documentService) : Controller
 {
  
     
     [HttpGet("")]
     [HttpGet("Index")]
-    public async Task<ActionResult<IEnumerable<TransactionDto>>> IndexAsync(string yearMonth)
+    public async Task<ActionResult<IEnumerable<TransactionViewModel>>> IndexAsync(string yearMonth)
     {
         ViewBag.YearMonth = yearMonth;
-        return View( await transactionService.GetTransactionsAsync());
+        
+        var transactions = await transactionService.GetTransactionsAsync(Common.GetYearMonth(yearMonth));
+        var vm = transactions.Select(t => t.ToViewModel());
+        return View( vm);
     }
     
     [HttpPost("Upload")]
-    public async Task<IActionResult> Upload(IFormFile file)
+    public async Task<IActionResult> Upload(IFormFile file,string yearMonth)
     {
+        var yearMonthDate = Common.GetYearMonth(yearMonth);
+        
         if(file.Length > 0)
         {
             try
             {
                 var reader = new StreamReader(file.OpenReadStream());
-
                 var transactions = transactionService.ParseTransactions(reader);
-                await transactionService.AddTransactionsAsync(transactions);
+                
+                await transactionService.AddTransactionsAsync(transactions, yearMonthDate);
                     
                 ViewBag.Message = "File processed successfully!";
             }
@@ -44,19 +53,34 @@ public class TransactionsController(ITransactionService transactionService) : Co
         
         TempData["Message"] = "File uploaded and processed successfully.";
         
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { yearMonth });
     }
 
-    public IActionResult DeleteTransaction()
+    public async Task<IActionResult> DeleteTransaction(string yearMonth)
     {
-        throw new NotImplementedException();
+        await transactionService.DeleteTransactionsAsync(Common.GetYearMonth(yearMonth));
+        ViewBag.YearMonth = yearMonth;
+        
+        return RedirectToAction("Index", new { yearMonth });
+    }
+    
+    public async Task<IActionResult> DeleteTransactions(string yearMonth)
+    {
+        await transactionService.DeleteTransactionsAsync(Common.GetYearMonth(yearMonth));
+        ViewBag.YearMonth = yearMonth;
+        
+        return RedirectToAction("Index", new { yearMonth });
     }
     
     [HttpGet("EditTransaction")]
     public async Task<IActionResult> EditTransaction(string yearMonth, int transactionId)
     {
+        
         var transaction = await transactionService.GetTransactionAsync(transactionId);
+        var documents = await documentService.GetDocumentsByMonthAsync(Common.GetYearMonth(yearMonth));
+
         ViewBag.YearMonth = yearMonth;
+        ViewBag.Documents = documents.Select( s=> new SelectListItem(s.Name,  s.Id.ToString(), s.Id == transaction.DocumentId));
         return View(transaction);
     }
     
@@ -65,6 +89,6 @@ public class TransactionsController(ITransactionService transactionService) : Co
     {
         await transactionService.UpdateTransactionAsync(transactionDto);
         ViewBag.YearMonth = yearMonth;
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { yearMonth });
     }
 }

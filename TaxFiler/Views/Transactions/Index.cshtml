@@ -1,17 +1,29 @@
-@model IEnumerable<TaxFiler.Model.Dto.TransactionDto>
+@model IEnumerable<TaxFiler.Models.TransactionViewModel>
 
 <div class="text-center">
     <h2>Transactions</h2>
 </div>
 
-
 <div class="text-left row">
-    <div  class="col-md-12" >
-        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+    <div  class="col-md-6" >
+        <form asp-action="Upload" 
+              method="post" 
+              enctype="multipart/form-data"
+              asp-route-yearMonth="@ViewBag.YearMonth"
+        >
             <div class="text-left row">
-                <div  class="col-md-6" ><input type="file" name="file" class="form-control"/> </div>
-                <div  class="col-md-6" ><button type="submit" class="btn btn-primary">Upload</button></div>
+                <div  class="col-md-4" ><input type="file" name="file" class="form-control"/> </div>
+                <div  class="col-md-4" ><button type="submit" class="btn btn-primary">Upload</button></div>
+                
             </div>
+        </form>
+    </div>
+    <div  class="text-right col-md-6" >
+        <form asp-action="DeleteTransactions"
+              asp-controller="Transactions"
+              method="post"
+              asp-route-yearMonth="@ViewBag.YearMonth">
+            <button type="submit" class="btn btn-danger">Delete</button>
         </form>
     </div>
 </div>
@@ -20,12 +32,14 @@
     <thead>
     <tr>
         <th>Id</th>
+        <th>out</th>
+        <th>Income Tax</th>
+        <th>Sales Tax</th>
         <th>Net Amount</th>
         <th>Gross Amount</th>
         <th>Tax Amount</th>
         <th>Tax Rate</th>
-        <th>Counterparty</th>
-        <th>Transaction Reference</th>
+        <th>Document</th>
         <th>Transaction DateTime</th>
         <th>Transaction Note</th>
         <th></th>
@@ -37,22 +51,27 @@
     {
         <tr>
             <td>@transaction.Id</td>
+            <td>@transaction.IsOutgoing</td>
+            <td>@transaction.IsIncomeTaxRelevant</td>
+            <td>@transaction.IsSalesTaxRelevant</td>
             <td>@transaction.NetAmount</td>
             <td>@transaction.GrossAmount</td>
             <td>@transaction.TaxAmount</td>
             <td>@transaction.TaxRate</td>
-            <td>@transaction.Counterparty</td>
-            <td>@transaction.TransactionReference</td>
+            <td>@transaction.DocumentName</td>
             <td>@transaction.TransactionDateTime</td>
             <td>@transaction.TransactionNote</td>
-
             <td>
                 @Html.ActionLink("Edit", "EditTransaction", "Transactions", 
       new { transactionId = transaction.Id , yearMonth = ViewBag.YearMonth }, 
     new { @class = "btn btn-secondary" })
             </td>
             <td>
-                <form asp-action="DeleteTransaction" asp-controller="Transactions" method="post" asp-route-id="@transaction.Id">
+                <form asp-action="DeleteTransaction" 
+                      asp-controller="Transactions" 
+                      method="post" 
+                      asp-route-id="@transaction.Id"
+                      asp-route-yearMonth="@ViewBag.YearMonth">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </td>

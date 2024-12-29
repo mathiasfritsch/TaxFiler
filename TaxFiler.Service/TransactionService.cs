@@ -15,10 +15,18 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         return transactions.ToArray();
     }
 
-    public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions)
+    public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions, DateTime yearMonth)
     {
-        foreach (var transaction in transactions) 
-            taxFilerContext.Transactions.Add(transaction.ToTransaction());
+        foreach (var transaction in transactions)
+        {
+            var transactionDb = transaction.ToTransaction();
+            transactionDb.TaxYear = yearMonth.Year;
+            transactionDb.TaxMonth = yearMonth.Month;
+            transactionDb.IsOutgoing = transactionDb.GrossAmount < 0;
+            transactionDb.GrossAmount = Math.Abs(transactionDb.GrossAmount);
+            
+            taxFilerContext.Transactions.Add(transactionDb);
+        }   
         
         await taxFilerContext.SaveChangesAsync();
     }
@@ -28,7 +36,18 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
 
     public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync()
     {
-        var transactions = await taxFilerContext.Transactions.ToListAsync();
+        var transactions = await taxFilerContext.Transactions.Include( t => t.Document).ToListAsync();
+        return transactions.Select(t => t.TransactionDto()).ToList();
+    }
+    
+    public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync(DateTime yearMonth)
+    {
+        var transactions = await taxFilerContext
+            .Transactions
+            .Include(t => t.Document)
+            .Where( t => t.TaxYear == yearMonth.Year && t.TaxMonth == yearMonth.Month)
+            .ToListAsync();
+        
         return transactions.Select(t => t.TransactionDto()).ToList();
     }
     
@@ -44,4 +63,11 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         TransactionMapper.UpdateTransaction(transaction, transactionDto);
         await taxFilerContext.SaveChangesAsync();
     }
+
+    public async Task DeleteTransactionsAsync(DateTime yearMonth)
+        => await taxFilerContext
+            .Transactions
+            .Where(t => t.TaxYear == yearMonth.Year && t.TaxMonth == yearMonth.Month)
+            .ExecuteDeleteAsync( );
+    
 }
