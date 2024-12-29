@@ -4,6 +4,24 @@ namespace TaxFiler.DB.Model
 {
     public class Document
     {
+        public Document()
+        {
+        }
+
+        public Document(string name, string externalRef, bool orphaned, decimal? taxRate, decimal? taxAmount, decimal? total, decimal? subTotal, DateOnly? invoiceDate, string? invoiceNumber, bool parsed)
+        {
+            Name = name;
+            ExternalRef = externalRef;
+            Orphaned = orphaned;
+            TaxRate = taxRate;
+            TaxAmount = taxAmount;
+            Total = total;
+            SubTotal = subTotal;
+            InvoiceDate = invoiceDate;
+            InvoiceNumber = invoiceNumber;
+            Parsed = parsed;
+        }
+
         [Key]
         public int Id { get; set; }
         [MaxLength(200)]

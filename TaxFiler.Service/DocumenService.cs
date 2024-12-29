@@ -15,20 +15,8 @@ public class DocumenService(TaxFilerContext context):IDocumentService
     }
     
     public async Task<IEnumerable<DocumentDto>> GetDocumentsAsync() =>
-        await context.Documents.Select(d => new DocumentDto
-        {
-            Id = d.Id,
-            Name = d.Name,
-            ExternalRef = d.ExternalRef,
-            Orphaned = d.Orphaned,
-            TaxRate = d.TaxRate,
-            TaxAmount = d.TaxAmount,
-            Total = d.Total,
-            SubTotal = d.SubTotal,
-            InvoiceDate = d.InvoiceDate,
-            InvoiceNumber = d.InvoiceNumber,
-            Parsed = d.Parsed
-        }).ToArrayAsync();
+        await context.Documents.Select(d => d.MapDocumentToDto())
+            .ToArrayAsync();
     
     public async Task<Result<DocumentDto>> GetDocumentAsync(int id)
     {
@@ -37,20 +25,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         {
             return Result.Fail($"DocumentId {id} not found");
         }
-        return Result.Ok(new DocumentDto
-        {
-             Id = document.Id,
-             Name = document.Name,
-             ExternalRef = document.ExternalRef,
-             Orphaned = document.Orphaned,
-             TaxRate = document.TaxRate,
-             TaxAmount = document.TaxAmount,
-             Total = document.Total,
-             SubTotal = document.SubTotal,
-             InvoiceDate = document.InvoiceDate,
-             InvoiceNumber = document.InvoiceNumber,
-             Parsed = document.Parsed
-        });
+        return Result.Ok(document.MapDocumentToDto());
     }
     
     public async Task<Result<DocumentDto>> AddDocumentAsync(AddDocumentDto documentDto)
@@ -64,36 +39,12 @@ public class DocumenService(TaxFilerContext context):IDocumentService
             return Result.Fail("ExternalRef is required");
         }
         
-        var document = new Document
-        {
-            Name = documentDto.Name,
-            ExternalRef = documentDto.ExternalRef,
-            Orphaned = documentDto.Orphaned,
-            TaxRate = documentDto.TaxRate,
-            TaxAmount = documentDto.TaxAmount,
-            Total = documentDto.Total,
-            SubTotal = documentDto.SubTotal,
-            InvoiceDate = documentDto.InvoiceDate,
-            InvoiceNumber = documentDto.InvoiceNumber,
-            Parsed = documentDto.Parsed
-        };
+        var document = documentDto.MapAddDocumentDtoToDocument();
         
         await context.Documents.AddAsync(document);
         await context.SaveChangesAsync();
-        return Result.Ok(new DocumentDto
-        {
-            Id = document.Id,
-            Name = document.Name,
-            ExternalRef = document.ExternalRef,
-            Orphaned = document.Orphaned,
-            TaxRate = document.TaxRate,
-            TaxAmount = document.TaxAmount,
-            Total = document.Total,
-            SubTotal = document.SubTotal,
-            InvoiceDate = document.InvoiceDate,
-            InvoiceNumber = document.InvoiceNumber,
-            Parsed = document.Parsed
-        });
+        
+        return Result.Ok(document.MapDocumentToDto());
     }
     
     public async Task<Result> UpdateDocumentAsync(int id, DocumentDto documentDto)
@@ -105,16 +56,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
             return Result.Fail($"DocumentId {id} not found");
         }
         
-        document.Name = documentDto.Name;
-        document.ExternalRef = documentDto.ExternalRef;
-        document.Orphaned = documentDto.Orphaned;
-        document.TaxRate = documentDto.TaxRate;
-        document.TaxAmount = documentDto.TaxAmount;
-        document.Total = documentDto.Total;
-        document.SubTotal = documentDto.SubTotal;
-        document.InvoiceDate = documentDto.InvoiceDate;
-        document.InvoiceNumber = documentDto.InvoiceNumber;
-        document.Parsed = documentDto.Parsed;
+        document.UpdateDocument(documentDto);
         
         context.Entry(document).State = EntityState.Modified;
         await context.SaveChangesAsync();
