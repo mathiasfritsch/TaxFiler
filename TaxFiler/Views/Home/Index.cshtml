@@ -1,14 +1,9 @@
 @model DocumentViewModel
 <div class="text-center">
-    <div>
-        @if(ViewBag.Error != null)
-        {
-            <div class="alert alert-danger" role="alert">
-                @ViewBag.Error
-            </div>
-        }
-    </div>
-    
+    <h2>Documents</h2>
+</div>
+<div class="text-center">
+
     <div class="text-left row">
         <div  class="col-md-2" >
             <form asp-action="SyncFiles" method="post">
@@ -18,7 +13,7 @@
         <div  class="col-md-2" >
             <a asp-action="AddDocument" asp-controller="Documents" class="btn btn-primary   w-100">Add Document</a>
         </div>
-       
+      
     </div>
     <table class="table">
         <thead>

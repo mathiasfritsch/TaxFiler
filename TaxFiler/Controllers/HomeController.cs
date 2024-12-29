@@ -16,12 +16,13 @@ namespace TaxFiler.Controllers
         private readonly IGoogleDriveService _googleDriveService;
         private readonly IParseService _parseService;
         private readonly IDocumentService _documentService;
-        
+ 
         public HomeController(TaxFilerContext taxFilerContext,
             ISyncService syncService,
             IGoogleDriveService googleDriveService,
             IParseService parseService,
-            IDocumentService documentService)
+            IDocumentService documentService
+            )
         {
             _taxFilerContext = taxFilerContext;
             _syncService = syncService;
@@ -30,7 +31,7 @@ namespace TaxFiler.Controllers
             _documentService = documentService;
         }
         
-               
+        
         [HttpGet("TestDB")]
         public IActionResult TestDb()
         {

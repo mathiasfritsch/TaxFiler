@@ -69,6 +69,7 @@ namespace TaxFiler
             builder.Services.AddScoped<IParseService,ParseService>();
             builder.Services.AddScoped<IGoogleDriveService,GoogleDriveService>();
             builder.Services.AddScoped<IDocumentService,DocumenService>();
+            builder.Services.AddScoped<ITransactionService,TransactionService>();
             builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
             builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "EntraId");
             
