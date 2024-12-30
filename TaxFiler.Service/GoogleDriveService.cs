@@ -8,7 +8,7 @@ namespace TaxFiler.Service
 {
     public class GoogleDriveService(IOptions<GoogleDriveSettings> settings) : IGoogleDriveService
     {
-        public async Task<List<FileData>> GetFilesAsync()
+        public async Task<List<FileData>> GetFilesAsync(DateOnly date)
         {
             string[] scopes = [DriveService.Scope.DriveReadonly];
 
@@ -25,12 +25,38 @@ namespace TaxFiler.Service
                 ApplicationName = "TaxFiler",
             });
 
-            var filesRequest = await service.Files.List().ExecuteAsync();
+            var yearFolder = await FindFolderIdAsync(service,date.Year.ToString(),"" );
+            var monthFolder = await FindFolderIdAsync(service,date.Month.ToString("D2"),yearFolder );
 
-            return filesRequest.Files
+            var filesRequest =  service.Files.List();
+            filesRequest.Q = $"'{monthFolder}' in parents";
+            filesRequest.Fields = "files(id, name)";
+            var filesList = await filesRequest.ExecuteAsync();
+            
+            return filesList.Files
                     .Where(f => f.MimeType != "application/vnd.google-apps.folder")
                     .Select(f => new FileData { Name = f.Name, Id = f.Id })
                     .ToList();
+        }
+        
+        private async Task<string> FindFolderIdAsync(DriveService service, string folderName, string parentId)
+        {
+            var filesRequest = await service.Files.List().ExecuteAsync();
+            
+            if(parentId == "")
+            {
+                return filesRequest.Files
+                    .Where(f => f.MimeType == "application/vnd.google-apps.folder")
+                    .Single(f => f.Name == folderName)
+                    .Id;
+            }
+            
+            var request = service.Files.List();
+            request.Q = $"'{parentId}' in parents and name contains '{folderName}'";
+            request.Fields = "nextPageToken, files(id, name, mimeType)";
+            
+            var result = await request.ExecuteAsync();
+            return result.Files.Single().Id;
         }
         
         public async Task<byte[]> DownloadFileAsync(string fileId)

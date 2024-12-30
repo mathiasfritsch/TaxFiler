@@ -12,13 +12,13 @@ public class DocumentsController(IDocumentService documentService) : Controller
 
     [HttpGet("")]
     [HttpGet("Index")]
-    public async Task<ActionResult<IEnumerable<DocumentDto>>> Index()
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> Index(string yearMonth)
     {
         return View( await documentService.GetDocumentsAsync());
     }
     
     [HttpGet("EditDocument/{documentId}")]
-    public async Task<ActionResult<DocumentDto>> EditDocument(int documentId)
+    public async Task<ActionResult<DocumentDto>> EditDocument(int documentId, string yearMonth )
     {
         var result = await documentService.GetDocumentAsync(documentId);
         
@@ -26,21 +26,24 @@ public class DocumentsController(IDocumentService documentService) : Controller
         if (result.IsFailed)
         {
             TempData["Error"] = result.Errors.First().Message;
-            RedirectToAction("Index");
+            RedirectToAction("Index", "Home", new {yearMonth});
         }
         ViewBag.Document = result.Value;
+        ViewBag.YearMonth = yearMonth;
         return View(result.Value);
     }
     
         
     [HttpGet("AddDocument")]
-    public ActionResult AddDocument()
+    public ActionResult AddDocument(string yearMonth)
     {
+        ViewBag.YearMonth = yearMonth;
+        
         return View();
     }
     
     [HttpPost("AddDocument")]
-    public async Task<ActionResult<DocumentDto>> AddDocument(AddDocumentDto documentDto)
+    public async Task<ActionResult<DocumentDto>> AddDocument(AddDocumentDto documentDto, string yearMonth)
     {
         var result = await documentService.AddDocumentAsync( documentDto);
         
@@ -51,11 +54,11 @@ public class DocumentsController(IDocumentService documentService) : Controller
             RedirectToAction("EditDocument");
         }
         
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Home", new {yearMonth});
     }
     
     [HttpPost("UpdateDocument")]
-    public async Task<IActionResult> UpdateDocument( DocumentDto documentDto)
+    public async Task<IActionResult> UpdateDocument( DocumentDto documentDto, string yearMonth)
     {
         var result = await documentService.UpdateDocumentAsync(documentDto.Id, documentDto);
         
@@ -63,14 +66,14 @@ public class DocumentsController(IDocumentService documentService) : Controller
         if (result.IsFailed)
         {
             TempData["Error"] = result.Errors.First().Message;
-            RedirectToAction("EditDocument");
+            RedirectToAction("EditDocument","Documents", new {documentDto.Id, yearMonth});
         }
         
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Home", new {yearMonth});
     }
     
     [HttpPost("DeleteDocument/{id}")]
-    public async Task<IActionResult> DeleteDocument(int id)
+    public async Task<IActionResult> DeleteDocument(int id,string yearMonth)
     {
         var result = await documentService.DeleteDocumentAsync(id);
         // ReSharper disable once InvertIf
@@ -80,6 +83,6 @@ public class DocumentsController(IDocumentService documentService) : Controller
             RedirectToAction("EditDocument");
         }
         
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Home", new {yearMonth});
     }
 }

@@ -60,6 +60,15 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
     public async Task UpdateTransactionAsync(modelDto.TransactionDto transactionDto)
     {
         var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == transactionDto.Id);
+        
+        if(transaction.DocumentId != transactionDto.DocumentId && transactionDto.DocumentId > 0)
+        {
+            var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == transactionDto.DocumentId);
+            transactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
+            transactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
+            transactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
+        }
+        
         TransactionMapper.UpdateTransaction(transaction, transactionDto);
         await taxFilerContext.SaveChangesAsync();
     }

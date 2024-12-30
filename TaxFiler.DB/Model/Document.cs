@@ -8,7 +8,9 @@ namespace TaxFiler.DB.Model
         {
         }
 
-        public Document(string name, string externalRef, bool orphaned, decimal? taxRate, decimal? taxAmount, decimal? total, decimal? subTotal, DateOnly? invoiceDate, string? invoiceNumber, bool parsed)
+        public Document(string name, string externalRef, bool orphaned, decimal? taxRate, decimal? taxAmount,
+            decimal? total, decimal? subTotal, DateOnly? invoiceDate, string? invoiceNumber, bool parsed,
+            decimal skonto)
         {
             Name = name;
             ExternalRef = externalRef;
@@ -39,5 +41,6 @@ namespace TaxFiler.DB.Model
         public decimal? TaxAmount { get; set; }
         public int TaxMonth { get; set; }
         public int TaxYear { get; set; }
+        public decimal? Skonto { get; set; }
     }
 }

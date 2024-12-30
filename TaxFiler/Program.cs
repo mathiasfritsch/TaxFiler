@@ -98,7 +98,9 @@ namespace TaxFiler
             {
                 if (context.Request.Path == "/")
                 {
-                    context.Response.Redirect($"/{DateTime.Now.Year}-{DateTime.Now.Month}/Home/Index");
+                    var previousMonth = DateTime.Now.AddMonths(-1);
+                    
+                    context.Response.Redirect($"/{previousMonth.Year}-{previousMonth.Month}/Home/Index");
                 }
                 else
                 {

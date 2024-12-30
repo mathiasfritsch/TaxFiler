@@ -15,4 +15,5 @@ public class DocumentDto
     public bool Parsed { get; set; }
     public int TaxMonth { get; set; }
     public int TaxYear { get; set; }
+    public decimal? Skonto { get; set; }
 }

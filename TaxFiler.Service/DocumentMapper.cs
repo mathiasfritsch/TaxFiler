@@ -18,7 +18,8 @@ public static class DocumentMapper
             SubTotal = document.SubTotal,
             InvoiceDate = document.InvoiceDate,
             InvoiceNumber = document.InvoiceNumber,
-            Parsed = document.Parsed
+            Parsed = document.Parsed,
+            Skonto = document.Skonto
         };
 
     public static Document ToDocument(this AddDocumentDto addDocumentDto)
@@ -32,7 +33,8 @@ public static class DocumentMapper
             subTotal: addDocumentDto.SubTotal, 
             invoiceDate: addDocumentDto.InvoiceDate,
             invoiceNumber: addDocumentDto.InvoiceNumber, 
-            parsed: addDocumentDto.Parsed);
+            parsed: addDocumentDto.Parsed,
+            skonto: addDocumentDto.Skonto);
     }
     
     public static void UpdateDocument(this Document document, DocumentDto documentDto)
@@ -47,5 +49,6 @@ public static class DocumentMapper
         document.InvoiceDate = documentDto.InvoiceDate;
         document.InvoiceNumber = documentDto.InvoiceNumber;
         document.Parsed = documentDto.Parsed;
+        document.Skonto = documentDto.Skonto;
     }
 }

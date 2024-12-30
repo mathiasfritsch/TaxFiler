@@ -67,6 +67,9 @@ namespace TaxFiler.DB.Migrations
                     b.Property<bool>("Parsed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal?>("Skonto")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal?>("SubTotal")
                         .HasColumnType("TEXT");
 

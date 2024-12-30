@@ -51,27 +51,31 @@ namespace TaxFiler.Controllers
         }
         
         [HttpPost("SyncFiles")]
-        public async Task<IActionResult> SyncFiles()
+        public async Task<IActionResult> SyncFiles(string yearMonth)
         {
-            await _syncService.SyncFilesAsync();
+            var date = Common.GetYearMonth(yearMonth);
+            await _syncService.SyncFilesAsync(new DateOnly(date.Year, date.Month, 1));
 
-            return View();
+            return RedirectToAction("Index", "Home", new {yearMonth});
         }
         
         [HttpDelete("DeleteAll")]
-        public async Task<IActionResult> DeleteAllDocuments()
+        public async Task<IActionResult> DeleteAllDocuments(string yearMonth)
         {
             await _documentService.DeleteAllDocumentsAsync();
             
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home", new {yearMonth});
         }
 
         
-        public async Task<IActionResult> GoogleDocuments()
+        public async Task<IActionResult> GoogleDocuments(string yearMonth)
         {
+            var date = Common.GetYearMonth(yearMonth);
+            ViewBag.YearMonth = yearMonth;
+            
             var viewModel = new HomeViewModel
             {
-                Files = await _googleDriveService.GetFilesAsync()
+                Files = await _googleDriveService.GetFilesAsync( new DateOnly(date.Year, date.Month, 1))
             };
 
             return View(viewModel);
@@ -79,7 +83,7 @@ namespace TaxFiler.Controllers
 
        
         [HttpPost]
-        public async Task<ActionResult> Parse([FromForm] int fileId)
+        public async Task<ActionResult> Parse([FromForm] int fileId, string yearMonth)
         {
             var parseResult = await _parseService.ParseFilesAsync(fileId);
 
@@ -88,7 +92,7 @@ namespace TaxFiler.Controllers
                 TempData["Error"] = parseResult.Errors.First().Message;
             }
             
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", new { yearMonth });
         }
         
         public async Task<IActionResult> IndexAsync(string yearMonth)

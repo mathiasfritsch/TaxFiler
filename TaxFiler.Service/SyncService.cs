@@ -6,9 +6,9 @@ namespace TaxFiler.Service;
 public class SyncService(TaxFilerContext context, IGoogleDriveService googleDriveService)
     : ISyncService
 {
-    public async Task SyncFilesAsync()
+    public async Task SyncFilesAsync(DateOnly date)
     {
-        var files = await googleDriveService.GetFilesAsync();
+        var files = await googleDriveService.GetFilesAsync(date);
         
         foreach(var document in context.Documents)
         {
@@ -31,7 +31,9 @@ public class SyncService(TaxFilerContext context, IGoogleDriveService googleDriv
             {
                 Name = file.Name,
                 ExternalRef = file.Id,
-                Orphaned = false
+                Orphaned = false,
+                TaxYear = date.Year,
+                TaxMonth = date.Month
             };
             await context.Documents.AddAsync(document);
         }
