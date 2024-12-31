@@ -24,4 +24,9 @@
     <ProjectReference Include="..\TaxFiler.Model\TaxFiler.Model.csproj" />
     <ProjectReference Include="..\TaxFiler.Service\TaxFiler.Service.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="TaxfilerDb.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
