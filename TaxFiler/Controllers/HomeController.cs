@@ -98,8 +98,8 @@ namespace TaxFiler.Controllers
         public async Task<IActionResult> IndexAsync(string yearMonth)
         {
             if(TempData["Error"] !=null) ViewBag.Error = TempData["Error"]!;
-            
-            var documents = await _documentService.GetDocumentsAsync();
+            var date = Common.GetYearMonth(yearMonth);
+            var documents = await _documentService.GetDocumentsAsync(new DateOnly(date.Year, date.Month, 1));;
             
             var documentViewModel = new DocumentViewModel
             {

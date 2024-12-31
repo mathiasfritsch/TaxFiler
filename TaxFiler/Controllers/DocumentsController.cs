@@ -14,7 +14,8 @@ public class DocumentsController(IDocumentService documentService) : Controller
     [HttpGet("Index")]
     public async Task<ActionResult<IEnumerable<DocumentDto>>> Index(string yearMonth)
     {
-        return View( await documentService.GetDocumentsAsync());
+        var date = Common.GetYearMonth(yearMonth);
+        return View( await documentService.GetDocumentsAsync(new DateOnly(date.Year, date.Month, 1)));
     }
     
     [HttpGet("EditDocument/{documentId}")]

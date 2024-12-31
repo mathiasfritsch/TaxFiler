@@ -64,9 +64,22 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         if(transaction.DocumentId != transactionDto.DocumentId && transactionDto.DocumentId > 0)
         {
             var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == transactionDto.DocumentId);
-            transactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
-            transactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
-            transactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
+            
+            if(document.Skonto is > 0)
+            {
+                var netAmountSkonto = document.SubTotal.GetValueOrDefault() * (100 - document.Skonto.GetValueOrDefault()) / 100;
+                
+                transactionDto.NetAmount = Math.Round(netAmountSkonto,2);
+                transactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
+                transactionDto.TaxAmount = transactionDto.GrossAmount - transactionDto.NetAmount;
+            }
+            else
+            {
+                transactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
+                transactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
+                transactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
+            }
+            
         }
         
         TransactionMapper.UpdateTransaction(transaction, transactionDto);
