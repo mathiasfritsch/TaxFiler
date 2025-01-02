@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
+using System.Text;
 using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
 using TaxFiler.Model.Csv;
@@ -14,6 +16,53 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         var transactions = csv.GetRecords<TransactionDto>();
         return transactions.ToArray();
     }
+
+    public async Task<MemoryStream> CreateCsvFileAsync(DateTime yearMonthh)
+    {
+        var transactions = await taxFilerContext
+            .Transactions.Include(t => t.Document)
+            .Where(t => t.TaxYear == yearMonthh.Year && t.TaxMonth == yearMonthh.Month)
+            .Where(t => t.IsSalesTaxRelevant || t.IsIncomeTaxRelevant)
+            .OrderBy(t => t.TransactionDateTime)
+            .ToListAsync();
+
+        var transactionReportDtos = transactions.Select
+            (
+                t => new TranactionReportDto
+                {
+                    NetAmount = t.NetAmount,
+                    GrossAmount = t.GrossAmount,
+                    TaxAmount = t.TaxAmount,
+                    TaxRate = t.TaxRate,
+                    TransactionReference = t.TransactionReference,
+                    TransactionDateTime = t.TransactionDateTime,
+                    TransactionNote = t.TransactionNote,
+                    IsOutgoing = t.IsOutgoing,
+                    IsIncomeTaxRelevant = t.IsIncomeTaxRelevant,
+                    IsSalesTaxRelevant = t.IsSalesTaxRelevant,
+                    DocumentName = t.IsOutgoing? "Rechnungseingang":"Rechnungsausgang"  + "/"+ t.Document?.Name
+                }
+            ).ToList();
+        
+        var memoryStream = new MemoryStream();
+
+        await using var writer = new StreamWriter(memoryStream, leaveOpen: true);
+        
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            Delimiter = ",",
+            Encoding = Encoding.UTF8 
+        };
+
+        await using var csv = new CsvWriter(writer, config) ;
+        
+        await csv.WriteRecordsAsync(transactionReportDtos); 
+        await writer.FlushAsync();
+        
+        return memoryStream;
+        
+    }
+    
 
     public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions, DateTime yearMonth)
     {

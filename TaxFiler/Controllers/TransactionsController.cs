@@ -25,6 +25,18 @@ public class TransactionsController(ITransactionService transactionService,
         return View( vm);
     }
     
+    [HttpGet("Download")]
+    public async Task<FileResult> Download(string yearMonth)
+    {
+        var yearMonthDate = Common.GetYearMonth(yearMonth);
+        var memoryStream = await transactionService.CreateCsvFileAsync(yearMonthDate);
+    
+        var fileName = $"transactions_{yearMonthDate:yyyy-MM}.csv";
+        memoryStream.Position = 0;
+    
+        return File(memoryStream, "text/csv", fileName);
+    }
+    
     [HttpPost("Upload")]
     public async Task<IActionResult> Upload(IFormFile file,string yearMonth)
     {

@@ -12,4 +12,5 @@ public interface ITransactionService
     Task<dtoModel.TransactionDto> GetTransactionAsync(int transactionid);
     Task UpdateTransactionAsync(dtoModel.TransactionDto transactionDto);
     Task DeleteTransactionsAsync(DateTime yearMonth);
+    Task<MemoryStream> CreateCsvFileAsync(DateTime yearMonthh);
 }

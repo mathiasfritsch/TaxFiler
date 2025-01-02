@@ -12,19 +12,25 @@
               asp-route-yearMonth="@ViewBag.YearMonth"
         >
             <div class="text-left row">
-                <div  class="col-md-4" ><input type="file" name="file" class="form-control"/> </div>
+                <div  class="col-md-8" ><input type="file" name="file" class="form-control"/> </div>
                 <div  class="col-md-4" ><button type="submit" class="btn btn-primary">Upload</button></div>
                 
             </div>
         </form>
     </div>
-    <div  class="text-right col-md-6" >
+    <div  class="text-right col-md-3" >
         <form asp-action="DeleteTransactions"
               asp-controller="Transactions"
               method="post"
               asp-route-yearMonth="@ViewBag.YearMonth">
             <button type="submit" class="btn btn-danger">Delete</button>
         </form>
+    </div>
+    <div  class="text-right col-md-3" >
+        <a asp-action="Download" 
+                    asp-controller="Transactions" 
+                    asp-route-yearMonth="@ViewBag.YearMonth" 
+                    class="btn btn-primary">Download</a>
     </div>
 </div>
 
