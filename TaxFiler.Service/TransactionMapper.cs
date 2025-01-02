@@ -9,6 +9,7 @@ public static class TransactionMapper
         new()
         {
             GrossAmount = transaction.Amount,
+            SenderReceiver = transaction.SenderReceiver,
             Counterparty = transaction.CounterPartyIBAN,
             TransactionNote = transaction.Comment,
             TransactionReference = transaction.TransactionID,
@@ -36,7 +37,8 @@ public static class TransactionMapper
             TaxMonth = transaction.TaxMonth,
             TaxYear = transaction.TaxYear,
             DocumentId = transaction.DocumentId,
-            Document = transaction.Document?.ToDto()
+            Document = transaction.Document?.ToDto(),
+            SenderReceiver = transaction.SenderReceiver
         };
 
     public static void UpdateTransaction( Transaction transaction, TransactionDto transactionDto)
@@ -52,6 +54,6 @@ public static class TransactionMapper
         transaction.TransactionReference = transactionDto.TransactionReference;
         transaction.Counterparty = transactionDto.Counterparty;
         transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
-        
+        transaction.SenderReceiver = transactionDto.SenderReceiver;
     }
 }

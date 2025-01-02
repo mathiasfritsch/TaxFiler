@@ -122,6 +122,10 @@ namespace TaxFiler.DB.Migrations
                     b.Property<decimal>("NetAmount")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SenderReceiver")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("TaxAmount")
                         .HasColumnType("TEXT");
 

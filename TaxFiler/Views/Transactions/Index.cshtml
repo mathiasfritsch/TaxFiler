@@ -42,6 +42,7 @@
         <th>Document</th>
         <th>Transaction DateTime</th>
         <th>Transaction Note</th>
+        <th>Sender/Receiver</th>
         <th></th>
         <th></th>
     </tr>
@@ -61,6 +62,7 @@
             <td>@transaction.DocumentName</td>
             <td>@transaction.TransactionDateTime</td>
             <td>@transaction.TransactionNote</td>
+            <td>@transaction.SenderReceiver</td>
             <td>
                 @Html.ActionLink("Edit", "EditTransaction", "Transactions", 
       new { transactionId = transaction.Id , yearMonth = ViewBag.YearMonth }, 

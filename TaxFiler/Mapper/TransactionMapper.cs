@@ -24,7 +24,8 @@ public static class TransactionMapper
             TaxMonth = transaction.TaxMonth,
             TaxYear = transaction.TaxYear,
             DocumentId = transaction.DocumentId,
-            DocumentName = transaction.Document?.Name
+            DocumentName = transaction.Document?.Name,
+            SenderReceiver = transaction.SenderReceiver
         };
     }
 }

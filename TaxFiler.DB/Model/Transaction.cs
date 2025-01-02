@@ -26,4 +26,5 @@ public class Transaction
     [ForeignKey(nameof(Document))]
     public int? DocumentId { get; set; }
     public Document? Document { get; set; }
+    public string SenderReceiver { get; set; }
 }

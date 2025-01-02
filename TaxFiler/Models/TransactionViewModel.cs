@@ -5,6 +5,7 @@ public class TransactionViewModel
     public int Id { get; init; }
     public decimal GrossAmount { get; init; }
     public string? Counterparty { get; init; }
+    public string? SenderReceiver { get; init; }
     public string? TransactionNote { get; init; }
     public string? TransactionReference { get; init; }
     public DateTime TransactionDateTime { get; init; }
