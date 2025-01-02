@@ -24,8 +24,10 @@ public class TranactionReportDto
     public bool IsOutgoing { get; set; }
     [Name("Ust relevant")]
     public bool IsIncomeTaxRelevant { get; set; }
-    [Name("Einommensteuer relevant")]
+    [Name("Einkommenssteuer relevant")]
     public bool IsSalesTaxRelevant { get; set; }
     [Name("Begleitende Dokumente")]
     public string DocumentName { get; set; }
+    [Name("Auftraggeber/Empfänger")]
+    public string SenderReceiver { get; set; }
 }

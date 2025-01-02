@@ -40,7 +40,8 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
                     IsOutgoing = t.IsOutgoing,
                     IsIncomeTaxRelevant = t.IsIncomeTaxRelevant,
                     IsSalesTaxRelevant = t.IsSalesTaxRelevant,
-                    DocumentName = t.IsOutgoing? "Rechnungseingang":"Rechnungsausgang"  + "/"+ t.Document?.Name
+                    DocumentName = t.IsOutgoing? $"Rechnungseingang/{t.Document?.Name}":$"Rechnungsausgang/{t.Document?.Name}",
+                    SenderReceiver = t.SenderReceiver
                 }
             ).ToList();
         
@@ -60,7 +61,6 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         await writer.FlushAsync();
         
         return memoryStream;
-        
     }
     
 
