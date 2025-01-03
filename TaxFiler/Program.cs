@@ -13,6 +13,7 @@ namespace TaxFiler
     {
         public static void Main(string[] args)
         {
+            
             var builder = WebApplication.CreateBuilder(args);
             
             builder.Configuration.AddUserSecrets<Program>();
