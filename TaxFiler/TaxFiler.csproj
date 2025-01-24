@@ -2,9 +2,20 @@
   <PropertyGroup>
     <UserSecretsId>e0135068-d373-4120-8495-3636482e1e15</UserSecretsId>
   </PropertyGroup>
+
+
+  <PropertyGroup>
+    <SpaRoot>ClientApp\</SpaRoot>
+    <SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
+    <SpaProxyServerUrl>http://localhost:4200</SpaProxyServerUrl>
+  </PropertyGroup>
+  
   <ItemGroup>
+
+ 
     <PackageReference Include="FluentResults.Extensions.AspNetCore" Version="0.1.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3373" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="9.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
 	 <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4" />

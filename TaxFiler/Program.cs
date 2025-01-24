@@ -112,6 +112,8 @@ namespace TaxFiler
                 name: "default",
                 pattern: "{yearMonth}/{controller=Home}/{action=Index}/{id?}");
        
+            app.UseDefaultFiles();
+            
             app.Run();
         }
     }
