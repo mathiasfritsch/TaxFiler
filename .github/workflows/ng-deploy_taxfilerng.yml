@@ -33,7 +33,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm  --prefix ./TaxFilerSpa install
+        run: npm install --prefix ./TaxFilerSpa
         
 
       - name: Upload artifact for deployment job
