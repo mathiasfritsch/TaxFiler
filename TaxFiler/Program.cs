@@ -100,20 +100,6 @@ namespace TaxFiler
                 c.OAuthUsePkce();
                 c.OAuthScopeSeparator(" ");
             });
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Path == "/")
-                {
-                    var previousMonth = DateTime.Now.AddMonths(-1);
-                    
-                    context.Response.Redirect($"/{previousMonth.Year}-{previousMonth.Month}/Home/Index");
-                }
-                else
-                {
-                    await next();
-                }
-            });
-            
    
             app.UseSpa(spa =>
             {
