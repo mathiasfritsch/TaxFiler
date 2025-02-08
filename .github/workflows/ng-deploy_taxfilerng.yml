@@ -27,18 +27,14 @@ jobs:
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.2.0
+      - run: npm install
+        working-directory: ./TaxFilerSpa
+      - run: npm run build
+        working-directory: ./TaxFilerSpa
 
-  
 
-      - name: Install dependencies
-        run: npm install --prefix ./TaxFilerSpa
-        env:
-          NODE_AUTH_TOKEN:  ${{ secrets.NPM_TOKEN }}
-        
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
