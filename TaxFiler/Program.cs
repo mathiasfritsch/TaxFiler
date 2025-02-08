@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.OpenApi.Models;
@@ -74,6 +75,10 @@ namespace TaxFiler
             builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
             builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "EntraId");
             
+            builder.Services.AddSpaStaticFiles(configuration => {
+                configuration.RootPath = "ClientApp/build";
+            });
+            
             var app = builder.Build();
             
             if (!app.Environment.IsDevelopment())
@@ -108,10 +113,18 @@ namespace TaxFiler
                     await next();
                 }
             });
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{yearMonth}/{controller=Home}/{action=Index}/{id?}");
-       
+            
+   
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+
+                if (app.Environment.IsDevelopment())
+                {
+                    spa.UseAngularCliServer(npmScript: "start");
+                }
+            });
+            
             app.Run();
         }
     }

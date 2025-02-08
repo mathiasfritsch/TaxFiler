@@ -5,6 +5,7 @@
   <ItemGroup>
     <PackageReference Include="FluentResults.Extensions.AspNetCore" Version="0.1.0" />
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3373" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="8.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
 	 <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4" />
