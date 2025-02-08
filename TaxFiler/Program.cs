@@ -76,7 +76,7 @@ namespace TaxFiler
             builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "EntraId");
             
             builder.Services.AddSpaStaticFiles(configuration => {
-                configuration.RootPath = "ClientApp/build";
+                configuration.RootPath = "ClientApp/dist";
             });
             
             var app = builder.Build();
