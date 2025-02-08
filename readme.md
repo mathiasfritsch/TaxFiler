@@ -5,7 +5,7 @@ import in excel with
     #"Höher gestufte Header",
     {
         {"Buchungsdatum", Date.Type},
-        {"Auftraggeber/Empfängeger", type text},
+        {"Auftraggeber/Empfänger", type text},
         {"Beschreibung", type text},
         {"Zahlungsbetrag", type number},
         {"Begleitende Dokumente", type text},
