@@ -22,16 +22,16 @@ public class TranactionReportDto
     
     [Index(7)]
     [Name("Transaktionsreferenz")]
-    public string TransactionReference { get; set; }
+    public required string TransactionReference { get; set; }
     
     [Index(0)]
     [Name("Buchungsdatum")]
-    [Format("dd.MM.yyyy")]
+    [Format("yyyy-MM-dd")]
     public DateTime TransactionDateTime { get; set; }
     
     [Index(2)]
     [Name("Beschreibung")]
-    public string TransactionNote { get; set; }
+    public required string TransactionNote { get; set; }
     
     [Name("Ausgehend")]
     
@@ -44,9 +44,9 @@ public class TranactionReportDto
     
     [Index(4)]
     [Name("Begleitende Dokumente")]
-    public string DocumentName { get; set; }
+    public required string DocumentName { get; set; }
     
     [Index(1)]
-    [Name("Auftraggeber/Empfänger")]
-    public string SenderReceiver { get; set; }
+    [Name("Auftraggeber/Empfaenger")]
+    public required string SenderReceiver { get; set; }
 }
