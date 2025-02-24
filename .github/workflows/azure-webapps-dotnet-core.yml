@@ -1,4 +1,4 @@
-name: Build and deploy ASP.Net Core app to an Azure Web App
+name: NG Web App
 
 env:
   AZURE_WEBAPP_NAME: taxfiler    # set this to the name of your Azure Web App
