@@ -45,12 +45,15 @@ jobs:
 
       - run: npm install
         working-directory: ./taxfiler.client
-
+        
+      - run: npm run build
+        working-directory: ./taxfiler.client
+        
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish TaxFiler/TaxFiler.csproj  -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish  -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: copy spa files to wwwroot
         run: cp -r taxfiler.client/dist/taxfiler.client/* TaxFiler/wwwroot/
