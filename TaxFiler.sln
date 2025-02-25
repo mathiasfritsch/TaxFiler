@@ -17,10 +17,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaIndex.Core", "LlamaInd
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaParse", "LlamaParse\LlamaParse.csproj", "{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "taxfiler.client", "taxfiler.client\taxfiler.client.esproj", "{A4D88908-A81A-45D5-A7EA-9F7539900CA0}"
+EndProject
+
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{A2D8E967-B1FB-4E28-8483-BA6F4A70FB37}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		.github\workflows\ng-deploy_taxfilerng.yml = .github\workflows\ng-deploy_taxfilerng.yml
+		.github\workflows\azure-webapps-dotnet-core.yml = .github\workflows\azure-webapps-dotnet-core.yml
+		readme.md = readme.md
 	EndProjectSection
 EndProject
 Global
@@ -57,6 +61,12 @@ Global
 		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

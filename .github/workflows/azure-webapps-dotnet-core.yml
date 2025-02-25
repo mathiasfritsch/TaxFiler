@@ -1,0 +1,34 @@
+name: NG Web App
+
+env:
+  AZURE_WEBAPP_NAME: taxfiler    # set this to the name of your Azure Web App
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '8.0'                 # set this to the .NET Core version to use
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the workflow on'
+        required: true
+        default: 'main'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.2.0
+        
+      - run: npm install
+        working-directory: ./taxfiler.client
