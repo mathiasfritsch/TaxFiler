@@ -1,0 +1,6 @@
+@TaxFiler.Server_HostAddress = http://localhost:5044
+
+GET {{TaxFiler.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

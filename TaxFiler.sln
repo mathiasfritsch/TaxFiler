@@ -1,31 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.8.34322.80
+VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxFiler", "TaxFiler\TaxFiler.csproj", "{1FF61C73-E661-43E0-8E30-B1EDA4A26934}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TaxFilerTests", "TaxFilerTests\TaxFilerTests.csproj", "{4C98A9DB-502D-4A8A-8651-E1E7F95002BD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Service", "TaxFiler.Service\TaxFiler.Service.csproj", "{1C5BF57F-2EC2-4842-B4C7-6196D616D124}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.DB", "TaxFiler.DB\TaxFiler.DB.csproj", "{036A8CAB-7724-491A-B8B7-4F3E43259D36}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Model", "TaxFiler.Model\TaxFiler.Model.csproj", "{D77ABB6C-8576-4044-B31F-F02F631C9E6E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaIndex.Core", "LlamaIndex.Core\LlamaIndex.Core.csproj", "{CF19C2A0-70C0-425B-A2C3-875F2EE797DC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaParse", "LlamaParse\LlamaParse.csproj", "{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Server", "TaxFiler.Server\TaxFiler.Server.csproj", "{15105C02-BDAE-4B90-A251-D6DEFADA061F}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "taxfiler.client", "taxfiler.client\taxfiler.client.esproj", "{A4D88908-A81A-45D5-A7EA-9F7539900CA0}"
-EndProject
-
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{A2D8E967-B1FB-4E28-8483-BA6F4A70FB37}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		.github\workflows\azure-webapps-dotnet-core.yml = .github\workflows\azure-webapps-dotnet-core.yml
-		readme.md = readme.md
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,34 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1FF61C73-E661-43E0-8E30-B1EDA4A26934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1FF61C73-E661-43E0-8E30-B1EDA4A26934}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1FF61C73-E661-43E0-8E30-B1EDA4A26934}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1FF61C73-E661-43E0-8E30-B1EDA4A26934}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C98A9DB-502D-4A8A-8651-E1E7F95002BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C98A9DB-502D-4A8A-8651-E1E7F95002BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C98A9DB-502D-4A8A-8651-E1E7F95002BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C98A9DB-502D-4A8A-8651-E1E7F95002BD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C5BF57F-2EC2-4842-B4C7-6196D616D124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C5BF57F-2EC2-4842-B4C7-6196D616D124}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C5BF57F-2EC2-4842-B4C7-6196D616D124}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C5BF57F-2EC2-4842-B4C7-6196D616D124}.Release|Any CPU.Build.0 = Release|Any CPU
-		{036A8CAB-7724-491A-B8B7-4F3E43259D36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{036A8CAB-7724-491A-B8B7-4F3E43259D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{036A8CAB-7724-491A-B8B7-4F3E43259D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{036A8CAB-7724-491A-B8B7-4F3E43259D36}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D77ABB6C-8576-4044-B31F-F02F631C9E6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D77ABB6C-8576-4044-B31F-F02F631C9E6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D77ABB6C-8576-4044-B31F-F02F631C9E6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D77ABB6C-8576-4044-B31F-F02F631C9E6E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF19C2A0-70C0-425B-A2C3-875F2EE797DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF19C2A0-70C0-425B-A2C3-875F2EE797DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF19C2A0-70C0-425B-A2C3-875F2EE797DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF19C2A0-70C0-425B-A2C3-875F2EE797DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C0EBD33-C903-4CB7-8B3B-78E64955EC4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15105C02-BDAE-4B90-A251-D6DEFADA061F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15105C02-BDAE-4B90-A251-D6DEFADA061F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15105C02-BDAE-4B90-A251-D6DEFADA061F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15105C02-BDAE-4B90-A251-D6DEFADA061F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
@@ -72,6 +28,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {40DCCAE3-2B6E-4293-9D2B-BAFC30F62D7B}
+		SolutionGuid = {2FCB18AA-DE47-41A4-A980-C0BB29871260}
 	EndGlobalSection
 EndGlobal
