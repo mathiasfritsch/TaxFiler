@@ -43,12 +43,6 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4.2.0
 
-      - run: npm install
-        working-directory: ./taxfiler.client
-        
-      - run: npm run build
-        working-directory: ./taxfiler.client
-        
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
