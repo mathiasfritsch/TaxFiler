@@ -50,7 +50,7 @@ jobs:
         run: dotnet publish  -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: copy spa files to wwwroot
-        run: cp -r taxfiler.client/dist/taxfiler.client/* TaxFiler/wwwroot/
+        run: cp -r taxfiler.client/dist/taxfiler.client/* ${{env.DOTNET_ROOT}}/myapp/wwwroot/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
