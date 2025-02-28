@@ -13,7 +13,7 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 || error.status === 403 || error.status === 504 || error.status == 0 ) {
           console.info('Unauthorized request, redirecting to login page');
-          window.location.href = 'https://127.0.0.1:4200/' +  'MicrosoftIdentity/Account/SignIn';
+          window.location.href =   '/MicrosoftIdentity/Account/SignIn';
         }
         return throwError(() => error);
       }),
