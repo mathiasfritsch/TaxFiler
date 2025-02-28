@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Server", "TaxFiler
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "taxfiler.client", "taxfiler.client\taxfiler.client.esproj", "{A4D88908-A81A-45D5-A7EA-9F7539900CA0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildfiles", "buildfiles", "{B0C92794-B2E3-4CC8-B833-72AA1A56976E}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\azure-webapps-dotnet-core.yml = .github\workflows\azure-webapps-dotnet-core.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
