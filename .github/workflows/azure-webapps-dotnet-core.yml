@@ -33,37 +33,37 @@ jobs:
       - run: npm install
         working-directory: ./taxfiler.client
         
-#      - name: Set up .NET Core
-#        uses: actions/setup-dotnet@v4
-#        with:
-#          dotnet-version: ${{ env.DOTNET_VERSION }}
-#
-#      - name: Set up dependency caching for faster builds
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.nuget/packages
-#          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-nuget-
-#
-#
-#      - name: Setup Node.js environment
-#        uses: actions/setup-node@v4.2.0
-#
-#      - name: Build with dotnet
-#        run: dotnet build --configuration Release
-#
-#      - name: dotnet publish
-#        run: dotnet publish  -c Release -o ${{env.DOTNET_ROOT}}/myapp
-#
-#      - name: copy spa files to wwwroot
-#        run: cp -r taxfiler.client/dist/taxfiler.client/* ${{env.DOTNET_ROOT}}/myapp/wwwroot/
-#
-#      - name: Upload artifact for deployment job
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: .net-app
-#          path: ${{env.DOTNET_ROOT}}/myapp
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.2.0
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish  -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: copy spa files to wwwroot
+        run: cp -r taxfiler.client/dist/taxfiler.client/* ${{env.DOTNET_ROOT}}/myapp/wwwroot/
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
     permissions:
