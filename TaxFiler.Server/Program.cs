@@ -2,6 +2,9 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using TaxFiler.DB;
+using TaxFiler.Model;
+using TaxFiler.Service;
 
 namespace TaxFiler.Server;
 
@@ -10,11 +13,18 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
+        builder.Configuration.AddUserSecrets<Program>();
         // Add services to the container.
         builder.Services.AddControllersWithViews()
             .AddMicrosoftIdentityUI();
-        
+        builder.Services.AddDbContext<TaxFilerContext>();
+        builder.Services.AddScoped<ISyncService,SyncService>();
+        builder.Services.AddScoped<IParseService,ParseService>();
+        builder.Services.AddScoped<IGoogleDriveService,GoogleDriveService>();
+        builder.Services.AddScoped<IDocumentService,DocumenService>();
+        builder.Services.AddScoped<ITransactionService,TransactionService>();
+        builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
+
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

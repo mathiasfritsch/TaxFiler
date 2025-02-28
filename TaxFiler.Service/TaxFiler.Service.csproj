@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="FluentResults" Version="3.16.0" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.67.0.3373" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LlamaIndex.Core\LlamaIndex.Core.csproj" />
+    <ProjectReference Include="..\LlamaParse\LlamaParse.csproj" />
+    <ProjectReference Include="..\TaxFiler.DB\TaxFiler.DB.csproj" />
+    <ProjectReference Include="..\TaxFiler.Model\TaxFiler.Model.csproj" />
+  </ItemGroup>
+</Project>
