@@ -15,48 +15,41 @@ public class TransactionsController(ITransactionService transactionService) : Co
     [HttpGet("GetTransactions")]
     public async Task<IEnumerable<TransactionViewModel>> List(string yearMonth)
     {
-        var transactions = await transactionService.GetTransactionsAsync(Common.GetYearMonth(yearMonth));
+        var transactions = await transactionService.GetTransactionsAsync( new DateOnly(2025,1,1));
         var vm = transactions.Select(t => t.ToViewModel());
         return vm;
     }
 
     [HttpGet("Download")]
-    public async Task<FileResult> Download(string yearMonth)
+    public async Task<FileResult> Download(DateOnly yearMonth)
     {
-        var yearMonthDate = Common.GetYearMonth(yearMonth);
-        var memoryStream = await transactionService.CreateCsvFileAsync(yearMonthDate);
+        var memoryStream = await transactionService.CreateCsvFileAsync(yearMonth);
 
-        var fileName = $"transactions_{yearMonthDate:yyyy-MM}.csv";
+        var fileName = $"transactions_{yearMonth:yyyy-MM}.csv";
         memoryStream.Position = 0;
 
         return File(memoryStream, "text/csv", fileName);
     }
 
     [HttpPost("Upload")]
-    public async Task Upload(IFormFile file, string yearMonth)
+    public async Task Upload(IFormFile file, DateOnly yearMonth)
     {
-        var yearMonthDate = Common.GetYearMonth(yearMonth);
         var reader = new StreamReader(file.OpenReadStream());
         var transactions = transactionService.ParseTransactions(reader);
-        await transactionService.AddTransactionsAsync(transactions, yearMonthDate);
+        await transactionService.AddTransactionsAsync(transactions, yearMonth);
+    }
+    
+    [HttpDelete("DeleteTransaction/{id:int}")]
+    public async Task DeleteTransaction(int id)
+    {
+        await transactionService.DeleteTransactionAsync(id);
     }
 
-    public async Task DeleteTransaction(string yearMonth)
+    
+    [HttpGet("GetTransaction/{id:int}")]
+    public async Task<TransactionDto> GetTransaction(int id)
     {
-        await transactionService.DeleteTransactionsAsync(Common.GetYearMonth(yearMonth));
-    }
-
-    public async Task DeleteTransactions(DateTime yearMonth)
-    {
-        await transactionService.DeleteTransactionsAsync(yearMonth);
-    }
-
-
-    [HttpGet("GetTransaction")]
-    public async Task<TransactionDto> GetTransaction(int transactionId)
-    {
-        var transaction = await transactionService.GetTransactionAsync(transactionId);
-        return transaction;
+        return await transactionService.GetTransactionAsync(id);
     }
 
     [HttpPost("UpdateTransaction")]

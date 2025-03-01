@@ -1,0 +1,32 @@
+<h1 id="tableLabel">Transactions</h1>
+<p *ngIf="!transactions"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
+<table *ngIf="transactions">
+  <thead>
+  <tr>
+    <th>id</th>
+    <th>Netto</th>
+    <th>Brutto</th>
+    <th>Sender/Empfänger</th>
+    <th>Kommentar</th>
+    <th>Dokument</th>
+    <th>Steuer</th>
+    <th>Steuersatz</th>
+    <th>Datum</th>
+    <th>Umsatzsteuerrelevant</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let transaction of transactions">
+    <td>{{ transaction.id }}</td>
+    <td>{{ transaction.netAmount }}</td>
+    <td>{{ transaction.grossAmount }}</td>
+    <td>{{ transaction.senderReceiver }}</td>
+    <td>{{ transaction.transactionNote }}</td>
+    <td>{{ transaction.documentName }}</td>
+    <td>{{ transaction.taxAmount }}</td>
+    <td>{{ transaction.taxRate }}</td>
+    <td>{{ transaction.transactionDateTime }}</td>
+    <td>{{ transaction.isSalesTaxRelevant }}</td>
+  </tr>
+  </tbody>
+</table>

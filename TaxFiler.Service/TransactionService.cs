@@ -17,7 +17,7 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         return transactions.ToArray();
     }
 
-    public async Task<MemoryStream> CreateCsvFileAsync(DateTime yearMonthh)
+    public async Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonthh)
     {
         var transactions = await taxFilerContext
             .Transactions.Include(t => t.Document)
@@ -64,7 +64,7 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
     }
     
 
-    public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions, DateTime yearMonth)
+    public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions, DateOnly yearMonth)
     {
         foreach (var transaction in transactions)
         {
@@ -80,16 +80,19 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         await taxFilerContext.SaveChangesAsync();
     }
     
-    public async Task TruncateTransactionsAsync()
-        => await taxFilerContext.Transactions.ExecuteDeleteAsync( );
 
-    public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync()
+    public async Task DeleteTransactionAsync(int id)
     {
-        var transactions = await taxFilerContext.Transactions.Include( t => t.Document).ToListAsync();
-        return transactions.Select(t => t.TransactionDto()).ToList();
+        var transaction = await taxFilerContext.Transactions.FindAsync(id);
+        if (transaction != null)
+        {
+            taxFilerContext.Transactions.Remove(transaction);
+            await taxFilerContext.SaveChangesAsync();
+        }
     }
     
-    public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync(DateTime yearMonth)
+    
+    public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth)
     {
         var transactions = await taxFilerContext
             .Transactions
