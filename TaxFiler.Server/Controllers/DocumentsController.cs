@@ -11,39 +11,37 @@ namespace TaxFiler.Server.Controllers;
 [Route("[controller]")]
 public class DocumentsController(IDocumentService documentService) : ControllerBase
 {
-
     [HttpGet("")]
     [HttpGet("List")]
-    public async Task<IEnumerable<DocumentDto>> List(string yearMonth)
+    public async Task<IEnumerable<DocumentDto>> List(DateOnly yearMonth)
     {
-        var date = Common.GetYearMonth(yearMonth);
-        return await documentService.GetDocumentsAsync(new DateOnly(date.Year, date.Month, 1));
+        return await documentService.GetDocumentsAsync(yearMonth);
     }
-    
-    [HttpGet("GeDocument/{documentId}")]
+
+    [HttpGet("GetDocument/{documentId}")]
     public async Task<Result<DocumentDto>> GetDocument(int documentId)
     {
-        var result = await documentService.GetDocumentAsync(documentId);
-        return result.Value;
+        return await documentService.GetDocumentAsync(documentId);
     }
-    
-    
+
+
     [HttpPost("AddDocument")]
-    public async Task<DocumentDto> AddDocument(AddDocumentDto documentDto)
-    { 
-        var result = await documentService.AddDocumentAsync( documentDto);
-        return result.Value;
-    }
-    
-    [HttpPost("UpdateDocument")]
-    public async Task UpdateDocument( DocumentDto documentDto)
+    public async Task<Result<DocumentDto>> AddDocument(AddDocumentDto documentDto)
     {
-        var result = await documentService.UpdateDocumentAsync(documentDto.Id, documentDto);
+        return await documentService.AddDocumentAsync(documentDto);
     }
-    
+
+
+    [HttpPost("UpdateDocument")]
+    public async Task UpdateDocument(DocumentDto documentDto)
+    {
+        await documentService.UpdateDocumentAsync(documentDto.Id, documentDto);
+    }
+
+
     [HttpPost("DeleteDocument/{id}")]
     public async Task DeleteDocument(int id)
     {
-        var result = await documentService.DeleteDocumentAsync(id);
+        await documentService.DeleteDocumentAsync(id);
     }
 }

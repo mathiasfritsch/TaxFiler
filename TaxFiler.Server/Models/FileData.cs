@@ -1,8 +1,7 @@
-﻿namespace TaxFiler.Models
+﻿namespace TaxFiler.Models;
+
+public class FileData
 {
-    public class FileData
-    {
-        public string Name { get; set; }
-        public string Id { get; set; }
-    }
+    public string Name { get; set; }
+    public string Id { get; set; }
 }

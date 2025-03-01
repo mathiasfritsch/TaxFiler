@@ -1,9 +1,6 @@
-﻿using TaxFiler.Model;
+﻿namespace TaxFiler.Models;
 
-namespace TaxFiler.Models
+public class HomeViewModel
 {
-    public class HomeViewModel
-    {
-        public List<Model.FileData> Files { get; set; }
-    }
+    public List<Model.FileData> Files { get; set; }
 }

@@ -1,27 +1,27 @@
 <Project>
-  <PropertyGroup>
-    <Deterministic>true</Deterministic>
-    <TargetFramework>net8.0</TargetFramework>
-    <Company>Mathias Fritsch</Company>
-    <Product>Taxfiler</Product>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <PlatformTarget>x64</PlatformTarget>
-    <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-    <Configurations>Debug;Release</Configurations>
-    <LangVersion>latest</LangVersion>
-    <Nullable>Enable</Nullable>    
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Title>$(AssemblyName)</Title>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DebugType>full</DebugType>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-  </PropertyGroup> 
+    <PropertyGroup>
+        <Deterministic>true</Deterministic>
+        <TargetFramework>net8.0</TargetFramework>
+        <Company>Mathias Fritsch</Company>
+        <Product>Taxfiler</Product>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+        <PlatformTarget>x64</PlatformTarget>
+        <Platforms>x64</Platforms>
+        <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+        <Configurations>Debug;Release</Configurations>
+        <LangVersion>latest</LangVersion>
+        <Nullable>Enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Title>$(AssemblyName)</Title>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+        <DebugType>full</DebugType>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
 </Project>
