@@ -9,13 +9,13 @@ namespace TaxFiler.Server.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class TransactionsController(ITransactionService transactionService) : ControllerBase
 {
     [HttpGet("GetTransactions")]
-    public async Task<IEnumerable<TransactionViewModel>> List(string yearMonth)
+    public async Task<IEnumerable<TransactionViewModel>> List(DateOnly yearMonth)
     {
-        var transactions = await transactionService.GetTransactionsAsync( new DateOnly(2025,1,1));
+        var transactions = await transactionService.GetTransactionsAsync( yearMonth );
         var vm = transactions.Select(t => t.ToViewModel());
         return vm;
     }

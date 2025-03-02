@@ -1,5 +1,9 @@
-<h1 id="tableLabel">Transactions</h1>
+<h1 id="tableLabel">Transactions   {{ yearMonth }}</h1>
 <p *ngIf="!transactions"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
+<div>
+  <button (click)="switchMonth(-1)">Previous Month</button>
+  <button (click)="switchMonth(1)">Next Month</button>
+</div>
 <table *ngIf="transactions">
   <thead>
   <tr>

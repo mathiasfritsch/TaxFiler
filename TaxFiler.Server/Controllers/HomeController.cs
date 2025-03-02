@@ -11,7 +11,7 @@ namespace TaxFiler.Server.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class HomeController(
     ITransactionService transactionService,
     TaxFilerContext taxFilerContext,
@@ -49,13 +49,13 @@ public class HomeController(
         await documentService.DeleteAllDocumentsAsync();
     }
 
-
+    [HttpDelete("GoogleDocuments")]
     public async Task<List<FileData>> GoogleDocuments(DateOnly yearMonth)
     {
         return await googleDriveService.GetFilesAsync(yearMonth);
     }
 
-    [HttpPost]
+    [HttpPost("Parse")]
     public async Task<Result<Invoice>> Parse([FromForm] int fileId)
     {
         return await parseService.ParseFilesAsync(fileId);

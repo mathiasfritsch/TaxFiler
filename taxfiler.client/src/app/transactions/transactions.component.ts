@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-transactions',
@@ -9,15 +9,17 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class TransactionsComponent  implements  OnInit{
   public transactions: any[] = [];
-  constructor(private http: HttpClient,private route: ActivatedRoute) {}
+  public yearMonth: any;
+  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {}
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      this.getTransactions(params.get('yearMonth'));
+      this.yearMonth = params.get('yearMonth');
+      this.getTransactions(this.yearMonth);
     });
   }
   getTransactions(yearMonth: any) {
     console.log(yearMonth);
-    this.http.get<any[]>('/transactions/gettransactions?yearMonth=2025-01').subscribe(
+    this.http.get<any[]>(`/api/transactions/gettransactions?yearMonth=${yearMonth}`).subscribe(
       (result) => {
         this.transactions = result;
       },
@@ -25,5 +27,11 @@ export class TransactionsComponent  implements  OnInit{
         console.error(error);
       }
     );
+  }
+  switchMonth(offset: number) {
+    const [year, month] = this.yearMonth.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    const newYearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    this.router.navigate([`/transactions/${newYearMonth}`]);
   }
 }
