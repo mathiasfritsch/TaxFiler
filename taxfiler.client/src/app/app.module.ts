@@ -11,8 +11,8 @@ import { DocumentsComponent } from './documents/documents.component';
 
 @NgModule({ declarations: [
         AppComponent,
-        TransactionsComponent,
-        DocumentsComponent
+        TransactionsComponent
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule, RouterModule.forRoot(routes)], providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, provideHttpClient(withInterceptorsFromDi())] })
+    bootstrap: [AppComponent],
+  imports: [BrowserModule, RouterModule.forRoot(routes), DocumentsComponent], providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
