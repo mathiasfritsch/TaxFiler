@@ -1,10 +1,9 @@
 {
   "name": "taxfiler.client",
   "version": "0.0.0",
-  "scripts": {
-     },
+  "scripts": {},
   "private": true,
-  "dependencies": {
-
+  "devDependencies": {
+    "express": "^4.21.2"
   }
 }
