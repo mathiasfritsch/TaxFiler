@@ -3,9 +3,10 @@ import { HttpClient } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
-  selector: 'app-transactions',
-  templateUrl: './transactions.component.html',
-  styleUrls: ['./transactions.component.css']
+    selector: 'app-transactions',
+    templateUrl: './transactions.component.html',
+    styleUrls: ['./transactions.component.css'],
+    standalone: false
 })
 export class TransactionsComponent  implements  OnInit{
   public transactions: any[] = [];

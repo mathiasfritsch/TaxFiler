@@ -3,9 +3,10 @@ import { HttpClient } from "@angular/common/http";
 import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
-  selector: 'app-documents',
-  templateUrl: './documents.component.html',
-  styleUrls: ['./documents.component.css']
+    selector: 'app-documents',
+    templateUrl: './documents.component.html',
+    styleUrls: ['./documents.component.css'],
+    standalone: false
 })
 export class DocumentsComponent implements  OnInit{
   public documents: any[] = [];
