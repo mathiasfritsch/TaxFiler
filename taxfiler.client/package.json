@@ -4,6 +4,6 @@
   "scripts": {},
   "private": true,
   "dependencies": {
-    "@angular/core": "^19.2.0"
+    "@angular/core": "^16.2.0"
   }
 }
