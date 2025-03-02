@@ -20,11 +20,13 @@ export class TransactionsComponent  implements  OnInit{
   getTransactions(yearMonth: any) {
     console.log(yearMonth);
     this.http.get<any[]>(`/api/transactions/gettransactions?yearMonth=${yearMonth}`).subscribe(
-      (result) => {
-        this.transactions = result;
-      },
-      (error) => {
-        console.error(error);
+      {
+        next: transactions => {
+          this.transactions = transactions;
+        },
+        error: error => {
+          console.error('There was an error!', error);
+        }
       }
     );
   }
@@ -32,6 +34,6 @@ export class TransactionsComponent  implements  OnInit{
     const [year, month] = this.yearMonth.split('-').map(Number);
     const date = new Date(year, month - 1 + offset, 1);
     const newYearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-    this.router.navigate([`/transactions/${newYearMonth}`]);
+    this.router.navigate([`/transactions/${newYearMonth}`]).then();
   }
 }

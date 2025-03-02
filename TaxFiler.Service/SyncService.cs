@@ -31,9 +31,7 @@ public class SyncService(TaxFilerContext context, IGoogleDriveService googleDriv
             {
                 Name = file.Name,
                 ExternalRef = file.Id,
-                Orphaned = false,
-                TaxYear = date.Year,
-                TaxMonth = date.Month
+                Orphaned = false
             };
             await context.Documents.AddAsync(document);
         }

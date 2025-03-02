@@ -14,9 +14,8 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         await context.SaveChangesAsync();
     }
     
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsAsync(DateOnly yearMonth) =>
+    public async Task<IEnumerable<DocumentDto>> GetDocumentsAsync() =>
         await context.Documents
-            .Where(d => d.TaxYear == yearMonth.Year && d.TaxMonth == yearMonth.Month)
             .Select(d => d.ToDto())
             .ToArrayAsync();
     
@@ -83,7 +82,6 @@ public class DocumenService(TaxFilerContext context):IDocumentService
 
     public async Task<IEnumerable<DocumentDto>> GetDocumentsByMonthAsync(DateTime yearMonth)
      => await context.Documents
-         .Where(d => d.TaxYear == yearMonth.Year && d.TaxMonth == yearMonth.Month)
          .Select(d => d.ToDto())
         .ToArrayAsync();
 

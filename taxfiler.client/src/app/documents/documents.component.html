@@ -1,0 +1,14 @@
+<h1 id="tableLabel">Documents </h1>
+<p *ngIf="!documents"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
+<table *ngIf="documents">
+  <thead>
+  <tr>
+    <th>id</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let transaction of documents">
+    <td>{{ transaction.id }}</td>
+  </tr>
+  </tbody>
+</table>

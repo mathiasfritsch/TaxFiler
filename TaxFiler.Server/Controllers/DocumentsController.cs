@@ -12,10 +12,10 @@ namespace TaxFiler.Server.Controllers;
 public class DocumentsController(IDocumentService documentService) : ControllerBase
 {
     [HttpGet("")]
-    [HttpGet("List")]
-    public async Task<IEnumerable<DocumentDto>> List(DateOnly yearMonth)
+    [HttpGet("GetDocuments")]
+    public async Task<IEnumerable<DocumentDto>> List()
     {
-        return await documentService.GetDocumentsAsync(yearMonth);
+        return await documentService.GetDocumentsAsync();
     }
 
     [HttpGet("GetDocument/{documentId}")]

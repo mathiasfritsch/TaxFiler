@@ -7,11 +7,13 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TransactionsComponent } from './transactions/transactions.component';
 import {RouterModule} from "@angular/router";
 import { routes } from './app.routes';
+import { DocumentsComponent } from './documents/documents.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TransactionsComponent
+    TransactionsComponent,
+    DocumentsComponent
   ],
   imports: [
     BrowserModule, HttpClientModule,  RouterModule.forRoot(routes)
