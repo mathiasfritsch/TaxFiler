@@ -1,26 +1,9 @@
-/* transactions.component.css */
 h1 {
   font-size: 28px;
   color: #333;
   text-align: center;
   margin-bottom: 20px;
   font-family: 'Arial', sans-serif;
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin: 5px;
-  cursor: pointer;
-  border-radius: 5px;
-  font-family: 'Arial', sans-serif;
-  font-size: 16px;
-}
-
-button:hover {
-  background-color: #0056b3;
 }
 
 table {
@@ -48,20 +31,4 @@ tr:nth-child(even) {
 
 tr:hover {
   background-color: #f1f1f1;
-}
-
-a {
-  display: inline-block;
-  margin: 10px 0;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  font-family: 'Arial', sans-serif;
-  font-size: 16px;
-}
-
-a:hover {
-  background-color: #0056b3;
 }

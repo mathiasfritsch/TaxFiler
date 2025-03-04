@@ -1,14 +1,19 @@
-<h1 id="tableLabel">Dokumente </h1>
+<h1 id="tableLabel" mat-dialog-title >Dokumente </h1>
 <p *ngIf="!documents"><em>Loading...</em></p>
 <div>
-  <a [routerLink]="['/transactions', yearMonth]">Transaktionen</a>
+  <a mat-button [routerLink]="['/transactions', yearMonth]">Transaktionen</a>
 </div>
+<button mat-button (click)="openEditDocument()" >Edit Document</button>
+<div>{{animal}}</div>
+<div>{{name}}</div>
 <ag-grid-angular
   class="ag-theme-quartz"
   style="height: 600px;"
   [rowData]="documents"
   [columnDefs]="colDefs"
   [defaultColDef]="defaultColDef"
+  (rowValueChanged)="onRowValueChanged($event)"
+  editType="fullRow"
 >
 </ag-grid-angular>
 
