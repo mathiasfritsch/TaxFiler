@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import {ActivatedRoute, Router, RouterLink} from "@angular/router";
+import {ActivatedRoute, RouterLink} from "@angular/router";
 import { ColDef } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry,RowValueChangedEvent } from 'ag-grid-community';
 import { AG_GRID_LOCALE_DE } from '@ag-grid-community/locale';
@@ -10,8 +10,8 @@ import {
   MatDialog, MatDialogTitle
 } from '@angular/material/dialog';
 import {FormBuilder} from '@angular/forms';
-import {DialogOverviewExampleDialog} from "../document-edit/document-edit.component";
 import {MatAnchor, MatButton} from "@angular/material/button";
+import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -30,7 +30,6 @@ function formatPrice(value: any):string{
     RouterLink,
     NgIf,
     AgGridAngular,
-    MatButton,
     MatDialogTitle,
     MatAnchor,
   ],
@@ -38,9 +37,6 @@ function formatPrice(value: any):string{
 })
 
 export class DocumentsComponent implements  OnInit{
-
-
-
   colDefs: ColDef[] = [
     {
       field: 'name',
@@ -77,6 +73,13 @@ export class DocumentsComponent implements  OnInit{
       cellStyle: { textAlign: 'left' }
     },
     { field: 'parsed', headerName:'Parsed', filter: true},
+    {
+      headerName: 'Edit',
+      cellRenderer: ButtonCellRendererComponent,
+      editable: false,
+      colId: 'params',
+      width: 100
+    }
   ];
 
   defaultColDef = {
@@ -93,12 +96,10 @@ export class DocumentsComponent implements  OnInit{
     console.log(data);
 
   }
-  public today:Date = new Date();
+
   public documents: Document[] = [];
   public yearMonth: any;
-  public amount: number = 10.24;
   localeText = AG_GRID_LOCALE_DE;
-
   constructor(private dialog: MatDialog,
               private fb: FormBuilder,
               private http: HttpClient,
@@ -106,24 +107,13 @@ export class DocumentsComponent implements  OnInit{
               @Inject(LOCALE_ID) public locale: string) {
   }
 
-  openEditDocument(): void {
-    const dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
-      width: '600px',
-      data: this.documents[0]
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-    });
-  }
-
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.yearMonth = params.get('yearMonth');
       this.getDocuments();
     });
-
   }
+
   getDocuments() {
     this.http.get<any[]>(`/api/documents/getdocuments`).subscribe(
       {

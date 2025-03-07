@@ -5,9 +5,9 @@
 
 mat-label {
   margin-right: 16px;
+  flex: 0 0 150px;
 }
 
 mat-form-field {
   flex: 1;
 }
-

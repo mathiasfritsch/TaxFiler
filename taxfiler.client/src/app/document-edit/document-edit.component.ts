@@ -12,7 +12,15 @@ import {
 import {MatButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
 import {Document} from "../model/document";
-import {JsonPipe} from "@angular/common";
+import {MatCheckbox} from "@angular/material/checkbox";
+
+function formatPrice(value: any):string{
+  return value ?
+    value.toLocaleString('de-DE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }) : '';
+}
 
 @Component({
   selector: 'dialog-overview-example-dialog',
@@ -30,6 +38,7 @@ import {JsonPipe} from "@angular/common";
     FormsModule,
     MatInput,
     MatLabel,
+    MatCheckbox
   ]
 })
 
@@ -44,20 +53,14 @@ export class DialogOverviewExampleDialog implements OnInit{
   ) {
     this.documentFormGroup = this.fb.group({
       nameControl: new FormControl(document.name),
-      totalControl: new FormControl(document.total),
-      subTotalControl: new FormControl(document.subTotal),
+      totalControl: new FormControl(formatPrice(document.total)),
+      subTotalControl: new FormControl(formatPrice(document.subTotal)),
+      taxAmountControl: new FormControl(formatPrice(document.taxAmount)),
+      skontoControl: new FormControl(formatPrice(document.skonto)),
+      invoiceNumberControl: new FormControl(formatPrice(document.invoiceNumber)),
+      parsedControl: new FormControl(document.parsed),
+      invoiceDateControl: new FormControl(document.invoiceDate)
     });
-    console.log(document)
-    // this.editDocumentForm = this.fb.group({
-    //   id: [document.id],
-    //   total: [document.total],
-    //   subTotal: [document.subTotal],
-    //   taxAmount: [document.taxAmount],
-    //   skonto: [document.skonto],
-    //   invoiceDate: [document.invoiceDate],
-    //   invoiceNumber: [document.invoiceNumber],
-    //   parsed: [document.parsed]
-    // });
   }
 
   onCancelClick(): void {
