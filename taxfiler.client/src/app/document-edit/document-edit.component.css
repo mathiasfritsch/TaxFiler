@@ -1,0 +1,13 @@
+.form-container div {
+  display: flex;
+  align-items: center;
+}
+
+mat-label {
+  margin-right: 16px;
+}
+
+mat-form-field {
+  flex: 1;
+}
+
