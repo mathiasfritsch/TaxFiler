@@ -8,11 +8,14 @@ import { TransactionsComponent } from './transactions/transactions.component';
 import {RouterModule} from "@angular/router";
 import { routes } from './app.routes';
 import { DocumentsComponent } from './documents/documents.component';
+import {MatAnchor, MatButton} from "@angular/material/button";
+import {MatDialogTitle} from "@angular/material/dialog";
+import {MatTable} from "@angular/material/table";
 
 @NgModule({ declarations: [
         AppComponent,
         TransactionsComponent
     ],
     bootstrap: [AppComponent],
-  imports: [BrowserModule, RouterModule.forRoot(routes), DocumentsComponent], providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, provideHttpClient(withInterceptorsFromDi())] })
+  imports: [BrowserModule, RouterModule.forRoot(routes), DocumentsComponent, MatAnchor, MatButton, MatDialogTitle, MatTable], providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }

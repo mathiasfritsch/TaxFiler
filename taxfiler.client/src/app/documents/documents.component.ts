@@ -1,12 +1,27 @@
-import {Component, OnInit} from '@angular/core';
 import { HttpClient } from "@angular/common/http";
-import {ActivatedRoute, Router, RouterLink} from "@angular/router";
+import {ActivatedRoute, RouterLink} from "@angular/router";
 import { ColDef } from 'ag-grid-community';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import {NgForOf, NgIf} from "@angular/common";
+import { AllCommunityModule, ModuleRegistry,RowValueChangedEvent } from 'ag-grid-community';
+import { AG_GRID_LOCALE_DE } from '@ag-grid-community/locale';
+import { NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
+import {Component, OnInit, LOCALE_ID, Inject} from '@angular/core';
+import {
+  MatDialog, MatDialogTitle
+} from '@angular/material/dialog';
+import {FormBuilder} from '@angular/forms';
+import {MatAnchor, MatButton} from "@angular/material/button";
+import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+function formatPrice(value: any):string{
+  return value.value ? value.value.toLocaleString('de-DE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) : '';
+}
+
 @Component({
   selector: 'app-documents',
   templateUrl: './documents.component.html',
@@ -14,33 +29,83 @@ ModuleRegistry.registerModules([AllCommunityModule]);
   imports: [
     RouterLink,
     NgIf,
-    NgForOf,
-    AgGridAngular
+    AgGridAngular,
+    MatDialogTitle,
+    MatAnchor,
   ],
   standalone: true
 })
 
 export class DocumentsComponent implements  OnInit{
-
   colDefs: ColDef[] = [
-    { field: 'name', headerName: 'Name', filter: true },
-    { field: 'total' , headerName: 'Brutto', filter: true },
-    { field: 'subTotal', headerName:'Netto', filter: true },
-    { field: 'taxAmount', headerName:'Steuerbetrag', filter: true },
-    { field: 'skonto' , headerName:'Skonto', filter: true},
+    {
+      field: 'name',
+      headerName: 'Name',
+      filter: true,
+      cellStyle: {
+        textAlign: 'left'
+      }
+    },
+    {
+      field: 'total' ,
+      headerName: 'Brutto',
+      valueFormatter: formatPrice,
+    },
+    {
+      field: 'subTotal',
+      headerName:'Netto',
+      valueFormatter: formatPrice,
+    },
+    {
+      field: 'taxAmount',
+      headerName:'Steuerbetrag',
+      valueFormatter: formatPrice,
+    },
+    {
+      field: 'skonto' ,
+      headerName:'Skonto',
+      valueFormatter: formatPrice,
+    },
     { field: 'invoiceDate', headerName:'Rechungsdatum', filter: true },
-    { field: 'invoiceNumber' , headerName:'Rechnungsnummer', filter: true},
+    {
+      field: 'invoiceNumber' ,
+      headerName:'Rechnungsnummer',
+      cellStyle: { textAlign: 'left' }
+    },
     { field: 'parsed', headerName:'Parsed', filter: true},
+    {
+      headerName: 'Edit',
+      cellRenderer: ButtonCellRendererComponent,
+      editable: false,
+      colId: 'params',
+      width: 100
+    }
   ];
 
   defaultColDef = {
     flex: 1,
+    filter: true,
+    cellStyle: {
+      textAlign: 'right',
+      paddingRight: '30px'
+    }
   };
 
-  public documents: any[] = [];
-  public yearMonth: any;
+  onRowValueChanged(event: RowValueChangedEvent) {
+    const data = event.data;
+    console.log(data);
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {}
+  }
+
+  public documents: Document[] = [];
+  public yearMonth: any;
+  localeText = AG_GRID_LOCALE_DE;
+  constructor(private dialog: MatDialog,
+              private fb: FormBuilder,
+              private http: HttpClient,
+              private route: ActivatedRoute,
+              @Inject(LOCALE_ID) public locale: string) {
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -48,6 +113,7 @@ export class DocumentsComponent implements  OnInit{
       this.getDocuments();
     });
   }
+
   getDocuments() {
     this.http.get<any[]>(`/api/documents/getdocuments`).subscribe(
       {

@@ -1,0 +1,49 @@
+﻿<h1 mat-dialog-title>Edit Document</h1>
+<div mat-dialog-content  class="form-container" >
+  <form [formGroup]="documentFormGroup"   >
+    <div>
+      <mat-label>Name</mat-label>
+      <mat-form-field>
+        <input id="name" type="text" formControlName="nameControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Brutto</mat-label>
+      <mat-form-field class="mat-form-field">
+        <input id="total" type="text" formControlName="totalControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Netto</mat-label>
+      <mat-form-field>
+        <input id="sub-total" type="text" formControlName="totalControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Steuerbetrag</mat-label>
+      <mat-form-field>
+        <input id="taxAmount" type="text" formControlName="taxAmountControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Skonto</mat-label>
+      <mat-form-field>
+        <input id="skonto" type="text" formControlName="skontoControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Rechnungsdatum</mat-label>
+      <mat-form-field>
+        <input id="invoiceDate" type="date" formControlName="invoiceDateControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Parsed</mat-label>
+      <mat-checkbox formControlName="parsedControl">Parsed</mat-checkbox>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="document.name" cdkFocusInitial>Save</button>
+</div>

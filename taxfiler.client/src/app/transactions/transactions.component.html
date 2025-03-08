@@ -1,11 +1,11 @@
-<h1 id="tableLabel">Transaktionen   {{ yearMonth }}</h1>
+<h1 id="tableLabel" mat-dialog-title >Transaktionen   {{ yearMonth }}</h1>
 <div>
-  <a [routerLink]="['/documents', yearMonth]">Dokumente</a>
-  <button (click)="switchMonth(-1)">Vorheriger Monat</button>
-  <button (click)="switchMonth(1)">Nächster Monat</button>
+  <a [routerLink]="['/documents', yearMonth]"  mat-button >Dokumente</a>
+  <button (click)="switchMonth(-1)" mat-button >Vorheriger Monat</button>
+  <button (click)="switchMonth(1)"  mat-button >Nächster Monat</button>
 </div>
 <p *ngIf="!transactions"><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationangular">https://aka.ms/jspsintegrationangular</a> for more details.</em></p>
-<table *ngIf="transactions">
+<table *ngIf="transactions" >
   <thead>
   <tr>
     <th>id</th>
