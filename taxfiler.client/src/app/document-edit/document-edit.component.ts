@@ -13,10 +13,11 @@ import {MatButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
 import {Document} from "../model/document";
 import {MatCheckbox} from "@angular/material/checkbox";
+import {HttpClient} from "@angular/common/http";
 
 function formatPrice(value: any):string{
   return value ?
-    value.toLocaleString('de-DE', {
+    value.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }) : '';
@@ -29,7 +30,6 @@ function formatPrice(value: any):string{
   standalone: true,
   imports: [
     MatFormField,
-    MatDialogClose,
     MatDialogActions,
     MatButton,
     MatDialogContent,
@@ -49,7 +49,8 @@ export class DialogOverviewExampleDialog implements OnInit{
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
     @Inject(MAT_DIALOG_DATA) public document: Document,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private http: HttpClient
   ) {
     this.documentFormGroup = this.fb.group({
       nameControl: new FormControl(document.name),
@@ -67,6 +68,29 @@ export class DialogOverviewExampleDialog implements OnInit{
     this.dialogRef.close();
   }
   onSaveClick(): void {
+
+    const updateDocument: Document = {
+      id: this.document.id, // Assuming 0 for a new document, adjust as needed
+      name: this.documentFormGroup.value.nameControl,
+      total: this.documentFormGroup.value.totalControl,
+      subTotal: this.documentFormGroup.value.subTotalControl,
+      taxAmount: this.documentFormGroup.value.taxAmountControl,
+      skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
+      invoiceDate: this.documentFormGroup.value.invoiceDateControl,
+      invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,
+      parsed: this.documentFormGroup.value.parsedControl
+    };
+    this.http.post<Document>(`/api/documents/updatedocument`,updateDocument).subscribe(
+      {
+        next: document => {
+          console.log('Success!', document);
+          this.dialogRef.close();
+        },
+        error: error => {
+          console.error('There was an error!', error);
+        }
+      }
+    );
 
   }
   ngOnInit(): void {

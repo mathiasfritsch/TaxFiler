@@ -33,7 +33,7 @@ public class DocumentsController(IDocumentService documentService) : ControllerB
 
 
     [HttpPost("UpdateDocument")]
-    public async Task UpdateDocument(DocumentDto documentDto)
+    public async Task UpdateDocument(UpdateDocumentDto documentDto)
     {
         await documentService.UpdateDocumentAsync(documentDto.Id, documentDto);
     }

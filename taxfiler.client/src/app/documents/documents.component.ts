@@ -16,7 +16,7 @@ import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-r
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function formatPrice(value: any):string{
-  return value.value ? value.value.toLocaleString('de-DE', {
+  return value.value ? value.value.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }) : '';

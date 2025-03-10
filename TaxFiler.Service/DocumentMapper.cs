@@ -37,16 +37,14 @@ public static class DocumentMapper
             skonto: addDocumentDto.Skonto);
     }
     
-    public static void UpdateDocument(this Document document, DocumentDto documentDto)
+    public static void UpdateDocument(this Document document, UpdateDocumentDto documentDto)
     {
         document.Name = documentDto.Name;
-        document.ExternalRef = documentDto.ExternalRef;
-        document.Orphaned = documentDto.Orphaned;
         document.TaxRate = documentDto.TaxRate;
         document.TaxAmount = documentDto.TaxAmount;
         document.Total = documentDto.Total;
         document.SubTotal = documentDto.SubTotal;
-        document.InvoiceDate = documentDto.InvoiceDate;
+        //document.InvoiceDate = documentDto.InvoiceDate;
         document.InvoiceNumber = documentDto.InvoiceNumber;
         document.Parsed = documentDto.Parsed;
         document.Skonto = documentDto.Skonto;

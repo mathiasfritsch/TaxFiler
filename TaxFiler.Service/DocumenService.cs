@@ -50,7 +50,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         return Result.Ok(document.ToDto());
     }
     
-    public async Task<Result> UpdateDocumentAsync(int id, DocumentDto documentDto)
+    public async Task<Result> UpdateDocumentAsync(int id, UpdateDocumentDto documentDto)
     {
         var document = await context.Documents.FindAsync(id);
         
