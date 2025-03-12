@@ -1,8 +1,7 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component,Input } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogOverviewExampleDialog } from '../document-edit/document-edit.component';
 import {MatButton} from "@angular/material/button";
 
 @Component({
@@ -16,11 +15,13 @@ import {MatButton} from "@angular/material/button";
 })
 export class ButtonCellRendererComponent implements ICellRendererAngularComp {
   private params: any;
+  @Input() onClickCallback: ((data: any) => void) | undefined;
 
   constructor(private dialog: MatDialog) {}
 
-  agInit(params: ICellRendererParams): void {
+  agInit(params: any): void {
     this.params = params;
+    this.onClickCallback = params.onClickCallback;
   }
 
   refresh(params: ICellRendererParams): boolean {
@@ -28,9 +29,8 @@ export class ButtonCellRendererComponent implements ICellRendererAngularComp {
   }
 
   onClick($event: any): void {
-    this.dialog.open(DialogOverviewExampleDialog, {
-      width: '600px',
-      data: this.params.data
-    });
+    if (this.onClickCallback) {
+      this.onClickCallback(this.params.data);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import {ActivatedRoute, RouterLink} from "@angular/router";
 import { ColDef } from 'ag-grid-community';
-import { AllCommunityModule, ModuleRegistry,RowValueChangedEvent } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AG_GRID_LOCALE_DE } from '@ag-grid-community/locale';
 import { NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
@@ -10,8 +10,9 @@ import {
   MatDialog, MatDialogTitle
 } from '@angular/material/dialog';
 import {FormBuilder} from '@angular/forms';
-import {MatAnchor, MatButton} from "@angular/material/button";
+import {MatAnchor} from "@angular/material/button";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
+import {DocumentEditComponent} from "../document-edit/document-edit.component";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -76,6 +77,9 @@ export class DocumentsComponent implements  OnInit{
     {
       headerName: 'Edit',
       cellRenderer: ButtonCellRendererComponent,
+      cellRendererParams: {
+        onClickCallback: (data: any) => this.openEditDialog(data)
+      },
       editable: false,
       colId: 'params',
       width: 100
@@ -90,12 +94,21 @@ export class DocumentsComponent implements  OnInit{
       paddingRight: '30px'
     }
   };
+  dialogRef: any;
+  openEditDialog(data:any) {
+    this.dialogRef =
+      this.dialog.open(DocumentEditComponent, {
+        width: '600px',
+        data: data
+      });
 
-  onRowValueChanged(event: RowValueChangedEvent) {
-    const data = event.data;
-    console.log(data);
+    this.dialogRef.afterClosed().subscribe(() =>
+    {
+      this.getDocuments();
+    });
 
   }
+
 
   public documents: Document[] = [];
   public yearMonth: any;

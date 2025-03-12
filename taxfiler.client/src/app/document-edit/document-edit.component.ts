@@ -4,7 +4,6 @@ import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} f
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle
@@ -19,7 +18,7 @@ function formatPrice(value: any):string{
   return value ?
     value.toLocaleString('en-US', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      useGrouping: false,
     }) : '';
 }
 
@@ -42,12 +41,12 @@ function formatPrice(value: any):string{
   ]
 })
 
-export class DialogOverviewExampleDialog implements OnInit{
+export class DocumentEditComponent implements OnInit{
 
   documentFormGroup: FormGroup;
 
   constructor(
-    public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
+    public dialogRef: MatDialogRef<DocumentEditComponent>,
     @Inject(MAT_DIALOG_DATA) public document: Document,
     private fb: FormBuilder,
     private http: HttpClient
@@ -68,30 +67,32 @@ export class DialogOverviewExampleDialog implements OnInit{
     this.dialogRef.close();
   }
   onSaveClick(): void {
+    if (this.documentFormGroup.valid) {
 
-    const updateDocument: Document = {
-      id: this.document.id, // Assuming 0 for a new document, adjust as needed
-      name: this.documentFormGroup.value.nameControl,
-      total: this.documentFormGroup.value.totalControl,
-      subTotal: this.documentFormGroup.value.subTotalControl,
-      taxAmount: this.documentFormGroup.value.taxAmountControl,
-      skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
-      invoiceDate: this.documentFormGroup.value.invoiceDateControl,
-      invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,
-      parsed: this.documentFormGroup.value.parsedControl
-    };
-    this.http.post<Document>(`/api/documents/updatedocument`,updateDocument).subscribe(
-      {
-        next: document => {
-          console.log('Success!', document);
-          this.dialogRef.close();
-        },
-        error: error => {
-          console.error('There was an error!', error);
+      const updateDocument: Document = {
+        id: this.document.id, // Assuming 0 for a new document, adjust as needed
+        name: this.documentFormGroup.value.nameControl,
+        total: this.documentFormGroup.value.totalControl,
+        subTotal: this.documentFormGroup.value.subTotalControl,
+        taxAmount: this.documentFormGroup.value.taxAmountControl,
+        skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
+        invoiceDate: this.documentFormGroup.value.invoiceDateControl,
+        invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,
+        parsed: this.documentFormGroup.value.parsedControl
+      };
+
+      this.http.post<Document>(`/api/documents/updatedocument`,updateDocument).subscribe(
+        {
+          next: document => {
+            console.log('Success!', document);
+            this.dialogRef.close();
+          },
+          error: error => {
+            console.error('There was an error!', error);
+          }
         }
-      }
-    );
-
+      );
+    }
   }
   ngOnInit(): void {
     this.documentFormGroup.value.nameControl = 'asfd'
