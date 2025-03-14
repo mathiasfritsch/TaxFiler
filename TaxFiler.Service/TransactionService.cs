@@ -18,7 +18,19 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         };
         using var csv = new CsvReader(reader, config);
         var transactions = csv.GetRecords<TransactionDto>();
-        return transactions.ToArray();
+
+        return transactions.Select(
+            
+            t => new TransactionDto
+            {
+                BookingDate = t.BookingDate,
+                SenderReceiver = t.SenderReceiver,
+                CounterPartyBIC = t.CounterPartyBIC,
+                CounterPartyIBAN = t.CounterPartyIBAN,
+                Comment = t.Comment,
+                Amount = t.Amount /100
+            }
+            ).ToArray();
     }
 
     public async Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonthh)
