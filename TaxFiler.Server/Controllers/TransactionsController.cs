@@ -32,11 +32,11 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpPost("Upload")]
-    public async Task Upload(IFormFile file, DateOnly yearMonth)
+    public async Task Upload([FromForm]IFormFile file)
     {
         var reader = new StreamReader(file.OpenReadStream());
         var transactions = transactionService.ParseTransactions(reader);
-        await transactionService.AddTransactionsAsync(transactions, yearMonth);
+        await transactionService.AddTransactionsAsync(transactions);
     }
     
     [HttpDelete("DeleteTransaction/{id:int}")]

@@ -13,16 +13,17 @@ public class Transaction
     public decimal TaxRate { get; set; }
     [MaxLength(200)]
     public String Counterparty { get; set; }
-    [MaxLength(200)]
-    public String TransactionReference { get; set; }
+
+    [MaxLength(200)] public String TransactionReference { get; set; } = "";
     public DateTime TransactionDateTime { get; set; }
     [MaxLength(200)]
     public string TransactionNote { get; set; }
     public bool IsOutgoing { get; set; }
     public bool IsIncomeTaxRelevant { get; set; }
     public bool IsSalesTaxRelevant { get; set; }
-    public int TaxMonth { get; set; }
-    public int TaxYear { get; set; }
+    public int? TaxMonth { get; set; } = 0;
+    public int? TaxYear { get; set; } = 0;
+    
     [ForeignKey(nameof(Document))]
     public int? DocumentId { get; set; }
     public Document? Document { get; set; }

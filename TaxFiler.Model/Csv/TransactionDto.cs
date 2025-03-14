@@ -5,37 +5,22 @@ namespace TaxFiler.Model.Csv;
 
 public class TransactionDto
 {
-    [Name("Transaktions-ID")]
-    public string TransactionID { get; init; }
-    
-    [Name("Buchungsdatum")]
+    [Name("Buchungstag")]
     [Format("dd.MM.yyyy")]
-    public DateOnly BookingDate { get; init; }
+    public DateTime BookingDate { get; init; }
     
-    [Name("Time completed")]
-    public TimeOnly TimeCompleted { get; init; }
-    
-    [Name("Status")]
-    public string State{get;init;}
-    
-    [Name("Transaktionsart")]
-    public string TransactionKind { get; init; }
-    
-    [Name("Auftraggeber/Empfänger")]
+    [Name("Name Zahlungsbeteiligter")]
     public string SenderReceiver { get; init; }
     
-    [Name("Counterparty BIC")]
+    [Name("BIC (SWIFT-Code) Zahlungsbeteiligter")]
     public string CounterPartyBIC { get; init; }
     
-    [Name("Counterparty IBAN")]
+    [Name("IBAN Zahlungsbeteiligter")]
     public string CounterPartyIBAN { get; init; }
     
     [Name("Verwendungszweck")]
     public string Comment { get; init; }
     
-    [Name("Zahlungsbetrag")]
+    [Name("Betrag")]
     public decimal Amount { get; init; }
-    
-    [Name("Wallet-Name")]
-    public string Wallet { get; init; }
 }

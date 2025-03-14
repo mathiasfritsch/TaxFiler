@@ -12,8 +12,7 @@ public static class TransactionMapper
             SenderReceiver = transaction.SenderReceiver,
             Counterparty = transaction.CounterPartyIBAN,
             TransactionNote = transaction.Comment,
-            TransactionReference = transaction.TransactionID,
-            TransactionDateTime = new DateTime(transaction.BookingDate, transaction.TimeCompleted),
+            TransactionDateTime = transaction.BookingDate,
             IsOutgoing = transaction.Amount < 0,
             IsIncomeTaxRelevant = false,
             IsSalesTaxRelevant = false
@@ -34,8 +33,6 @@ public static class TransactionMapper
             IsSalesTaxRelevant = transaction.IsSalesTaxRelevant,
             IsOutgoing = transaction.IsOutgoing,
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
-            TaxMonth = transaction.TaxMonth,
-            TaxYear = transaction.TaxYear,
             DocumentId = transaction.DocumentId,
             Document = transaction.Document?.ToDto(),
             SenderReceiver = transaction.SenderReceiver

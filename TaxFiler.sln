@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Model", "TaxFiler.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Service", "TaxFiler.Service\TaxFiler.Service.csproj", "{5757C6B5-797F-48F4-B924-B2ACC03CEA4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Service.Test", "TaxFiler.Service.Test\TaxFiler.Service.Test.csproj", "{D1301331-87E4-4C4E-B181-4C1A2EED3E78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{5757C6B5-797F-48F4-B924-B2ACC03CEA4E}.Debug|Any CPU.Build.0 = Debug|x64
 		{5757C6B5-797F-48F4-B924-B2ACC03CEA4E}.Release|Any CPU.ActiveCfg = Release|x64
 		{5757C6B5-797F-48F4-B924-B2ACC03CEA4E}.Release|Any CPU.Build.0 = Release|x64
+		{D1301331-87E4-4C4E-B181-4C1A2EED3E78}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{D1301331-87E4-4C4E-B181-4C1A2EED3E78}.Debug|Any CPU.Build.0 = Debug|x64
+		{D1301331-87E4-4C4E-B181-4C1A2EED3E78}.Release|Any CPU.ActiveCfg = Release|x64
+		{D1301331-87E4-4C4E-B181-4C1A2EED3E78}.Release|Any CPU.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

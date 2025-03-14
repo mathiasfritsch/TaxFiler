@@ -21,8 +21,6 @@ public static class TransactionMapper
             IsSalesTaxRelevant = transaction.IsSalesTaxRelevant,
             IsOutgoing = transaction.IsOutgoing,
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
-            TaxMonth = transaction.TaxMonth,
-            TaxYear = transaction.TaxYear,
             DocumentId = transaction.DocumentId,
             DocumentName = transaction.Document?.Name,
             SenderReceiver = transaction.SenderReceiver

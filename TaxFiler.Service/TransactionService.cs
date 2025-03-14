@@ -12,7 +12,11 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
 {
     public IEnumerable<TransactionDto> ParseTransactions(TextReader reader)
     {
-        using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            Delimiter = ";"
+        };
+        using var csv = new CsvReader(reader, config);
         var transactions = csv.GetRecords<TransactionDto>();
         return transactions.ToArray();
     }
@@ -64,13 +68,11 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
     }
     
 
-    public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions, DateOnly yearMonth)
+    public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions)
     {
         foreach (var transaction in transactions)
         {
             var transactionDb = transaction.ToTransaction();
-            transactionDb.TaxYear = yearMonth.Year;
-            transactionDb.TaxMonth = yearMonth.Month;
             transactionDb.IsOutgoing = transactionDb.GrossAmount < 0;
             transactionDb.GrossAmount = Math.Abs(transactionDb.GrossAmount);
             
@@ -97,7 +99,7 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         var transactions = await taxFilerContext
             .Transactions
             .Include(t => t.Document)
-            .Where( t => t.TaxYear == yearMonth.Year && t.TaxMonth == yearMonth.Month)
+            .Where( t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month)
             .ToListAsync();
         
         return transactions.Select(t => t.TransactionDto()).ToList();

@@ -14,8 +14,6 @@ public class TransactionViewModel
     public decimal TaxRate { get; init; }
     public bool IsOutgoing { get; init; }
     public bool IsIncomeTaxRelevant { get; init; }
-    public int TaxMonth { get; init; }
-    public int TaxYear { get; init; }
     public int? DocumentId { get; init; }
     public bool IsSalesTaxRelevant { get; init; }
     public string? DocumentName { get; init; }

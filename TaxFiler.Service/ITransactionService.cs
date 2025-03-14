@@ -5,7 +5,7 @@ namespace TaxFiler.Service;
 public interface ITransactionService
 {
     public IEnumerable<csvModel.TransactionDto> ParseTransactions(TextReader reader);
-    public Task AddTransactionsAsync(IEnumerable<csvModel.TransactionDto> transactions, DateOnly yearMonth);    
+    public Task AddTransactionsAsync(IEnumerable<csvModel.TransactionDto> transactions);    
     Task<IEnumerable<dtoModel.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth);
     Task<dtoModel.TransactionDto> GetTransactionAsync(int transactionid);
     Task UpdateTransactionAsync(dtoModel.TransactionDto transactionDto);
