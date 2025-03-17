@@ -13,9 +13,18 @@ import {MatDialogTitle} from "@angular/material/dialog";
 import {MatTable} from "@angular/material/table";
 
 @NgModule({ declarations: [
-        AppComponent,
-        TransactionsComponent
+        AppComponent
     ],
     bootstrap: [AppComponent],
-  imports: [BrowserModule, RouterModule.forRoot(routes), DocumentsComponent, MatAnchor, MatButton, MatDialogTitle, MatTable], providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, provideHttpClient(withInterceptorsFromDi())] })
+  imports: [BrowserModule, RouterModule.forRoot(routes),
+    DocumentsComponent,
+    TransactionsComponent,
+    MatAnchor,
+    MatButton,
+    MatDialogTitle,
+    MatTable],
+  providers: [{
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthInterceptor, multi: true },
+    provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
