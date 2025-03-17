@@ -98,7 +98,8 @@ export class DocumentsComponent implements  OnInit{
   openEditDialog(data:any) {
     this.dialogRef =
       this.dialog.open(DocumentEditComponent, {
-        width: '600px',
+        width: '50vw',
+        maxWidth: '90vw',
         data: data
       });
 

@@ -94,7 +94,8 @@ export class TransactionsComponent  implements  OnInit{
   openEditDialog(data:any) {
     this.dialogRef =
       this.dialog.open(TransactionEditComponent, {
-        width: '600px',
+        width: '50vw',
+        maxWidth: '90vw',
         data: data
       });
 
