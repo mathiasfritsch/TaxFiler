@@ -5,9 +5,11 @@ import { ColDef } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import {NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
-import {MatDialogTitle} from "@angular/material/dialog";
+import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
 import {MatAnchor} from "@angular/material/button";
 import {AG_GRID_LOCALE_DE} from "@ag-grid-community/locale";
+import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
+import {TransactionEditComponent} from "../transaction-edit/transaction-edit.component";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -77,8 +79,31 @@ export class TransactionsComponent  implements  OnInit{
       field: 'isSalesTaxRelevant',
       headerName: 'Umsatzsteuerrelevant',
     },
+    {
+      headerName: 'Edit',
+      cellRenderer: ButtonCellRendererComponent,
+      cellRendererParams: {
+        onClickCallback: (data: any) => this.openEditDialog(data)
+      },
+      editable: false,
+      colId: 'params',
+      width: 100
+    }
   ];
+  dialogRef: any;
+  openEditDialog(data:any) {
+    this.dialogRef =
+      this.dialog.open(TransactionEditComponent, {
+        width: '600px',
+        data: data
+      });
 
+    this.dialogRef.afterClosed().subscribe(() =>
+    {
+      this.getTransactions(this.yearMonth);
+    });
+
+  }
   defaultColDef = {
     flex: 1,
     filter: true,
@@ -88,7 +113,13 @@ export class TransactionsComponent  implements  OnInit{
     }
   };
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {}
+  constructor(private http: HttpClient,
+              private route: ActivatedRoute,
+              private router: Router,
+              private dialog: MatDialog) {
+
+
+  }
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.yearMonth = params.get('yearMonth');

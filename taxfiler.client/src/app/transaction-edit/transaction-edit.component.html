@@ -1,0 +1,57 @@
+<h1 mat-dialog-title>Edit Transaction</h1>
+<div mat-dialog-content  class="form-container" >
+  <form [formGroup]="transactionFormGroup"   >
+    <div>
+      <mat-label>Kommentar</mat-label>
+      <mat-form-field>
+        <input id="transactionNote" type="text" formControlName="transactionNoteControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Brutto</mat-label>
+      <mat-form-field class="mat-form-field">
+        <input id="grossAmount" type="text" formControlName="grossAmountControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Netto</mat-label>
+      <mat-form-field>
+        <input id="netAmount" type="text" formControlName="netAmountControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Steuerbetrag</mat-label>
+      <mat-form-field>
+        <input id="taxAmount" type="text" formControlName="taxAmountControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Sender/Empfänger</mat-label>
+      <mat-form-field>
+        <input id="senderReceiver" type="text" formControlName="senderReceiverControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Dokument</mat-label>
+      <mat-form-field>
+        <input id="documentName" type="text" formControlName="documentNameControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Datum</mat-label>
+      <mat-form-field>
+        <input id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-label>Umsatzsteuerrelevant</mat-label>
+      <mat-form-field>
+        <input id="isSalesTaxRelevant" type="text" formControlName="isSalesTaxRelevantControl" matInput >
+      </mat-form-field>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+  <button mat-button  (click)="onSaveClick()">Save</button>
+</div>

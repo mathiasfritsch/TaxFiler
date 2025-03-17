@@ -95,7 +95,6 @@ export class DocumentEditComponent implements OnInit{
     }
   }
   ngOnInit(): void {
-    this.documentFormGroup.value.nameControl = 'asfd'
   }
 
 }
