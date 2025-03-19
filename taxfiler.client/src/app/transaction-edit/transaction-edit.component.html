@@ -34,11 +34,14 @@
     <div>
       <mat-label>Dokument</mat-label>
       <mat-form-field>
-        <mat-select id="document" formControlName="documentControl" matInput>
-          <mat-option *ngFor="let document of documents" [value]="document.id">
+        <input type="text"
+               matInput formControlName="documentControl"
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
+          <mat-option *ngFor="let document of filteredDocuments | async" [value]="document">
             {{ document.name }}
           </mat-option>
-        </mat-select>
+        </mat-autocomplete>
       </mat-form-field>
     </div>
     <div>

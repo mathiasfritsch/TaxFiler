@@ -15,7 +15,10 @@ import {MatCheckbox} from "@angular/material/checkbox";
 import {HttpClient} from "@angular/common/http";
 import {Transaction} from "../model/transaction";
 import {MatOption, MatSelect} from "@angular/material/select";
-import {NgForOf} from "@angular/common";
+import {AsyncPipe, NgForOf} from "@angular/common";
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { Observable } from "rxjs";
+import {map, startWith} from 'rxjs/operators';
 
 @Component({
   selector: 'app-transaction-edit',
@@ -33,6 +36,8 @@ import {NgForOf} from "@angular/common";
     MatOption,
     NgForOf,
     MatCheckbox,
+    MatAutocompleteModule,
+    AsyncPipe
   ],
   templateUrl: './transaction-edit.component.html',
   standalone: true,
@@ -41,6 +46,7 @@ import {NgForOf} from "@angular/common";
 export class TransactionEditComponent implements OnInit{
   transactionFormGroup: FormGroup;
   documents: any[] = [];
+  filteredDocuments: Observable<Document[]>;
 
   constructor(
     public dialogRef: MatDialogRef<TransactionEditComponent>,
@@ -48,24 +54,38 @@ export class TransactionEditComponent implements OnInit{
     private fb: FormBuilder,
     private http: HttpClient
   ) {
+
+    var document = {
+      id: transaction.documentId,
+      name: transaction.documentName
+    };
+
     this.transactionFormGroup = this.fb.group({
       transactionNoteControl: new FormControl(transaction.transactionNote),
       netAmountControl: new FormControl(transaction.netAmount),
       grossAmountControl: new FormControl(transaction.grossAmount),
       senderReceiverControl: new FormControl(transaction.senderReceiver),
-      documentControl: new FormControl(transaction.documentId),
+      documentControl: new FormControl(document),
       taxAmountControl: new FormControl(transaction.taxAmount),
       transactionDateTimeControl: new FormControl(transaction.transactionDateTime),
       isSalesTaxRelevantControl: new FormControl(transaction.isSalesTaxRelevant),
     });
+    this.filteredDocuments = this.transactionFormGroup.controls['documentControl'].valueChanges.pipe(
+      map(value => this._filterDocuments(value))
+    );
   }
   onCancelClick(): void {
     this.dialogRef.close();
   }
+  private _filterDocuments(value: string): Document[] {
+    const filterValue = value.toLowerCase();
+    return this.documents.filter(document => document.name.toLowerCase().includes(filterValue));
+  }
+
   onSaveClick(): void {
     const updatedTransaction = {
       ...this.transaction,
-      documentId: this.transactionFormGroup.value.documentControl,
+      documentId: this.transactionFormGroup.value.documentControl.id,
       transactionNote: this.transactionFormGroup.value.transactionNoteControl,
       netAmount: this.transactionFormGroup.value.netAmountControl,
       grossAmount: this.transactionFormGroup.value.grossAmountControl,
@@ -89,6 +109,11 @@ export class TransactionEditComponent implements OnInit{
   ngOnInit(): void {
     this.getDocuments();
   }
+
+  displayWithDocumentName(document: Document): string {
+    return document && document.name ? document.name : '';
+  }
+
   getDocuments() {
     this.http.get<any[]>(`/api/documents/getdocuments`).subscribe(
       {
