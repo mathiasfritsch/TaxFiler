@@ -123,32 +123,32 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         return transaction.TransactionDto();
     }
     
-    public async Task UpdateTransactionAsync(modelDto.TransactionDto transactionDto)
+    public async Task UpdateTransactionAsync(modelDto.UpdateTransactionDto updateTransactionDto)
     {
-        var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == transactionDto.Id);
+        var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == updateTransactionDto.Id);
         
-        if(transaction.DocumentId != transactionDto.DocumentId && transactionDto.DocumentId > 0)
+        if(transaction.DocumentId != updateTransactionDto.DocumentId && updateTransactionDto.DocumentId > 0)
         {
-            var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == transactionDto.DocumentId);
+            var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == updateTransactionDto.DocumentId);
             
             if(document.Skonto is > 0)
             {
                 var netAmountSkonto = document.SubTotal.GetValueOrDefault() * (100 - document.Skonto.GetValueOrDefault()) / 100;
                 
-                transactionDto.NetAmount = Math.Round(netAmountSkonto,2);
-                transactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
-                transactionDto.TaxAmount = transactionDto.GrossAmount - transactionDto.NetAmount;
+                updateTransactionDto.NetAmount = Math.Round(netAmountSkonto,2);
+                updateTransactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
+                updateTransactionDto.TaxAmount = updateTransactionDto.GrossAmount - updateTransactionDto.NetAmount;
             }
             else
             {
-                transactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
-                transactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
-                transactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
+                updateTransactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
+                updateTransactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
+                updateTransactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
             }
             
         }
         
-        TransactionMapper.UpdateTransaction(transaction, transactionDto);
+        TransactionMapper.UpdateTransaction(transaction, updateTransactionDto);
         await taxFilerContext.SaveChangesAsync();
     }
 

@@ -38,7 +38,7 @@ public static class TransactionMapper
             SenderReceiver = transaction.SenderReceiver
         };
 
-    public static void UpdateTransaction( Transaction transaction, TransactionDto transactionDto)
+    public static void UpdateTransaction( Transaction transaction, UpdateTransactionDto transactionDto)
     {
         transaction.IsIncomeTaxRelevant = transactionDto.IsIncomeTaxRelevant;
         transaction.IsOutgoing  = transactionDto.IsOutgoing;

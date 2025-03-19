@@ -34,7 +34,11 @@
     <div>
       <mat-label>Dokument</mat-label>
       <mat-form-field>
-        <input id="documentName" type="text" formControlName="documentNameControl" matInput >
+        <mat-select id="document" formControlName="documentControl" matInput>
+          <mat-option *ngFor="let document of documents" [value]="document.id">
+            {{ document.name }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
     </div>
     <div>
@@ -45,9 +49,7 @@
     </div>
     <div>
       <mat-label>Umsatzsteuerrelevant</mat-label>
-      <mat-form-field>
-        <input id="isSalesTaxRelevant" type="text" formControlName="isSalesTaxRelevantControl" matInput >
-      </mat-form-field>
+      <mat-checkbox id="isSalesTaxRelevant" formControlName="isSalesTaxRelevantControl"></mat-checkbox>
     </div>
   </form>
 </div>

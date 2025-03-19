@@ -8,7 +8,7 @@ public interface ITransactionService
     public Task AddTransactionsAsync(IEnumerable<csvModel.TransactionDto> transactions);    
     Task<IEnumerable<dtoModel.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth);
     Task<dtoModel.TransactionDto> GetTransactionAsync(int transactionid);
-    Task UpdateTransactionAsync(dtoModel.TransactionDto transactionDto);
+    Task UpdateTransactionAsync(dtoModel.UpdateTransactionDto transactionDto);
     Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonthh);
     Task DeleteTransactionAsync(int id);
 }

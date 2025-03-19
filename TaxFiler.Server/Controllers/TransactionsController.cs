@@ -53,8 +53,8 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpPost("UpdateTransaction")]
-    public async Task UpdateTransaction(TransactionDto transactionDto)
+    public async Task UpdateTransaction(UpdateTransactionDto updateTransactionDto)
     {
-        await transactionService.UpdateTransactionAsync(transactionDto);
+        await transactionService.UpdateTransactionAsync(updateTransactionDto);
     }
 }

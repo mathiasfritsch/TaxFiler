@@ -14,6 +14,8 @@ import {Document} from "../model/document";
 import {MatCheckbox} from "@angular/material/checkbox";
 import {HttpClient} from "@angular/common/http";
 import {Transaction} from "../model/transaction";
+import {MatOption, MatSelect} from "@angular/material/select";
+import {NgForOf} from "@angular/common";
 
 @Component({
   selector: 'app-transaction-edit',
@@ -27,6 +29,10 @@ import {Transaction} from "../model/transaction";
     FormsModule,
     MatInput,
     MatLabel,
+    MatSelect,
+    MatOption,
+    NgForOf,
+    MatCheckbox,
   ],
   templateUrl: './transaction-edit.component.html',
   standalone: true,
@@ -34,6 +40,7 @@ import {Transaction} from "../model/transaction";
 })
 export class TransactionEditComponent implements OnInit{
   transactionFormGroup: FormGroup;
+  documents: any[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<TransactionEditComponent>,
@@ -46,7 +53,7 @@ export class TransactionEditComponent implements OnInit{
       netAmountControl: new FormControl(transaction.netAmount),
       grossAmountControl: new FormControl(transaction.grossAmount),
       senderReceiverControl: new FormControl(transaction.senderReceiver),
-      documentNameControl: new FormControl(transaction.documentName),
+      documentControl: new FormControl(transaction.documentId),
       taxAmountControl: new FormControl(transaction.taxAmount),
       transactionDateTimeControl: new FormControl(transaction.transactionDateTime),
       isSalesTaxRelevantControl: new FormControl(transaction.isSalesTaxRelevant),
@@ -56,9 +63,42 @@ export class TransactionEditComponent implements OnInit{
     this.dialogRef.close();
   }
   onSaveClick(): void {
+    const updatedTransaction = {
+      ...this.transaction,
+      documentId: this.transactionFormGroup.value.documentControl,
+      transactionNote: this.transactionFormGroup.value.transactionNoteControl,
+      netAmount: this.transactionFormGroup.value.netAmountControl,
+      grossAmount: this.transactionFormGroup.value.grossAmountControl,
+      senderReceiver: this.transactionFormGroup.value.senderReceiverControl,
+      taxAmount: this.transactionFormGroup.value.taxAmountControl,
+      transactionDateTime: this.transactionFormGroup.value.transactionDateTimeControl,
+      isSalesTaxRelevant: this.transactionFormGroup.value.isSalesTaxRelevantControl,
+    };
+
+    this.http.post('/api/transactions/updatetransaction', updatedTransaction).subscribe({
+      next: () => {
+        this.dialogRef.close(updatedTransaction);
+      },
+      error: error => {
+        console.error('There was an error!', error);
+      }
+    });
+
     this.dialogRef.close();
   }
   ngOnInit(): void {
-
+    this.getDocuments();
+  }
+  getDocuments() {
+    this.http.get<any[]>(`/api/documents/getdocuments`).subscribe(
+      {
+        next: documents => {
+          this.documents = documents;
+        },
+        error: error => {
+          console.error('There was an error!', error);
+        }
+      }
+    );
   }
 }

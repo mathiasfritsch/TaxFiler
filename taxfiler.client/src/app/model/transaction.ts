@@ -8,4 +8,5 @@
   taxAmount: number;
   transactionDateTime: Date;
   isSalesTaxRelevant: boolean;
+  documentId: number;
 }

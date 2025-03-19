@@ -39,11 +39,6 @@ export class TransactionsComponent  implements  OnInit{
   localeText = AG_GRID_LOCALE_DE;
   colDefs: ColDef[] = [
     {
-      field: 'id',
-      headerName: 'id',
-      filter: false,
-    },
-    {
       field: 'netAmount',
       headerName: 'Netto',
     },
@@ -70,10 +65,6 @@ export class TransactionsComponent  implements  OnInit{
     {
       field: 'transactionDateTime',
       headerName: 'Datum',
-    },
-    {
-      field: 'taxAmount',
-      headerName: 'Steuer',
     },
     {
       field: 'isSalesTaxRelevant',
