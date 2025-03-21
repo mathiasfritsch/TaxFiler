@@ -39,7 +39,9 @@
                [matAutocomplete]="auto">
         <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
           <mat-option *ngFor="let document of filteredDocuments | async" [value]="document">
-            {{ document.name }}
+            <span>{{ document.name }}</span>|
+            <span>{{ document.total }}</span>|
+            <span>{{ document.invoiceDate }}</span>
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>

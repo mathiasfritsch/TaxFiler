@@ -32,7 +32,6 @@ import {map, startWith} from 'rxjs/operators';
     FormsModule,
     MatInput,
     MatLabel,
-    MatSelect,
     MatOption,
     NgForOf,
     MatCheckbox,
@@ -45,7 +44,7 @@ import {map, startWith} from 'rxjs/operators';
 })
 export class TransactionEditComponent implements OnInit{
   transactionFormGroup: FormGroup;
-  documents: any[] = [];
+  documents: Document[] = [];
   filteredDocuments: Observable<Document[]>;
 
   constructor(
@@ -79,7 +78,14 @@ export class TransactionEditComponent implements OnInit{
   }
   private _filterDocuments(value: string): Document[] {
     const filterValue = value.toLowerCase();
-    return this.documents.filter(document => document.name.toLowerCase().includes(filterValue));
+    const filterValueNumber = parseFloat(value);
+    const filterValueDate:Date = new Date(value);
+
+    return this.documents.filter(document =>
+      document.name.toLowerCase().includes(filterValue) ||
+      document.total == filterValueNumber ||
+      document.invoiceDate == filterValueDate
+    );
   }
 
   onSaveClick(): void {
