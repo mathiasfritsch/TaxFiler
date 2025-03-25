@@ -11,17 +11,18 @@ import {MatButton} from "@angular/material/button";
     MatButton
   ],
   template: `
-    <button mat-button (click)="onClick($event)">Edit</button>`
+    <button mat-button (click)="onClick($event)">{{ buttonText }}</button>`
 })
 export class ButtonCellRendererComponent implements ICellRendererAngularComp {
   private params: any;
   @Input() onClickCallback: ((data: any) => void) | undefined;
-
+  @Input() buttonText: string | undefined;
   constructor(private dialog: MatDialog) {}
 
   agInit(params: any): void {
     this.params = params;
     this.onClickCallback = params.onClickCallback;
+    this.buttonText = params.buttonText;
   }
 
   refresh(params: ICellRendererParams): boolean {

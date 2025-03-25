@@ -56,6 +56,7 @@ export class DocumentEditComponent implements OnInit{
       totalControl: new FormControl(formatPrice(document.total)),
       subTotalControl: new FormControl(formatPrice(document.subTotal)),
       taxAmountControl: new FormControl(formatPrice(document.taxAmount)),
+      taxRateControl: new FormControl(formatPrice(document.taxRate)),
       skontoControl: new FormControl(formatPrice(document.skonto)),
       invoiceNumberControl: new FormControl(formatPrice(document.invoiceNumber)),
       parsedControl: new FormControl(document.parsed),
@@ -70,11 +71,12 @@ export class DocumentEditComponent implements OnInit{
     if (this.documentFormGroup.valid) {
 
       const updateDocument: Document = {
-        id: this.document.id, // Assuming 0 for a new document, adjust as needed
+        id: this.document.id,
         name: this.documentFormGroup.value.nameControl,
         total: this.documentFormGroup.value.totalControl,
         subTotal: this.documentFormGroup.value.subTotalControl,
         taxAmount: this.documentFormGroup.value.taxAmountControl,
+        taxRate: this.documentFormGroup.value.taxRateControl,
         skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
         invoiceDate: this.documentFormGroup.value.invoiceDateControl,
         invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,

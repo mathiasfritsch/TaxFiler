@@ -2,6 +2,7 @@ using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxFiler.Model.Dto;
+using TaxFiler.Model.Llama;
 using TaxFiler.Service;
 
 namespace TaxFiler.Server.Controllers;
@@ -9,7 +10,7 @@ namespace TaxFiler.Server.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class DocumentsController(IDocumentService documentService) : ControllerBase
+public class DocumentsController(IDocumentService documentService, IParseService parseService) : ControllerBase
 {
     [HttpGet("")]
     [HttpGet("GetDocuments")]
@@ -43,5 +44,11 @@ public class DocumentsController(IDocumentService documentService) : ControllerB
     public async Task DeleteDocument(int id)
     {
         await documentService.DeleteDocumentAsync(id);
+    }
+    
+    [HttpPost("Parse/{documentId}")]
+    public async Task<Result<Invoice>> Parse([FromRoute] int documentId)
+    {
+        return await parseService.ParseFilesAsync(documentId);
     }
 }

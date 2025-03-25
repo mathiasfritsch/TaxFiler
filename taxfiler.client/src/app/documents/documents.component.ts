@@ -13,6 +13,7 @@ import {FormBuilder} from '@angular/forms';
 import {MatAnchor} from "@angular/material/button";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 import {DocumentEditComponent} from "../document-edit/document-edit.component";
+import {Document} from "../model/document";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -63,6 +64,11 @@ export class DocumentsComponent implements  OnInit{
       valueFormatter: formatPrice,
     },
     {
+      field: 'taxRate',
+      headerName:'Steuersatz',
+      valueFormatter: formatPrice,
+    },
+    {
       field: 'skonto' ,
       headerName:'Skonto',
       valueFormatter: formatPrice,
@@ -78,12 +84,24 @@ export class DocumentsComponent implements  OnInit{
       headerName: 'Edit',
       cellRenderer: ButtonCellRendererComponent,
       cellRendererParams: {
-        onClickCallback: (data: any) => this.openEditDialog(data)
+        onClickCallback: (data: any) => this.openEditDialog(data),
+        buttonText: 'Edit'
       },
       editable: false,
       colId: 'params',
-      width: 100
-    }
+      maxWidth: 150
+    },
+    {
+      headerName: 'Parse',
+      cellRenderer: ButtonCellRendererComponent,
+      cellRendererParams: {
+        onClickCallback: (data: any) => this.parseDocument(data),
+        buttonText: 'Parse'
+      },
+      editable: false,
+      colId: 'params',
+      width: 150
+    },
   ];
 
   defaultColDef = {
@@ -133,6 +151,19 @@ export class DocumentsComponent implements  OnInit{
       {
         next: documents => {
           this.documents = documents;
+        },
+        error: error => {
+          console.error('There was an error!', error);
+        }
+      }
+    );
+  }
+
+  private parseDocument(document: Document) {
+    this.http.post<any>(`/api/documents/parse/${document.id}`,{}).subscribe(
+      {
+        next: documents => {
+          this.getDocuments();
         },
         error: error => {
           console.error('There was an error!', error);

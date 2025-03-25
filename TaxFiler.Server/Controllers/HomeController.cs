@@ -55,9 +55,5 @@ public class HomeController(
         return await googleDriveService.GetFilesAsync(yearMonth);
     }
 
-    [HttpPost("Parse")]
-    public async Task<Result<Invoice>> Parse([FromForm] int fileId)
-    {
-        return await parseService.ParseFilesAsync(fileId);
-    }
+
 }

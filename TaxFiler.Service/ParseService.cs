@@ -24,9 +24,9 @@ public class ParseService:IParseService
     
     public async Task<Result<Invoice>> ParseFilesAsync(int documentId)
     {
-        var file = await _taxFilerContext.Documents.FindAsync(documentId);
+        var document = await _taxFilerContext.Documents.FindAsync(documentId);
         
-        if(file == null)
+        if(document == null)
         {
             return Result.Fail<Invoice>($"DocumentId {documentId} not found");
         }
@@ -45,36 +45,36 @@ public class ParseService:IParseService
             StructuredOutputJsonSchemaName = "invoice"
         };
         
-        var bytes = await _googleDriveService.DownloadFileAsync(file.ExternalRef);
+        var bytes = await _googleDriveService.DownloadFileAsync(document.ExternalRef);
         
         var client = new LlamaParseClient(new HttpClient(), parseConfig);
         
         var inMemoryFile = new InMemoryFile( new ReadOnlyMemory<byte>(bytes), 
-            file.Name.ToLower(),
-            FileTypes.GetMimeType(file.Name.ToLower()));
+            document.Name.ToLower(),
+            FileTypes.GetMimeType(document.Name.ToLower()));
         
-        var documents = new List<StructuredResult>();
-        await foreach(var document in client.LoadDataStructuredAsync(inMemoryFile, ResultType.Json))
+        var structuredResults = new List<StructuredResult>();
+        await foreach(var structuredResult in client.LoadDataStructuredAsync(inMemoryFile, ResultType.Json))
         {
-            documents.Add(document);
+            structuredResults.Add(structuredResult);
         }
         
-        StructuredResult doc = documents.First();
+        StructuredResult doc = structuredResults.First();
         
-        var invoice = ConvertJsonElementToInvoice(doc.ResultPagesStructured[0]);
+        var invoiceStructuredResult = ConvertJsonElementToInvoice(doc.ResultPagesStructured[0]);
         
-        file.InvoiceDate = invoice.InvoiceDate;
-        file.InvoiceNumber = invoice.InvoiceNumber;
-        file.Total = invoice.Total;
-        file.SubTotal = invoice.SubTotal;
-        file.TaxAmount = invoice.Tax.Amount;
-        file.TaxRate = invoice.Tax.Rate;
+        document.InvoiceDate = invoiceStructuredResult.InvoiceDate;
+        document.InvoiceNumber = invoiceStructuredResult.InvoiceNumber;
+        document.Total = invoiceStructuredResult.Total;
+        document.SubTotal = invoiceStructuredResult.SubTotal;
+        document.TaxAmount = invoiceStructuredResult.Tax.Amount;
+        document.TaxRate = invoiceStructuredResult.Tax.Rate;
 
-        file.Parsed = true;
+        document.Parsed = true;
         
         await _taxFilerContext.SaveChangesAsync();
         
-        return Result.Ok(invoice);
+        return Result.Ok(invoiceStructuredResult);
     }
     
     private Invoice ConvertJsonElementToInvoice(JsonElement jsonElement)
