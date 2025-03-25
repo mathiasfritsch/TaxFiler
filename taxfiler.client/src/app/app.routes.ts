@@ -7,8 +7,7 @@ function getStartOfMonth(): string {
   const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
   const year = firstDay.getFullYear();
   const month = (firstDay.getMonth() + 1).toString().padStart(2, '0');
-  const day = firstDay.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return `${year}-${month}`;
 }
 
 export const routes: Routes = [

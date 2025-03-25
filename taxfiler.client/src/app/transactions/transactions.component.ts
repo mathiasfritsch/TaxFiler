@@ -74,11 +74,12 @@ export class TransactionsComponent  implements  OnInit{
       headerName: 'Edit',
       cellRenderer: ButtonCellRendererComponent,
       cellRendererParams: {
-        onClickCallback: (data: any) => this.openEditDialog(data)
+        onClickCallback: (data: any) => this.openEditDialog(data),
+        buttonText: 'Edit'
       },
       editable: false,
       colId: 'params',
-      width: 100
+      maxWidth: 150
     }
   ];
   dialogRef: any;
