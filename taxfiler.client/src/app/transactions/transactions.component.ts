@@ -75,7 +75,8 @@ export class TransactionsComponent  implements  OnInit{
       cellRenderer: ButtonCellRendererComponent,
       cellRendererParams: {
         onClickCallback: (data: any) => this.openEditDialog(data),
-        buttonText: 'Edit'
+        buttonText: 'Edit',
+        enabled:true
       },
       editable: false,
       colId: 'params',
@@ -109,10 +110,8 @@ export class TransactionsComponent  implements  OnInit{
   constructor(private http: HttpClient,
               private route: ActivatedRoute,
               private router: Router,
-              private dialog: MatDialog) {
+              private dialog: MatDialog) {}
 
-
-  }
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.yearMonth = params.get('yearMonth');
