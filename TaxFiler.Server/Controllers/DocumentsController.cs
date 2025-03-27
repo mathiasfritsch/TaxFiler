@@ -42,7 +42,7 @@ public class DocumentsController(IDocumentService documentService,
     }
 
 
-    [HttpPost("DeleteDocument/{id}")]
+    [HttpDelete("DeleteDocument/{id}")]
     public async Task DeleteDocument(int id)
     {
         await documentService.DeleteDocumentAsync(id);

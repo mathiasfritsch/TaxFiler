@@ -104,6 +104,18 @@ export class DocumentsComponent implements  OnInit{
       colId: 'params',
       width: 150
     },
+    {
+      headerName: 'Delete',
+      cellRenderer: ButtonCellRendererComponent,
+      cellRendererParams: {
+        onClickCallback: (data: any, button:any) => this.deleteDocument(data, button),
+        buttonText: 'Delete',
+        enabled:true
+      },
+      editable: false,
+      colId: 'params',
+      width: 150
+    },
   ];
 
   defaultColDef = {
@@ -184,6 +196,21 @@ export class DocumentsComponent implements  OnInit{
         },
         error: error => {
           console.error('There was an error!', error);
+        }
+      }
+    );
+  }
+
+  private deleteDocument(document: Document, button: any) {
+    button.enabled = false;
+    this.http.delete<any>(`/api/documents/deleteDocument/${document.id}`,{}).subscribe(
+      {
+        next: documents => {
+          button.enabled = true;
+        },
+        error: error => {
+          button.enabled = true;
+          alert('There was an error deleteing the document');
         }
       }
     );

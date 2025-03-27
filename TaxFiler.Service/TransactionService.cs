@@ -84,6 +84,15 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
     {
         foreach (var transaction in transactions)
         {
+            if(taxFilerContext.Transactions.Any(
+                   t => t.TransactionDateTime == transaction.BookingDate 
+                        && t.Counterparty == transaction.CounterPartyIBAN
+                        && t.TransactionNote == transaction.Comment
+                        && t.GrossAmount == transaction.Amount))
+            {
+                continue;
+            }
+            
             var transactionDb = transaction.ToTransaction();
             transactionDb.IsOutgoing = transactionDb.GrossAmount < 0;
             transactionDb.GrossAmount = Math.Abs(transactionDb.GrossAmount);
