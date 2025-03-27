@@ -175,4 +175,17 @@ export class DocumentsComponent implements  OnInit{
       }
     );
   }
+
+  synchronize() {
+    this.http.post(`/api/documents/syncfiles/${this.yearMonth}`,{}).subscribe(
+      {
+        next: documents => {
+          this.getDocuments()
+        },
+        error: error => {
+          console.error('There was an error!', error);
+        }
+      }
+    );
+  }
 }

@@ -10,7 +10,9 @@ namespace TaxFiler.Server.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class DocumentsController(IDocumentService documentService, IParseService parseService) : ControllerBase
+public class DocumentsController(IDocumentService documentService, 
+    IParseService parseService,
+    ISyncService syncService) : ControllerBase
 {
     [HttpGet("")]
     [HttpGet("GetDocuments")]
@@ -44,6 +46,12 @@ public class DocumentsController(IDocumentService documentService, IParseService
     public async Task DeleteDocument(int id)
     {
         await documentService.DeleteDocumentAsync(id);
+    }
+    
+    [HttpPost("SyncFiles/{yearMonth}")]
+    public async Task SyncFiles(DateOnly yearMonth)
+    {
+        await syncService.SyncFilesAsync(yearMonth);
     }
     
     [HttpPost("Parse/{documentId}")]

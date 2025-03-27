@@ -1,9 +1,7 @@
-using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
-using TaxFiler.Model.Llama;
 using TaxFiler.Service;
 using FileData = TaxFiler.Model.FileData;
 
@@ -13,11 +11,8 @@ namespace TaxFiler.Server.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class HomeController(
-    ITransactionService transactionService,
     TaxFilerContext taxFilerContext,
-    ISyncService syncService,
     IGoogleDriveService googleDriveService,
-    IParseService parseService,
     IDocumentService documentService) : ControllerBase
 {
     [HttpGet("TestDB")]
@@ -35,13 +30,7 @@ public class HomeController(
 
         return "ok";
     }
-
-    [HttpPost("SyncFiles")]
-    public async Task SyncFiles(DateOnly yearMonth)
-    {
-        await syncService.SyncFilesAsync(yearMonth);
-    }
-
+    
 
     [HttpDelete("DeleteAll")]
     public async Task DeleteAllDocuments()
