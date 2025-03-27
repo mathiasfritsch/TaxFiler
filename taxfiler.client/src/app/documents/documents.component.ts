@@ -210,7 +210,7 @@ export class DocumentsComponent implements  OnInit{
         },
         error: error => {
           button.enabled = true;
-          alert('There was an error deleteing the document');
+          alert('There was an error deleting the document');
         }
       }
     );

@@ -69,12 +69,18 @@ public class DocumenService(TaxFilerContext context):IDocumentService
     public async Task<Result> DeleteDocumentAsync(int id)
     {
         var document = await context.Documents.FindAsync(id);
-        
         if(document == null)
         {
             return Result.Fail($"DocumentId {id} not found");
         }
 
+        var transactionsWithDocument = context.Transactions.Where(t => t.DocumentId == id);
+
+        foreach (var transaction in transactionsWithDocument)
+        {
+            transaction.Document = null;
+        }
+        
         context.Remove(document);
         await context.SaveChangesAsync();
         return Result.Ok();

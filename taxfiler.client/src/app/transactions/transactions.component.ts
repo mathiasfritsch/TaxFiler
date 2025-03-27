@@ -10,6 +10,7 @@ import {MatAnchor} from "@angular/material/button";
 import {AG_GRID_LOCALE_DE} from "@ag-grid-community/locale";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 import {TransactionEditComponent} from "../transaction-edit/transaction-edit.component";
+import {Transaction} from "../model/transaction";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -76,6 +77,18 @@ export class TransactionsComponent  implements  OnInit{
       cellRendererParams: {
         onClickCallback: (data: any) => this.openEditDialog(data),
         buttonText: 'Edit',
+        enabled:true
+      },
+      editable: false,
+      colId: 'params',
+      maxWidth: 150
+    },
+    {
+      headerName: 'Delete',
+      cellRenderer: ButtonCellRendererComponent,
+      cellRendererParams: {
+        onClickCallback: (data: any, button:any) => this.deleteTransaction(data, button),
+        buttonText: 'Delete',
         enabled:true
       },
       editable: false,
@@ -161,5 +174,20 @@ export class TransactionsComponent  implements  OnInit{
           }
         );
     }
+  }
+
+  private deleteTransaction(transaction: Transaction, button: any) {
+    this.http.delete(`/api/transactions/deleteTransaction/${transaction.id}`)
+      .subscribe(
+        {
+          next: () => {
+            button.enabled = true;
+          },
+          error: error => {
+            button.enabled = true;
+            alert("error deleting transaction");
+          }
+        }
+      );
   }
 }
