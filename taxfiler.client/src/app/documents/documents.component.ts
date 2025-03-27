@@ -85,7 +85,8 @@ export class DocumentsComponent implements  OnInit{
       cellRenderer: ButtonCellRendererComponent,
       cellRendererParams: {
         onClickCallback: (data: any) => this.openEditDialog(data),
-        buttonText: 'Edit'
+        buttonText: 'Edit',
+        enabled:true
       },
       editable: false,
       colId: 'params',
@@ -95,8 +96,9 @@ export class DocumentsComponent implements  OnInit{
       headerName: 'Parse',
       cellRenderer: ButtonCellRendererComponent,
       cellRendererParams: {
-        onClickCallback: (data: any) => this.parseDocument(data),
-        buttonText: 'Parse'
+        onClickCallback: (data: any, button:any) => this.parseDocument(data, button),
+        buttonText: 'Parse',
+        enabled:true
       },
       editable: false,
       colId: 'params',
@@ -159,14 +161,16 @@ export class DocumentsComponent implements  OnInit{
     );
   }
 
-  private parseDocument(document: Document) {
+  private parseDocument(document: Document, button:ButtonCellRendererComponent) {
+    button.enabled = false;
     this.http.post<any>(`/api/documents/parse/${document.id}`,{}).subscribe(
       {
         next: documents => {
-          this.getDocuments();
+          button.enabled = true;
         },
         error: error => {
-          console.error('There was an error!', error);
+          button.enabled = true;
+          alert('There was an error parsing the document');
         }
       }
     );
