@@ -10,7 +10,7 @@ import {
   MatDialog, MatDialogTitle
 } from '@angular/material/dialog';
 import {FormBuilder} from '@angular/forms';
-import {MatAnchor} from "@angular/material/button";
+import {MatAnchor, MatButton} from "@angular/material/button";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 import {DocumentEditComponent} from "../document-edit/document-edit.component";
 import {Document} from "../model/document";
@@ -34,6 +34,7 @@ function formatPrice(value: any):string{
     AgGridAngular,
     MatDialogTitle,
     MatAnchor,
+    MatButton,
   ],
   standalone: true
 })

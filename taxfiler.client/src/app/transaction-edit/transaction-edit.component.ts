@@ -68,6 +68,7 @@ export class TransactionEditComponent implements OnInit{
       taxAmountControl: new FormControl(transaction.taxAmount),
       transactionDateTimeControl: new FormControl(transaction.transactionDateTime),
       isSalesTaxRelevantControl: new FormControl(transaction.isSalesTaxRelevant),
+      isIncomeTaxRelevantControl: new FormControl(transaction.isIncomeTaxRelevant),
     });
     this.filteredDocuments = this.transactionFormGroup.controls['documentControl'].valueChanges.pipe(
       map(value => this._filterDocuments(value))
@@ -99,6 +100,7 @@ export class TransactionEditComponent implements OnInit{
       taxAmount: this.transactionFormGroup.value.taxAmountControl,
       transactionDateTime: this.transactionFormGroup.value.transactionDateTimeControl,
       isSalesTaxRelevant: this.transactionFormGroup.value.isSalesTaxRelevantControl,
+      isIncomeTaxRelevant: this.transactionFormGroup.value.isIncomeTaxRelevant
     };
 
     this.http.post('/api/transactions/updatetransaction', updatedTransaction).subscribe({

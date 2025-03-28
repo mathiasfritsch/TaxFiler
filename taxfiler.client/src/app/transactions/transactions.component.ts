@@ -6,7 +6,7 @@ import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import {NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
-import {MatAnchor} from "@angular/material/button";
+import {MatAnchor, MatButton} from "@angular/material/button";
 import {AG_GRID_LOCALE_DE} from "@ag-grid-community/locale";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 import {TransactionEditComponent} from "../transaction-edit/transaction-edit.component";
@@ -26,13 +26,14 @@ function formatPrice(value: any):string{
     templateUrl: './transactions.component.html',
     styleUrls: ['./transactions.component.css'],
     standalone: true,
-    imports: [
-      RouterLink,
-      NgIf,
-      AgGridAngular,
-      MatDialogTitle,
-      MatAnchor,
-    ]
+  imports: [
+    RouterLink,
+    NgIf,
+    AgGridAngular,
+    MatDialogTitle,
+    MatAnchor,
+    MatButton,
+  ]
 })
 export class TransactionsComponent  implements  OnInit{
   public transactions: any[] = [];
@@ -70,6 +71,10 @@ export class TransactionsComponent  implements  OnInit{
     {
       field: 'isSalesTaxRelevant',
       headerName: 'Umsatzsteuerrelevant',
+    },
+    {
+      field: 'isIncomeTaxRelevant',
+      headerName: 'Einkommenssteuerrelevant',
     },
     {
       headerName: 'Edit',
@@ -189,5 +194,9 @@ export class TransactionsComponent  implements  OnInit{
           }
         }
       );
+  }
+
+  downloadReport() {
+    window.location.href = `/api/transactions/download?yearMonth=${this.yearMonth}`;
   }
 }

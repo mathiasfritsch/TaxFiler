@@ -33,11 +33,14 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
             ).ToArray();
     }
 
-    public async Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonthh)
+    public async Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonth)
     {
+        var startOfMonth = new DateTime(yearMonth.Year, yearMonth.Month, 1);
+        var endOfMonth = new DateTime(yearMonth.Year, yearMonth.Month, DateTime.DaysInMonth(yearMonth.Year, yearMonth.Month));
+        
         var transactions = await taxFilerContext
             .Transactions.Include(t => t.Document)
-            .Where(t => t.TaxYear == yearMonthh.Year && t.TaxMonth == yearMonthh.Month)
+            .Where(t => t.TransactionDateTime >= startOfMonth && t.TransactionDateTime <= endOfMonth)
             .Where(t => t.IsSalesTaxRelevant || t.IsIncomeTaxRelevant)
             .OrderBy(t => t.TransactionDateTime)
             .ToListAsync();

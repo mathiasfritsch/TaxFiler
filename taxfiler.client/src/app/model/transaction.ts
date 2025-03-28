@@ -8,5 +8,6 @@
   taxAmount: number;
   transactionDateTime: Date;
   isSalesTaxRelevant: boolean;
+  isIncomeTaxRelevant: boolean;
   documentId: number;
 }
