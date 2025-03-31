@@ -80,7 +80,8 @@ export class DocumentEditComponent implements OnInit{
         skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
         invoiceDate: this.documentFormGroup.value.invoiceDateControl,
         invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,
-        parsed: this.documentFormGroup.value.parsedControl
+        parsed: this.documentFormGroup.value.parsedControl,
+        unconnected: false
       };
 
       this.http.post<Document>(`/api/documents/updatedocument`,updateDocument).subscribe(

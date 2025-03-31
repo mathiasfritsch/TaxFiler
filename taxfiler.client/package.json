@@ -26,7 +26,6 @@
     "@angular/router": "^19.2.0",
     "ag-grid-angular": "^33.1.1",
     "jest-editor-support": "*",
-    "run-script-os": "*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -43,6 +42,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "run-script-os": "^1.1.6",
     "typescript": "~5.8.2"
   }
 }

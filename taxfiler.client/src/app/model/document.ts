@@ -9,4 +9,5 @@
   invoiceDate: Date;
   invoiceNumber: string;
   parsed: boolean;
+  unconnected: boolean;
 }

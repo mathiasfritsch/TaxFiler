@@ -84,9 +84,14 @@ export class TransactionEditComponent implements OnInit{
     const filterValueDate:Date = new Date(value);
 
     return this.documents.filter(document =>
-      document.name.toLowerCase().includes(filterValue) ||
-      document.total == filterValueNumber ||
-      document.invoiceDate == filterValueDate
+      (
+        document.name.toLowerCase().includes(filterValue) ||
+        document.total == filterValueNumber ||
+        document.invoiceDate == filterValueDate
+      ) &&
+      (
+        document.unconnected || !this.unconnectedOnly
+      )
     );
   }
 
