@@ -34,7 +34,7 @@ public static class TransactionMapper
             IsOutgoing = transaction.IsOutgoing,
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
             DocumentId = transaction.DocumentId,
-            Document = transaction.Document?.ToDto(),
+            Document = transaction.Document?.ToDto([]),
             SenderReceiver = transaction.SenderReceiver
         };
 

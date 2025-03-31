@@ -11,5 +11,4 @@ public interface IDocumentService
     public Task<Result> UpdateDocumentAsync(int id, UpdateDocumentDto documentDto);
     public Task<Result<DocumentDto>> GetDocumentAsync(int id);
     public Task<Result> DeleteDocumentAsync(int id);
-    public Task<IEnumerable<DocumentDto>> GetDocumentsByMonthAsync(DateTime yearMonth);
 }

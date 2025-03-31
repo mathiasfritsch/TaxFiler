@@ -33,6 +33,8 @@
     </div>
     <div>
       <mat-label>Dokument</mat-label>
+        {{unconnectedOnly}}
+        <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
       <mat-form-field>
         <input type="text"
                matInput formControlName="documentControl"

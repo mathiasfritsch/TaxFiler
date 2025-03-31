@@ -13,14 +13,22 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         context.Documents.RemoveRange(context.Documents);
         await context.SaveChangesAsync();
     }
-    
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsAsync() =>
-        await context.Documents
-            .Select(d => d.ToDto())
+
+    async Task<IEnumerable<DocumentDto>> IDocumentService.GetDocumentsAsync()
+    {
+        var documentsWithTransactions = context.Transactions
+            .Where(t => t.DocumentId != null)
+            .Select( t => t.DocumentId)
+            .Distinct()
+            .ToArray();
+        
+        return await context.Documents
+            .Select(d => d.ToDto(documentsWithTransactions))
             .ToArrayAsync();
-    
-    
-    
+        
+    }
+
+
     public async Task<Result<DocumentDto>> GetDocumentAsync(int id)
     {
         var document = await context.Documents.FindAsync(id);
@@ -28,7 +36,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         {
             return Result.Fail($"DocumentId {id} not found");
         }
-        return Result.Ok(document.ToDto());
+        return Result.Ok(document.ToDto([]));
     }
     
     public async Task<Result<DocumentDto>> AddDocumentAsync(AddDocumentDto documentDto)
@@ -47,7 +55,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         await context.Documents.AddAsync(document);
         await context.SaveChangesAsync();
         
-        return Result.Ok(document.ToDto());
+        return Result.Ok(document.ToDto([]));
     }
     
     public async Task<Result> UpdateDocumentAsync(int id, UpdateDocumentDto documentDto)
@@ -85,10 +93,5 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         await context.SaveChangesAsync();
         return Result.Ok();
     }
-
-    public async Task<IEnumerable<DocumentDto>> GetDocumentsByMonthAsync(DateTime yearMonth)
-     => await context.Documents
-         .Select(d => d.ToDto())
-        .ToArrayAsync();
-
+    
 }

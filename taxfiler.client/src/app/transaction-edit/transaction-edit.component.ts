@@ -46,6 +46,7 @@ export class TransactionEditComponent implements OnInit{
   transactionFormGroup: FormGroup;
   documents: Document[] = [];
   filteredDocuments: Observable<Document[]>;
+  unconnectedOnly: boolean = true;
 
   constructor(
     public dialogRef: MatDialogRef<TransactionEditComponent>,
@@ -133,5 +134,9 @@ export class TransactionEditComponent implements OnInit{
         }
       }
     );
+  }
+
+  changeUnconnectedOnly() {
+    this.unconnectedOnly = !this.unconnectedOnly;
   }
 }
