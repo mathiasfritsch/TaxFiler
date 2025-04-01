@@ -81,6 +81,7 @@ export class DocumentsComponent implements  OnInit{
       cellStyle: { textAlign: 'left' }
     },
     { field: 'parsed', headerName:'Parsed', filter: true},
+    { field: 'unconnected', headerName:'Unconnected', filter: true},
     {
       headerName: 'Edit',
       cellRenderer: ButtonCellRendererComponent,

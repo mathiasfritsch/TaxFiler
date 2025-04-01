@@ -106,7 +106,7 @@ export class TransactionEditComponent implements OnInit{
       taxAmount: this.transactionFormGroup.value.taxAmountControl,
       transactionDateTime: this.transactionFormGroup.value.transactionDateTimeControl,
       isSalesTaxRelevant: this.transactionFormGroup.value.isSalesTaxRelevantControl,
-      isIncomeTaxRelevant: this.transactionFormGroup.value.isIncomeTaxRelevant
+      isIncomeTaxRelevant: this.transactionFormGroup.value.isIncomeTaxRelevantControl
     };
 
     this.http.post('/api/transactions/updatetransaction', updatedTransaction).subscribe({
