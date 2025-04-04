@@ -10,7 +10,7 @@ namespace TaxFiler.Server.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class HomeController(
+public class DBController(
     TaxFilerContext taxFilerContext,
     IGoogleDriveService googleDriveService,
     IDocumentService documentService) : ControllerBase
@@ -31,18 +31,19 @@ public class HomeController(
         return "ok";
     }
     
-
-    [HttpDelete("DeleteAll")]
-    public async Task DeleteAllDocuments()
+    [HttpGet("RunMigrations")]
+    public async Task<string> RunMigrations()
     {
-        await documentService.DeleteAllDocumentsAsync();
+        try
+        {
+            await taxFilerContext.Database.MigrateAsync();
+        }
+        catch (Exception e)
+        {
+            return e.ToString();
+        }
+
+        return "ok";
     }
-
-    [HttpDelete("GoogleDocuments")]
-    public async Task<List<FileData>> GoogleDocuments(DateOnly yearMonth)
-    {
-        return await googleDriveService.GetFilesAsync(yearMonth);
-    }
-
-
+    
 }
