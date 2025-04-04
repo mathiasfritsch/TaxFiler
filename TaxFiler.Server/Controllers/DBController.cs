@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
-using TaxFiler.Service;
-using FileData = TaxFiler.Model.FileData;
 
 namespace TaxFiler.Server.Controllers;
 
@@ -11,9 +9,7 @@ namespace TaxFiler.Server.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class DBController(
-    TaxFilerContext taxFilerContext,
-    IGoogleDriveService googleDriveService,
-    IDocumentService documentService) : ControllerBase
+    TaxFilerContext taxFilerContext) : ControllerBase
 {
     [HttpGet("TestDB")]
     public string TestDb()
