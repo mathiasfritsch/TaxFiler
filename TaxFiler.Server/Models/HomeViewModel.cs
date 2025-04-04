@@ -2,5 +2,5 @@
 
 public class HomeViewModel
 {
-    public List<Model.FileData> Files { get; set; }
+    public required List<Model.FileData> Files { get; set; }
 }
