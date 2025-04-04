@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxFiler.DB;
 
@@ -10,9 +11,11 @@ using TaxFiler.DB;
 namespace TaxFiler.DB.Migrations
 {
     [DbContext(typeof(TaxFilerContext))]
-    partial class TaxFilerContextModelSnapshot : ModelSnapshot
+    [Migration("20250404225106_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -113,9 +116,6 @@ namespace TaxFiler.DB.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AccountId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Counterparty")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -170,8 +170,6 @@ namespace TaxFiler.DB.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
-
                     b.HasIndex("DocumentId");
 
                     b.ToTable("Transactions");
@@ -202,17 +200,9 @@ namespace TaxFiler.DB.Migrations
 
             modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
                 {
-                    b.HasOne("TaxFiler.DB.Model.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxFiler.DB.Model.Document", "Document")
                         .WithMany()
                         .HasForeignKey("DocumentId");
-
-                    b.Navigation("Account");
 
                     b.Navigation("Document");
                 });
