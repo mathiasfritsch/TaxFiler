@@ -8,10 +8,9 @@ public class Transaction
     [Key]
     public int Id { get; set; }
     
-    
-    // [ForeignKey(nameof(Account))]
-    // public int AccountId { get; set; }
-    // public Account Account { get; set; }
+    [ForeignKey(nameof(Account))]
+    public int AccountId { get; set; }
+    public Account Account { get; set; }
     public decimal NetAmount { get; set; }
     public decimal GrossAmount { get; set; }
     public decimal TaxAmount { get; set; }
