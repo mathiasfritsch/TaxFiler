@@ -17,47 +17,6 @@ namespace TaxFiler.DB.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
-            modelBuilder.Entity("TaxFiler.DB.Model.Account", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Accounts");
-                });
-
-            modelBuilder.Entity("TaxFiler.DB.Model.Booking", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("DocumnentId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("TransactionId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("DocumnentId");
-
-                    b.HasIndex("TransactionId");
-
-                    b.ToTable("Bookings");
-                });
-
             modelBuilder.Entity("TaxFiler.DB.Model.Document", b =>
                 {
                     b.Property<int>("Id")
@@ -111,9 +70,6 @@ namespace TaxFiler.DB.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Counterparty")
@@ -170,49 +126,16 @@ namespace TaxFiler.DB.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
-
                     b.HasIndex("DocumentId");
 
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("TaxFiler.DB.Model.Booking", b =>
-                {
-                    b.HasOne("TaxFiler.DB.Model.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaxFiler.DB.Model.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumnentId");
-
-                    b.HasOne("TaxFiler.DB.Model.Transaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId");
-
-                    b.Navigation("Account");
-
-                    b.Navigation("Document");
-
-                    b.Navigation("Transaction");
-                });
-
             modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
                 {
-                    b.HasOne("TaxFiler.DB.Model.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TaxFiler.DB.Model.Document", "Document")
                         .WithMany()
                         .HasForeignKey("DocumentId");
-
-                    b.Navigation("Account");
 
                     b.Navigation("Document");
                 });
