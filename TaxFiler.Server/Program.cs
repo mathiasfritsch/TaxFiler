@@ -5,6 +5,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using TaxFiler.DB;
 using TaxFiler.Model;
 using TaxFiler.Service;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaxFiler.Server;
 
@@ -79,6 +80,23 @@ public class Program
         });
 
         var app = builder.Build();
+
+        // Run database migrations at startup
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<TaxFilerContext>();
+                context.Database.Migrate();
+                Console.WriteLine("Database migrations applied successfully.");
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while migrating the database.");
+            }
+        }
 
         app.UseDefaultFiles();
         app.UseStaticFiles();
