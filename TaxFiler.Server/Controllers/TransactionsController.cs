@@ -36,6 +36,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     {
         var reader = new StreamReader(file.OpenReadStream());
         var transactions = transactionService.ParseTransactions(reader);
+
         await transactionService.AddTransactionsAsync(transactions);
     }
     

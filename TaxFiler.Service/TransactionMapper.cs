@@ -8,6 +8,7 @@ public static class TransactionMapper
     public static Transaction ToTransaction(this TaxFiler.Model.Csv.TransactionDto transaction) =>
         new()
         {
+            AccountId = 1,
             GrossAmount = transaction.Amount,
             SenderReceiver = transaction.SenderReceiver,
             Counterparty = transaction.CounterPartyIBAN,
