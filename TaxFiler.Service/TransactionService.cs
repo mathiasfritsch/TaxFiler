@@ -123,6 +123,7 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         var transactions = await taxFilerContext
             .Transactions
             .Include(t => t.Document)
+            .Include(t => t.Account)
             .Where( t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month)
             .ToListAsync();
         

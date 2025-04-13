@@ -19,6 +19,7 @@ import {AsyncPipe, NgForOf} from "@angular/common";
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { Observable } from "rxjs";
 import {map, startWith} from 'rxjs/operators';
+import { Account } from "../model/account";
 
 @Component({
   selector: 'app-transaction-edit',
@@ -36,7 +37,8 @@ import {map, startWith} from 'rxjs/operators';
     NgForOf,
     MatCheckbox,
     MatAutocompleteModule,
-    AsyncPipe
+    AsyncPipe,
+    MatSelect
   ],
   templateUrl: './transaction-edit.component.html',
   standalone: true,
@@ -47,6 +49,7 @@ export class TransactionEditComponent implements OnInit{
   documents: Document[] = [];
   filteredDocuments: Observable<Document[]>;
   unconnectedOnly: boolean = true;
+  accounts: Account[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<TransactionEditComponent>,
@@ -70,6 +73,7 @@ export class TransactionEditComponent implements OnInit{
       transactionDateTimeControl: new FormControl(transaction.transactionDateTime),
       isSalesTaxRelevantControl: new FormControl(transaction.isSalesTaxRelevant),
       isIncomeTaxRelevantControl: new FormControl(transaction.isIncomeTaxRelevant),
+      accountControl: new FormControl(transaction.accountId)
     });
     this.filteredDocuments = this.transactionFormGroup.controls['documentControl'].valueChanges.pipe(
       map(value => this._filterDocuments(value))
@@ -106,7 +110,8 @@ export class TransactionEditComponent implements OnInit{
       taxAmount: this.transactionFormGroup.value.taxAmountControl,
       transactionDateTime: this.transactionFormGroup.value.transactionDateTimeControl,
       isSalesTaxRelevant: this.transactionFormGroup.value.isSalesTaxRelevantControl,
-      isIncomeTaxRelevant: this.transactionFormGroup.value.isIncomeTaxRelevantControl
+      isIncomeTaxRelevant: this.transactionFormGroup.value.isIncomeTaxRelevantControl,
+      accountId: this.transactionFormGroup.value.accountControl
     };
 
     this.http.post('/api/transactions/updatetransaction', updatedTransaction).subscribe({
@@ -122,6 +127,7 @@ export class TransactionEditComponent implements OnInit{
   }
   ngOnInit(): void {
     this.getDocuments();
+    this.getAccounts();
   }
 
   displayWithDocumentName(document: Document): string {
@@ -139,6 +145,17 @@ export class TransactionEditComponent implements OnInit{
         }
       }
     );
+  }
+
+  getAccounts() {
+    this.http.get<Account[]>(`/api/accounts/getaccounts`).subscribe({
+      next: accounts => {
+        this.accounts = accounts;
+      },
+      error: error => {
+        console.error('There was an error fetching accounts!', error);
+      }
+    });
   }
 
   changeUnconnectedOnly() {

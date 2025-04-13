@@ -36,7 +36,9 @@ public static class TransactionMapper
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
             DocumentId = transaction.DocumentId,
             Document = transaction.Document?.ToDto([]),
-            SenderReceiver = transaction.SenderReceiver
+            SenderReceiver = transaction.SenderReceiver,
+            AccountId = transaction.AccountId,
+            AccountName = transaction.Account.Name
         };
 
     public static void UpdateTransaction( Transaction transaction, UpdateTransactionDto transactionDto)

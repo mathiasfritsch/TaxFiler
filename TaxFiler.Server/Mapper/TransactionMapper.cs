@@ -23,7 +23,9 @@ public static class TransactionMapper
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
             DocumentId = transaction.DocumentId,
             DocumentName = transaction.Document?.Name,
-            SenderReceiver = transaction.SenderReceiver
+            SenderReceiver = transaction.SenderReceiver,
+            AccountId = transaction.AccountId,
+            AccountName = transaction.AccountName
         };
     }
 }

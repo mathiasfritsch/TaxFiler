@@ -10,4 +10,6 @@
   isSalesTaxRelevant: boolean;
   isIncomeTaxRelevant: boolean;
   documentId: number;
+  accountId: number;
+  accountName: string;
 }

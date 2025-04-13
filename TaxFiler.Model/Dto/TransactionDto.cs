@@ -17,4 +17,6 @@ public class TransactionDto
     public DocumentDto? Document { get; set; }
     public bool IsSalesTaxRelevant { get; set; }
     public string SenderReceiver { get; set; }
+    public int AccountId { get; set; }
+    public string AccountName { get; set; }
 }

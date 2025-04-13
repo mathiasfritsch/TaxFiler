@@ -24,6 +24,7 @@ public class Program
         builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
         builder.Services.AddScoped<IDocumentService, DocumenService>();
         builder.Services.AddScoped<ITransactionService, TransactionService>();
+        builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
 
         builder.Services.AddControllers();

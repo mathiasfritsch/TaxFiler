@@ -57,6 +57,10 @@ export class TransactionsComponent  implements  OnInit{
       headerName: 'Kommentar',
     },
     {
+      field: 'accountName',
+      headerName: 'Konto',
+    },
+    {
       field: 'documentName',
       headerName: 'Dokument',
     },

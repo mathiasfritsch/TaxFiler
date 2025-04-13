@@ -62,6 +62,16 @@
       <mat-label>Einkommenssteuerrelevant</mat-label>
       <mat-checkbox id="isIncomeTaxRelevant" formControlName="isIncomeTaxRelevantControl"></mat-checkbox>
     </div>
+    <div>
+      <mat-label>Konto</mat-label>
+      <mat-form-field>
+        <mat-select id="account" formControlName="accountControl">
+          <mat-option *ngFor="let account of accounts" [value]="account.id">
+            {{account.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </form>
 </div>
 <div mat-dialog-actions>
