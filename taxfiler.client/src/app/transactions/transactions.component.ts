@@ -38,6 +38,7 @@ function formatPrice(value: any):string{
 export class TransactionsComponent  implements  OnInit{
   public transactions: any[] = [];
   public yearMonth: any;
+  public accountId: number | null = null;
   localeText = AG_GRID_LOCALE_DE;
   colDefs: ColDef[] = [
     {
@@ -139,11 +140,22 @@ export class TransactionsComponent  implements  OnInit{
       this.yearMonth = params.get('yearMonth');
       this.getTransactions(this.yearMonth);
     });
+
+    this.route.queryParams.subscribe(params => {
+      this.accountId = params['accountId'] ? parseInt(params['accountId']) : null;
+      if (this.yearMonth) {
+        this.getTransactions(this.yearMonth);
+      }
+    });
   }
 
   getTransactions(yearMonth: any) {
     console.log(yearMonth);
-    this.http.get<any[]>(`/api/transactions/gettransactions?yearMonth=${yearMonth}`).subscribe(
+    let url = `/api/transactions/gettransactions?yearMonth=${yearMonth}`;
+    if (this.accountId) {
+      url += `&accountId=${this.accountId}`;
+    }
+    this.http.get<any[]>(url).subscribe(
       {
         next: transactions => {
           this.transactions = transactions;
@@ -159,7 +171,8 @@ export class TransactionsComponent  implements  OnInit{
     const [year, month] = this.yearMonth.split('-').map(Number);
     const date = new Date(year, month - 1 + offset, 1);
     const newYearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-    this.router.navigate([`/transactions/${newYearMonth}`]).then();
+    const queryParams = this.accountId ? { accountId: this.accountId } : {};
+    this.router.navigate([`/transactions/${newYearMonth}`], { queryParams }).then();
   }
 
   onFileSelected(event: any): void {
@@ -201,6 +214,10 @@ export class TransactionsComponent  implements  OnInit{
   }
 
   downloadReport() {
-    window.location.href = `/api/transactions/download?yearMonth=${this.yearMonth}`;
+    let url = `/api/transactions/download?yearMonth=${this.yearMonth}`;
+    if (this.accountId) {
+      url += `&accountId=${this.accountId}`;
+    }
+    window.location.href = url;
   }
 }

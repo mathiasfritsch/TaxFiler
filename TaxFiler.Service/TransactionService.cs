@@ -118,15 +118,20 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
     }
     
     
-    public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth)
+    public async Task<IEnumerable<Model.Dto.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth, int? accountId = null)
     {
-        var transactions = await taxFilerContext
+        var query = taxFilerContext
             .Transactions
             .Include(t => t.Document)
             .Include(t => t.Account)
-            .Where( t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month)
-            .ToListAsync();
+            .Where(t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month);
+
+        if (accountId.HasValue)
+        {
+            query = query.Where(t => t.AccountId == accountId.Value);
+        }
         
+        var transactions = await query.ToListAsync();
         return transactions.Select(t => t.TransactionDto()).ToList();
     }
     

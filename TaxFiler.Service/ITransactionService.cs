@@ -6,7 +6,7 @@ public interface ITransactionService
 {
     public IEnumerable<csvModel.TransactionDto> ParseTransactions(TextReader reader);
     public Task AddTransactionsAsync(IEnumerable<csvModel.TransactionDto> transactions);    
-    Task<IEnumerable<dtoModel.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth);
+    Task<IEnumerable<dtoModel.TransactionDto>> GetTransactionsAsync(DateOnly yearMonth, int? accountId = null);
     Task<dtoModel.TransactionDto> GetTransactionAsync(int transactionid);
     Task UpdateTransactionAsync(dtoModel.UpdateTransactionDto transactionDto);
     Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonthh);

@@ -1,6 +1,10 @@
 <div class="accounts-container">
   <h1>Accounts</h1>
   
+  <div>
+    <a [routerLink]="['/transactions', yearMonth]" mat-button>Transactions</a>
+  </div>
+  
   <ag-grid-angular
     class="ag-theme-quartz"
     style="height: 600px;"

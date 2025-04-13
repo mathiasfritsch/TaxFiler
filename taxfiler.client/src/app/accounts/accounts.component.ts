@@ -8,6 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AgGridModule } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent } from 'ag-grid-community';
 import { ButtonCellRendererComponent } from '../button-cell-renderer/button-cell-renderer.component';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-accounts',
@@ -18,6 +19,7 @@ import { ButtonCellRendererComponent } from '../button-cell-renderer/button-cell
     MatIconModule,
     MatDialogModule,
     AgGridModule,
+    RouterModule,
   ],
   templateUrl: './accounts.component.html',
   styleUrls: ['./accounts.component.css']
@@ -25,6 +27,7 @@ import { ButtonCellRendererComponent } from '../button-cell-renderer/button-cell
 export class AccountsComponent implements OnInit {
   accounts: Account[] = [];
   colDefs: ColDef[] = [];
+  yearMonth: string = '';
   defaultColDef: ColDef = {
     sortable: true,
     filter: true,
@@ -43,10 +46,16 @@ export class AccountsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      this.yearMonth = params.get('yearMonth') || '';
+    });
+
     this.setupGrid();
     this.getAccounts();
   }
@@ -68,5 +77,4 @@ export class AccountsComponent implements OnInit {
       }
     });
   }
-
-} 
+}

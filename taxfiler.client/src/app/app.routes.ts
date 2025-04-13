@@ -27,6 +27,11 @@ export const routes: Routes = [
   },
   {
     path: 'accounts',
+    redirectTo: `accounts/${getStartOfMonth()}`,
+    pathMatch: 'full'
+  },
+  {
+    path: 'accounts/:yearMonth',
     component: AccountsComponent
   },
 ];

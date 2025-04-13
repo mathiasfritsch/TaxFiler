@@ -13,9 +13,9 @@ namespace TaxFiler.Server.Controllers;
 public class TransactionsController(ITransactionService transactionService) : ControllerBase
 {
     [HttpGet("GetTransactions")]
-    public async Task<IEnumerable<TransactionViewModel>> List(DateOnly yearMonth)
+    public async Task<IEnumerable<TransactionViewModel>> List(DateOnly yearMonth, [FromQuery] int? accountId = null)
     {
-        var transactions = await transactionService.GetTransactionsAsync( yearMonth );
+        var transactions = await transactionService.GetTransactionsAsync(yearMonth, accountId);
         var vm = transactions.Select(t => t.ToViewModel());
         return vm;
     }

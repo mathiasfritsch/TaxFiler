@@ -1,7 +1,7 @@
 <h1 id="tableLabel" mat-dialog-title >Transaktionen   {{ yearMonth }}</h1>
 <div>
   <a [routerLink]="['/documents', yearMonth]"  mat-button >Dokumente</a>
-  <a [routerLink]="['/accounts']" mat-button>Konten</a>
+  <a [routerLink]="['/accounts', yearMonth]" mat-button>Konten</a>
   <button (click)="switchMonth(-1)" mat-button ><< Vorheriger Monat</button>
   <button (click)="switchMonth(1)"  mat-button >Nächster Monat >></button>
   <input type="file" (change)="onFileSelected($event)" style="display: none;" #fileInput>
