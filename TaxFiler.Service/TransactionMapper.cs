@@ -55,5 +55,6 @@ public static class TransactionMapper
         transaction.Counterparty = transactionDto.Counterparty;
         transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
         transaction.SenderReceiver = transactionDto.SenderReceiver;
+        transaction.AccountId = transactionDto.AccountId ?? transaction.AccountId;
     }
 }

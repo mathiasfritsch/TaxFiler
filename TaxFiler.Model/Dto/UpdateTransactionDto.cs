@@ -16,4 +16,5 @@ public class UpdateTransactionDto
     public int? DocumentId { get; set; }
     public bool IsSalesTaxRelevant { get; set; }
     public string SenderReceiver { get; set; }
+    public int? AccountId { get; set; }
 }
