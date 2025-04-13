@@ -25,4 +25,12 @@ h1 {
 
 .mat-column-id {
   width: 80px;
+}
+
+.ag-theme-quartz {
+  --ag-header-height: 50px;
+  --ag-header-foreground-color: #333;
+  --ag-header-background-color: #f5f5f5;
+  --ag-row-hover-color: #f0f0f0;
+  --ag-selected-row-background-color: #e6f7ff;
 } 
