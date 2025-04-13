@@ -22,4 +22,25 @@ public class AccountsController : ControllerBase
     {
         return await _accountService.GetAccountsAsync();
     }
+
+    [HttpPost("AddAccount")]
+    public async Task<IActionResult> AddAccount(AccountDto accountDto)
+    {
+        await _accountService.AddAccountAsync(accountDto);
+        return Ok();
+    }
+
+    [HttpPost("UpdateAccount")]
+    public async Task<IActionResult> UpdateAccount(AccountDto accountDto)
+    {
+        await _accountService.UpdateAccountAsync(accountDto);
+        return Ok();
+    }
+
+    [HttpDelete("DeleteAccount/{id:int}")]
+    public async Task<IActionResult> DeleteAccount(int id)
+    {
+        await _accountService.DeleteAccountAsync(id);
+        return Ok();
+    }
 } 

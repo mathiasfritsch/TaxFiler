@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { TransactionsComponent } from './transactions/transactions.component';
 import { DocumentsComponent } from "./documents/documents.component";
+import { AccountsComponent } from './accounts/accounts.component';
 
 function getStartOfMonth(): string {
   const date = new Date();
@@ -23,5 +24,9 @@ export const routes: Routes = [
   {
     path: 'documents/:yearMonth',
     component: DocumentsComponent
+  },
+  {
+    path: 'accounts',
+    component: AccountsComponent
   },
 ];
