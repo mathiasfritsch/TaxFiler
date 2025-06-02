@@ -6,6 +6,8 @@ using TaxFiler.DB;
 using TaxFiler.Model;
 using TaxFiler.Service;
 using Microsoft.EntityFrameworkCore;
+using Refit;
+using TaxFiler.Service.LlamaClient;
 
 namespace TaxFiler.Server;
 
@@ -26,7 +28,17 @@ public class Program
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
-
+        
+        // Register the LlamaBearerTokenHandler and configure the ILlamaApiClient
+        builder.Services.AddTransient<LlamaBearerTokenHandler>();
+        builder.Services
+            .AddRefitClient<ILlamaApiClient>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri("https://api.cloud.llamaindex.ai");
+            })
+            .AddHttpMessageHandler<LlamaBearerTokenHandler>();
+            
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

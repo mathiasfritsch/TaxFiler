@@ -1,9 +1,11 @@
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Refit;
 using TaxFiler.Model.Dto;
 using TaxFiler.Model.Llama;
 using TaxFiler.Service;
+using TaxFiler.Service.LlamaClient;
 
 namespace TaxFiler.Server.Controllers;
 
@@ -12,8 +14,21 @@ namespace TaxFiler.Server.Controllers;
 [Route("api/[controller]")]
 public class DocumentsController(IDocumentService documentService, 
     IParseService parseService,
-    ISyncService syncService) : ControllerBase
+    ISyncService syncService,
+    ILlamaApiClient llamaApiClient) : ControllerBase
 {
+    [HttpGet("UploadFileForParsing")]
+    public async Task<string> UploadFileForParsing(CancellationToken cancellationToken)
+    {
+        // var filePath = "C:/documents/file.PDF";
+        // await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        // var filePart = new StreamPart(fileStream, Path.GetFileName(filePath), "application/pdf");
+        // await llamaApiClient.UploadFileForParsingAsync(filePart);
+        string res = await llamaApiClient.GetAgents();
+        
+        return res;
+    }
+    
     [HttpGet("")]
     [HttpGet("GetDocuments")]
     public async Task<IEnumerable<DocumentDto>> List()

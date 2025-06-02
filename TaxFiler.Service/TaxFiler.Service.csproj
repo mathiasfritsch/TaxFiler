@@ -3,6 +3,7 @@
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="FluentResults" />
     <PackageReference Include="Google.Apis.Drive.v3" />
+    <PackageReference Include="Refit" />
 
   </ItemGroup>
   <ItemGroup>
