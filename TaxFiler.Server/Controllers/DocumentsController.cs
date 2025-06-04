@@ -14,8 +14,32 @@ namespace TaxFiler.Server.Controllers;
 public class DocumentsController(IDocumentService documentService, 
     IParseService parseService,
     ISyncService syncService,
-    ILlamaApiClient llamaApiClient) : ControllerBase
+    ILlamaApiClient llamaApiClient,
+    IGoogleDriveService googleDriveService) : ControllerBase
 {
+    
+    [HttpGet("DownloadDocument/{documentId}")]
+    public async Task<IActionResult> DownloadDocument(int documentId)
+    {
+        var document = await documentService.GetDocumentAsync(documentId);
+
+        if (document.IsFailed || document.Value == null)
+        {
+            return NotFound("Document not found.");
+        }
+
+        var fileId = document.Value.ExternalRef;
+        var fileBytes = await googleDriveService.DownloadFileAsync(fileId);
+
+        if ( fileBytes.Length == 0)
+        {
+            return NotFound("File not found on Google Drive.");
+        }
+
+        var fileName = document.Value.Name;
+        return File(fileBytes, "application/octet-stream", fileName);
+    }
+    
     [HttpGet("UploadFileForParsing")]
     public async Task<string> UploadFileForParsing(CancellationToken cancellationToken)
     {
