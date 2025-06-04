@@ -11,13 +11,13 @@ namespace TaxFiler.Server.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class DocumentsController(IDocumentService documentService, 
+public class DocumentsController(
+    IDocumentService documentService,
     IParseService parseService,
     ISyncService syncService,
     ILlamaApiClient llamaApiClient,
     IGoogleDriveService googleDriveService) : ControllerBase
 {
-    
     [HttpGet("DownloadDocument/{documentId}")]
     public async Task<IActionResult> DownloadDocument(int documentId)
     {
@@ -31,15 +31,17 @@ public class DocumentsController(IDocumentService documentService,
         var fileId = document.Value.ExternalRef;
         var fileBytes = await googleDriveService.DownloadFileAsync(fileId);
 
-        if ( fileBytes.Length == 0)
+        if (fileBytes.Length == 0)
         {
             return NotFound("File not found on Google Drive.");
         }
 
         var fileName = document.Value.Name;
-        return File(fileBytes, "application/octet-stream", fileName);
+        var contentType = "application/pdf";
+
+        return File(fileBytes, contentType, fileName, enableRangeProcessing: true);
     }
-    
+
     [HttpGet("UploadFileForParsing")]
     public async Task<string> UploadFileForParsing(CancellationToken cancellationToken)
     {
@@ -48,10 +50,10 @@ public class DocumentsController(IDocumentService documentService,
         // var filePart = new StreamPart(fileStream, Path.GetFileName(filePath), "application/pdf");
         // await llamaApiClient.UploadFileForParsingAsync(filePart);
         string res = await llamaApiClient.GetAgents();
-        
+
         return res;
     }
-    
+
     [HttpGet("")]
     [HttpGet("GetDocuments")]
     public async Task<IEnumerable<DocumentDto>> List()
@@ -85,13 +87,13 @@ public class DocumentsController(IDocumentService documentService,
     {
         await documentService.DeleteDocumentAsync(id);
     }
-    
+
     [HttpPost("SyncFiles/{yearMonth}")]
     public async Task SyncFiles(DateOnly yearMonth)
     {
         await syncService.SyncFilesAsync(yearMonth);
     }
-    
+
     [HttpPost("Parse/{documentId}")]
     public async Task<Result<Invoice>> Parse([FromRoute] int documentId)
     {
