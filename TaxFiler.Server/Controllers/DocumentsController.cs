@@ -1,7 +1,6 @@
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Refit;
 using TaxFiler.Model.Dto;
 using TaxFiler.Model.Llama;
 using TaxFiler.Service;

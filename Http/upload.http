@@ -1,0 +1,14 @@
+### Get Extraction Agent by Name
+GET {{host}}/extraction/extraction-agents/by-name/invoice
+Accept: application/json
+Authorization: Bearer {{apikey}}
+
+### Get Extraction Agent by Name
+GET {{host}}/files
+Accept: application/json
+Authorization: Bearer {{apikey}}
+
+### Get Extraction Agent by Name
+POST {{host}}/files
+Accept: application/json
+Authorization: Bearer {{apikey}}

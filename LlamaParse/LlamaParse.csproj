@@ -8,6 +8,7 @@
 		<PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+		<PackageReference Include="Refit" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\LlamaIndex.Core\LlamaIndex.Core.csproj" />
