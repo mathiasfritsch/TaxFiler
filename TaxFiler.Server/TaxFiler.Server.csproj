@@ -8,6 +8,7 @@
         <SpaProxyServerUrl>https://localhost:4200</SpaProxyServerUrl>
         <AssemblyName>TaxFiler</AssemblyName>
         <RootNamespace>TaxFiler</RootNamespace>
+        <UserSecretsId>89b35d80-b916-4143-bab1-0fa4440d57ed</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>

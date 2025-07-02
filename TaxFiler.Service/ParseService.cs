@@ -1,89 +1,59 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using FluentResults;
-using LlamaParse;
 using Microsoft.Extensions.Configuration;
 using TaxFiler.DB;
 using TaxFiler.Model.Llama;
+using TaxFiler.Service.LlamaIndex;
 
 namespace TaxFiler.Service;
 
-public class ParseService:IParseService
+public class ParseService : IParseService
 {
-    private readonly IConfiguration _configuration;
     private readonly IGoogleDriveService _googleDriveService;
     private readonly TaxFilerContext _taxFilerContext;
+    private readonly ILlamaIndexService _llamaIndexService;
 
-    public ParseService(IConfiguration configuration, 
+    public ParseService(
         IGoogleDriveService googleDriveService,
-        TaxFilerContext taxFilerContext)
+        TaxFilerContext taxFilerContext,
+        ILlamaIndexService llamaIndexService)
     {
-        _configuration = configuration;
         _googleDriveService = googleDriveService;
         _taxFilerContext = taxFilerContext;
+        _llamaIndexService = llamaIndexService;
     }
-    
-    public async Task<Result<Invoice>> ParseFilesAsync(int documentId)
+
+    public async Task<Result<LlamaIndexJobResultResponse>> ParseFilesAsync(int documentId)
     {
         var document = await _taxFilerContext.Documents.FindAsync(documentId);
-        
-        if(document == null)
+
+        if (document == null)
         {
-            return Result.Fail<Invoice>($"DocumentId {documentId} not found");
+            return Result.Fail<LlamaIndexJobResultResponse>($"DocumentId {documentId} not found");
         }
-        
-        var apiKey = _configuration["LlamaParse:ApiKey"];
-        
-        if(apiKey == null)
-        {
-            return Result.Fail<Invoice>(" Configuation LlamaParse:ApiKey not found");
-        }
-        
-        var parseConfig = new Configuration
-        {
-            ApiKey = apiKey,
-            StructuredOutput = true,
-            StructuredOutputJsonSchemaName = "invoice"
-        };
         
         var bytes = await _googleDriveService.DownloadFileAsync(document.ExternalRef);
         
-        var client = new LlamaParseClient(new HttpClient(), parseConfig);
+        LlamaIndexJobResultResponse parseResult = await _llamaIndexService.UploadFileAndCreateJobAsync(bytes,  document.Name.ToLower());
+       
+        var germanCulture = new CultureInfo("de-DE");
+        var parsedDateTime = DateTime.TryParse(parseResult.data.InvoiceDate, germanCulture, DateTimeStyles.None, out DateTime parsedDate);
         
-        var inMemoryFile = new InMemoryFile( new ReadOnlyMemory<byte>(bytes), 
-            document.Name.ToLower(),
-            FileTypes.GetMimeType(document.Name.ToLower()));
-        
-        var structuredResults = new List<StructuredResult>();
-        await foreach(var structuredResult in client.LoadDataStructuredAsync(inMemoryFile, ResultType.Json))
-        {
-            structuredResults.Add(structuredResult);
-        }
-        
-        StructuredResult doc = structuredResults.First();
-        
-        var invoiceStructuredResult = ConvertJsonElementToInvoice(doc.ResultPagesStructured[0]);
-        
-        document.InvoiceDate = invoiceStructuredResult.InvoiceDate;
-        document.InvoiceNumber = invoiceStructuredResult.InvoiceNumber;
-        document.Total = invoiceStructuredResult.Total;
-        document.SubTotal = invoiceStructuredResult.SubTotal;
-        document.TaxAmount = invoiceStructuredResult.Tax.Amount;
-        document.TaxRate = invoiceStructuredResult.Tax.Rate;
+        document.InvoiceDate = parsedDateTime ? DateOnly.FromDateTime(parsedDate):null;
+        document.InvoiceNumber = parseResult.data.InvoiceNumber;
+        document.Total = parseResult.data.Total;
+        document.SubTotal = parseResult.data.SubTotal;
+        document.TaxAmount = parseResult.data.TaxAmount;
+        document.TaxRate = parseResult.data.TaxRate;
 
         document.Parsed = true;
-        
+
         await _taxFilerContext.SaveChangesAsync();
-        
-        return Result.Ok(invoiceStructuredResult);
+
+        return Result.Ok(parseResult);
     }
     
-    private Invoice ConvertJsonElementToInvoice(JsonElement jsonElement)
-    {
-        var jsonString = jsonElement.GetRawText();
-        var invoice = JsonSerializer.Deserialize<Invoice>(jsonString,new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-        return invoice;
-    }
+
+   
 }

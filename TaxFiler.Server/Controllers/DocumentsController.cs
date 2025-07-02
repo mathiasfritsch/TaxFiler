@@ -5,6 +5,7 @@ using TaxFiler.Model.Dto;
 using TaxFiler.Model.Llama;
 using TaxFiler.Service;
 using TaxFiler.Service.LlamaClient;
+using TaxFiler.Service.LlamaIndex;
 
 namespace TaxFiler.Server.Controllers;
 
@@ -95,7 +96,7 @@ public class DocumentsController(
     }
 
     [HttpPost("Parse/{documentId}")]
-    public async Task<Result<Invoice>> Parse([FromRoute] int documentId)
+    public async Task<Result<LlamaIndexJobResultResponse>> Parse([FromRoute] int documentId)
     {
         return await parseService.ParseFilesAsync(documentId);
     }

@@ -8,6 +8,7 @@ using TaxFiler.Service;
 using Microsoft.EntityFrameworkCore;
 using Refit;
 using TaxFiler.Service.LlamaClient;
+using TaxFiler.Service.LlamaIndex;
 
 namespace TaxFiler.Server;
 
@@ -27,6 +28,8 @@ public class Program
         builder.Services.AddScoped<IDocumentService, DocumenService>();
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<ILlamaIndexService, LlamaIndexService>();
+        
         builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
         
         // Register the LlamaBearerTokenHandler and configure the ILlamaApiClient

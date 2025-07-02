@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaxFiler.DB;
 
@@ -10,9 +11,11 @@ using TaxFiler.DB;
 namespace TaxFiler.DB.Migrations
 {
     [DbContext(typeof(TaxFilerContext))]
-    partial class TaxFilerContextModelSnapshot : ModelSnapshot
+    [Migration("20250629164617_change")]
+    partial class change
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");

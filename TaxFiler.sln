@@ -14,10 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildfiles", "buildfiles", 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaIndex.Core", "LlamaIndex.Core\LlamaIndex.Core.csproj", "{EA22216D-18D6-449E-98E0-C7F0C053666D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LlamaParse", "LlamaParse\LlamaParse.csproj", "{F31CBD8D-1E65-4CF6-AF45-FF862C10C34E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.DB", "TaxFiler.DB\TaxFiler.DB.csproj", "{9846E984-5FC0-477E-8D86-340D3F67C6DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxFiler.Model", "TaxFiler.Model\TaxFiler.Model.csproj", "{C8A247EF-B87D-4DCB-BD5F-38F8C7EFA28B}"
@@ -42,14 +38,6 @@ Global
 		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4D88908-A81A-45D5-A7EA-9F7539900CA0}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{EA22216D-18D6-449E-98E0-C7F0C053666D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA22216D-18D6-449E-98E0-C7F0C053666D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA22216D-18D6-449E-98E0-C7F0C053666D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA22216D-18D6-449E-98E0-C7F0C053666D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F31CBD8D-1E65-4CF6-AF45-FF862C10C34E}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{F31CBD8D-1E65-4CF6-AF45-FF862C10C34E}.Debug|Any CPU.Build.0 = Debug|x64
-		{F31CBD8D-1E65-4CF6-AF45-FF862C10C34E}.Release|Any CPU.ActiveCfg = Release|x64
-		{F31CBD8D-1E65-4CF6-AF45-FF862C10C34E}.Release|Any CPU.Build.0 = Release|x64
 		{9846E984-5FC0-477E-8D86-340D3F67C6DC}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{9846E984-5FC0-477E-8D86-340D3F67C6DC}.Debug|Any CPU.Build.0 = Debug|x64
 		{9846E984-5FC0-477E-8D86-340D3F67C6DC}.Release|Any CPU.ActiveCfg = Release|x64
