@@ -98,7 +98,7 @@ dotnet user-secrets set "GoogleDriveSettings:ClientSecret" "your-client-secret"
 
 ## Development Workflow
 
-1. **Database First**: Create/modify entities in `TaxFiler.DB.Model`
+1. **Model First**: Create/modify entities in `TaxFiler.DB.Model`
 2. **Create Migration**: Use EF Core migrations for schema changes
 3. **Update Services**: Implement business logic in service layer
 4. **API Controllers**: Expose endpoints in `TaxFiler.Server.Controllers`
