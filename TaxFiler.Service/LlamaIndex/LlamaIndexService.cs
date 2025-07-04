@@ -1,31 +1,19 @@
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using System.Text.Json.Serialization;
-
+using TaxFiler.Service.LlamaClient;
+using Refit;
 
 namespace TaxFiler.Service.LlamaIndex;
 
 public class LlamaIndexService : ILlamaIndexService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
+    private readonly ILlamaApiClient _llamaApiClient;
     private readonly string _agentId;
 
-    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+    public LlamaIndexService(ILlamaApiClient llamaApiClient, IConfiguration config)
     {
-        PropertyNameCaseInsensitive = true,
-    };
-
-    public LlamaIndexService(IConfiguration config)
-    {
-        _httpClient = new HttpClient();
+        _llamaApiClient = llamaApiClient;
         var llamaConfig = config.GetSection("LlamaParse");
-        _apiKey = llamaConfig["ApiKey"] ?? throw new Exception("LlamaParse:ApiKey not configured");
         _agentId = llamaConfig["AgentId"] ?? throw new Exception("LlamaParse:AgentId not configured");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
     }
 
     public async Task<LlamaIndexJobResultResponse> UploadFileAndCreateJobAsync(byte[] bytes, string fileName)
@@ -41,17 +29,10 @@ public class LlamaIndexService : ILlamaIndexService
 
     private async Task<LlamaIndexUploadFileResponse> UploadFileAsync(byte[] bytes, string fileName)
     {
-        using var form = new MultipartFormDataContent();
-        using var fileStream = new MemoryStream(bytes); 
-        var fileContent = new StreamContent(fileStream);
+        using var fileStream = new MemoryStream(bytes);
+        var filePart = new StreamPart(fileStream, fileName, "application/pdf");
         
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
-        form.Add(fileContent, "upload_file", fileName);
-
-        var response = await _httpClient.PostAsync("https://api.cloud.llamaindex.ai/api/v1/files", form);
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        var uploadResponse = JsonSerializer.Deserialize<LlamaIndexUploadFileResponse>(json, _jsonOptions);
+        var uploadResponse = await _llamaApiClient.UploadFileAsync(filePart);
         if (uploadResponse == null || string.IsNullOrEmpty(uploadResponse.id))
             throw new Exception("File ID not returned from LlamaIndex");
         return uploadResponse;
@@ -64,11 +45,8 @@ public class LlamaIndexService : ILlamaIndexService
             file_id = fileId,
             extraction_agent_id = _agentId
         };
-        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync("https://api.cloud.llamaindex.ai/api/v1/extraction/jobs", content);
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        var jobResponse = JsonSerializer.Deserialize<LlamaIndexExtractionJobCreationResponse>(json, _jsonOptions);
+        
+        var jobResponse = await _llamaApiClient.CreateExtractionJobAsync(payload);
         if (jobResponse == null || string.IsNullOrEmpty(jobResponse.id))
             throw new Exception("Job ID not returned from LlamaIndex");
         return jobResponse;
@@ -76,10 +54,7 @@ public class LlamaIndexService : ILlamaIndexService
 
     public async Task<LlamaIndexExtractionJobStatusResponse> GetExtractionJobAsync(string jobId)
     {
-        var response = await _httpClient.GetAsync($"https://api.cloud.llamaindex.ai/api/v1/extraction/jobs/{jobId}");
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        var jobResponse = JsonSerializer.Deserialize<LlamaIndexExtractionJobStatusResponse>(json, _jsonOptions);
+        var jobResponse = await _llamaApiClient.GetExtractionJobAsync(jobId);
         if (jobResponse == null || string.IsNullOrEmpty(jobResponse.id))
             throw new Exception("Job not found or invalid response from LlamaIndex");
         return jobResponse;
@@ -111,11 +86,7 @@ public class LlamaIndexService : ILlamaIndexService
 
     public async Task<LlamaIndexJobResultResponse?> GetExtractionJobResultAsync(string jobId)
     {
-        var response =
-            await _httpClient.GetAsync($"https://api.cloud.llamaindex.ai/api/v1/extraction/jobs/{jobId}/result");
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<LlamaIndexJobResultResponse>(json, _jsonOptions);
+        var result = await _llamaApiClient.GetExtractionJobResultAsync(jobId);
         return result;
     }
 }

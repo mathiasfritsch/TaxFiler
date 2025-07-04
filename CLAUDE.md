@@ -133,6 +133,58 @@ The workflow involves multiple API calls in sequence:
 - **Timeout**: 5-minute default timeout with 5-second polling intervals
 - **Error Handling**: Comprehensive error handling for job failures and timeouts
 
+### Refit Integration
+
+**Current State:**
+The codebase now uses Refit for all LlamaIndex API calls, providing type safety and automatic serialization.
+
+**Existing Refit Setup:**
+```csharp
+// Program.cs - Already configured
+builder.Services.AddTransient<LlamaBearerTokenHandler>();
+builder.Services
+    .AddRefitClient<ILlamaApiClient>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api.cloud.llamaindex.ai"))
+    .AddHttpMessageHandler<LlamaBearerTokenHandler>();
+```
+
+**Complete ILlamaApiClient Interface:**
+```csharp
+public interface ILlamaApiClient
+{
+    [Multipart]
+    [Post("/api/v1/files")]
+    Task<LlamaIndexUploadFileResponse> UploadFileAsync([AliasAs("upload_file")] StreamPart file);
+
+    [Post("/api/v1/extraction/jobs")]
+    Task<LlamaIndexExtractionJobCreationResponse> CreateExtractionJobAsync([Body] object payload);
+
+    [Get("/api/v1/extraction/jobs/{jobId}")]
+    Task<LlamaIndexExtractionJobStatusResponse> GetExtractionJobAsync(string jobId);
+
+    [Get("/api/v1/extraction/jobs/{jobId}/result")]
+    Task<LlamaIndexJobResultResponse> GetExtractionJobResultAsync(string jobId);
+
+    [Get("/api/v1/extraction/extraction-agents?project_id=c22f5d97-22f5-40ab-8992-e40e32b0992c")]
+    Task<string> GetAgents();
+}
+```
+
+**Implementation Details:**
+- **LlamaIndexService**: Now injects `ILlamaApiClient` instead of creating `HttpClient`
+- **Authentication**: `LlamaBearerTokenHandler` reads API key from `LlamaParse:ApiKey` configuration
+- **Type Safety**: All API calls use strongly typed request/response models
+- **Error Handling**: Refit provides consistent HTTP error handling
+
+**Benefits Achieved:**
+- **Type Safety**: Strongly typed request/response models eliminate manual JSON handling
+- **Automatic Serialization**: JSON serialization/deserialization handled by Refit
+- **Authentication**: Bearer token automatically added via `LlamaBearerTokenHandler` 
+- **HTTP Configuration**: Base URL and timeouts centrally configured in DI
+- **Error Handling**: Consistent HTTP error handling across all API calls
+- **Testability**: Easy to mock `ILlamaApiClient` interface for unit testing
+- **Maintainability**: Eliminates boilerplate HTTP client code
+
 ### Extracted Data Structure
 The agent returns structured invoice data:
 ```csharp
@@ -156,266 +208,13 @@ public class InvoiceResult
 
 The fixed agent approach ensures consistent extraction quality for German tax documents without requiring per-document configuration.
 
+## Refactoring Tasks
+
+### Service Integrations
+- **Change LlamaIndexService to use Refit**: Migrate the current API integration to use Refit for type-safe HTTP calls
+- Refactor API interactions to use Refit interfaces for better type safety and simpler HTTP request management
+- Update dependency injection to register Refit-based service implementations
+
 ## Document-Transaction Matching
 
 The application provides manual document-to-transaction matching functionality through the UI, allowing users to link parsed documents with bank transactions for tax reporting purposes.
-
-### Database Relationship
-- **Transaction.DocumentId**: Foreign key linking transactions to documents
-- **TransactionDocumentMatcher**: Configuration table for automated matching rules (currently not implemented)
-- **Document.Unconnected**: Flag indicating whether a document is already linked to a transaction
-
-### Manual Matching Process (UI)
-1. **Transaction Grid View**: Navigate to `/transactions/{yearMonth}` to view transactions for a specific month
-2. **Edit Transaction**: Click "Edit" button on any transaction to open the transaction edit dialog
-3. **Document Selection**: Use the document autocomplete field to search and select a document
-4. **Filtering Options**: 
-   - **"nur unconnected" checkbox**: Toggle to show only unconnected documents vs. all documents
-   - **Search by**: Document name, total amount, or invoice date
-5. **Save**: Document is linked to transaction via `DocumentId` field
-
-### UI Components for Matching
-- **TransactionEditComponent**: Main dialog for editing transactions and linking documents
-- **Document Autocomplete**: Material Design autocomplete with custom filtering
-- **Smart Filtering**: Matches documents by name, total amount, or invoice date
-- **Unconnected Toggle**: Filters to show only documents not yet linked to transactions
-
-### Search and Filter Logic
-The document autocomplete provides intelligent matching:
-```typescript
-// Filters documents by name, amount, or date
-document.name.toLowerCase().includes(filterValue) ||
-document.total == filterValueNumber ||
-document.invoiceDate == filterValueDate
-```
-
-### Integration Points
-- **GET /api/documents/getdocuments**: Loads all documents for selection
-- **POST /api/transactions/updatetransaction**: Updates transaction with selected document ID
-- **Document Display**: Shows document name in transaction grid after linking
-
-### Automated Matching (Future)
-The `TransactionDocumentMatcher` entity exists for future automated matching based on:
-- **TransactionReceiver**: Counterparty name matching
-- **TransactionCommentPattern**: Comment pattern matching
-- **AmountMatches**: Amount validation
-- Current implementation is incomplete (`throw new NotImplementedException()`)
-
-### Best Practices
-- Parse documents before attempting to match (ensures Total, InvoiceDate, etc. are populated)
-- Use "unconnected only" filter to avoid duplicate assignments
-- Match by amount first, then verify document details
-- Review linked documents in transaction reports for accuracy
-
-## Adding Transactions
-
-The application supports adding transactions through CSV file upload and manual entry via the transaction-edit form component.
-
-### Method 1: CSV File Upload
-
-**Frontend Upload Process:**
-1. **Navigation**: Go to `/transactions/{yearMonth}` page
-2. **Upload Button**: Click "Upload" button in the transaction toolbar
-3. **File Selection**: Choose CSV file using hidden file input
-4. **Processing**: File is uploaded and parsed automatically
-5. **Refresh**: Transaction grid refreshes to show new transactions
-
-**CSV File Format (German Bank Export):**
-The system expects German bank CSV exports with semicolon delimiters:
-
-```csv
-Bezeichnung Auftragskonto;IBAN Auftragskonto;BIC Auftragskonto;Bankname Auftragskonto;Buchungstag;Valutadatum;Name Zahlungsbeteiligter;IBAN Zahlungsbeteiligter;BIC (SWIFT-Code) Zahlungsbeteiligter;Buchungstext;Verwendungszweck;Betrag;Waehrung;Saldo nach Buchung;Bemerkung;Kategorie;Steuerrelevant;Glaeubiger ID;Mandatsreferenz
-```
-
-**Required CSV Columns:**
-- **Buchungstag** → Transaction date (dd.MM.yyyy format)
-- **Name Zahlungsbeteiligter** → Counterparty name
-- **IBAN Zahlungsbeteiligter** → Counterparty IBAN  
-- **Verwendungszweck** → Transaction comment/purpose
-- **Betrag** → Amount (converted from cents to euros)
-
-### Method 2: Manual Transaction Entry
-
-**Angular Form Component:**
-- **Component**: `TransactionEditComponent` can be used for both editing and adding
-- **Form Fields**: All transaction properties (amount, date, counterparty, tax flags, etc.)
-- **Document Linking**: Autocomplete field for linking documents during creation
-- **Account Selection**: Dropdown for selecting the transaction account
-
-**Transaction Form Fields:**
-```typescript
-{
-  transactionNoteControl: FormControl,     // Comment/description
-  netAmountControl: FormControl,           // Net amount
-  grossAmountControl: FormControl,         // Gross amount  
-  senderReceiverControl: FormControl,      // Counterparty name
-  documentControl: FormControl,            // Linked document (optional)
-  taxAmountControl: FormControl,           // Tax amount
-  transactionDateTimeControl: FormControl, // Transaction date
-  isSalesTaxRelevantControl: FormControl,  // Sales tax relevance flag
-  isIncomeTaxRelevantControl: FormControl, // Income tax relevance flag
-  accountControl: FormControl              // Account selection
-}
-```
-
-### Backend Processing
-
-**CSV Upload Pipeline:**
-1. **Parsing**: Uses CsvHelper with semicolon delimiter and German culture
-2. **Duplicate Detection**: Prevents re-importing existing transactions
-3. **Data Transformation**: 
-   - Direction detection (`IsOutgoing = Amount < 0`)
-   - Amount normalization (convert to positive, set direction flag)
-   - Default account assignment (`AccountId = 1`)
-
-**Manual Entry Processing:**
-- **API Endpoint**: `POST /api/transactions/updatetransaction`
-- **Auto-calculation**: When document is linked, tax amounts auto-populate from document data
-- **Skonto Handling**: Applies early payment discounts if document has skonto percentage
-
-### API Endpoints
-
-**Upload:** `POST /api/transactions/upload` (multipart/form-data)  
-**Manual Add/Update:** `POST /api/transactions/updatetransaction`  
-**Delete:** `DELETE /api/transactions/deleteTransaction/{id}`
-
-### Duplicate Prevention
-
-During CSV upload, transactions are skipped if matching records exist with identical:
-- Transaction date
-- Counterparty IBAN
-- Comment
-- Gross amount
-
-### Transaction Export
-
-**Download Reports:**
-- **Endpoint**: `GET /api/transactions/download?yearMonth={yearMonth}`
-- **Format**: CSV with comma delimiter
-- **Filters**: Only tax-relevant transactions
-- **Document Integration**: Includes linked document names with directional prefixes
-
-## Document Management
-
-The application supports two primary methods for managing documents: automatic synchronization from Google Drive and manual entry/editing through the UI.
-
-### Method 1: Google Drive Synchronization
-
-**Folder Structure Requirements:**
-The Google Drive integration expects a specific folder hierarchy:
-```
-Google Drive/
-├── 2025/           # Year folder
-│   ├── 01/         # Month folder (01-12)
-│   ├── 02/
-│   └── ...
-└── 2024/
-    ├── 01/
-    └── ...
-```
-
-**Synchronization Process:**
-1. **Navigation**: Go to `/documents/{yearMonth}` page
-2. **Sync Button**: Click "Sync from Google Drive" button
-3. **Authentication**: Uses Google Service Account with Base64-encoded credentials
-4. **Folder Traversal**: Finds year folder → month folder → retrieves files
-5. **Database Update**: Creates new document records and marks orphaned documents
-
-**Sync Logic (`SyncService`):**
-- **New Files**: Creates `Document` records for files not in database
-- **Orphaned Detection**: Marks existing documents as orphaned if no longer in Google Drive
-- **File Filtering**: Only processes non-folder files (excludes Google Apps folder MIME type)
-- **External Reference**: Stores Google Drive file ID as `ExternalRef`
-
-**Google Drive Service Features:**
-- **Authentication**: OAuth2 with service account credentials
-- **Scopes**: Read-only access (`DriveService.Scope.DriveReadonly`)
-- **File Operations**: List files, download file content
-- **Folder Navigation**: Recursive folder ID lookup by name
-
-### Method 2: Manual Document Entry/Editing
-
-**Document Edit Component (`DocumentEditComponent`):**
-- **Form Fields**: Complete document information editing
-- **Usage**: Can edit existing documents or add new ones
-- **API Integration**: Uses `POST /api/documents/updatedocument` and `POST /api/documents/adddocument`
-
-**Editable Document Fields:**
-```typescript
-{
-  nameControl: FormControl,           // Document name
-  totalControl: FormControl,          // Gross amount (Brutto)
-  subTotalControl: FormControl,       // Net amount (Netto)
-  taxAmountControl: FormControl,      // Tax amount
-  taxRateControl: FormControl,        // Tax rate percentage
-  skontoControl: FormControl,         // Early payment discount
-  invoiceDateControl: FormControl,    // Invoice date
-  invoiceNumberControl: FormControl,  // Invoice number
-  parsedControl: FormControl          // Parsed status checkbox
-}
-```
-
-**Manual Entry Process:**
-1. **Add Document**: Use `AddDocumentDto` for creating new documents
-2. **Form Validation**: Name and ExternalRef are required fields
-3. **Editing**: Click "Edit" button in documents grid to modify existing documents
-4. **Save**: Form data is validated and posted to backend
-
-### Document Processing Workflow
-
-**From Google Drive:**
-1. **Sync**: Files discovered in Google Drive folders
-2. **Database Creation**: Document records created with Google Drive file ID
-3. **Download**: Files downloaded on-demand for processing
-4. **Parse**: LlamaIndex extracts structured data
-5. **Link**: Documents linked to transactions manually
-
-**Manual Entry:**
-1. **Create**: Manual document entry with required fields
-2. **Edit**: Modify document details through form interface
-3. **Validation**: Backend validates required fields (Name, ExternalRef)
-4. **Storage**: Document metadata stored in SQLite database
-
-### API Endpoints
-
-**Google Drive Operations:**
-- **Sync**: `POST /api/documents/syncfiles/{yearMonth}`
-- **Download**: `GET /api/documents/downloaddocument/{documentId}`
-
-**Manual Document Operations:**
-- **List**: `GET /api/documents/getdocuments`
-- **Get**: `GET /api/documents/getdocument/{documentId}`
-- **Add**: `POST /api/documents/adddocument`
-- **Update**: `POST /api/documents/updatedocument`
-- **Delete**: `DELETE /api/documents/deletedocument/{id}`
-- **Parse**: `POST /api/documents/parse/{documentId}`
-
-### Document Status Management
-
-**Orphaned Documents:**
-- **Detection**: Documents marked as orphaned when no longer found in Google Drive
-- **Status**: `Orphaned` boolean flag tracks availability
-- **Cleanup**: Manual cleanup required for orphaned documents
-
-**Parsed Status:**
-- **Flag**: `Parsed` boolean indicates if LlamaIndex has processed the document
-- **Processing**: Parse button triggers LlamaIndex extraction
-- **Data Population**: Successful parsing populates tax amounts, dates, and invoice numbers
-
-**Connection Status:**
-- **Unconnected**: Documents not yet linked to transactions
-- **Connected**: Documents with active transaction relationships
-- **Display**: Grid shows connection status for easy identification
-
-### File Operations
-
-**Download Functionality:**
-- **Source**: Downloads from Google Drive using file ID
-- **Format**: Returns PDF files with proper MIME types
-- **Range Support**: Supports HTTP range requests for large files
-- **Authentication**: Downloads require valid user authentication
-
-**Delete Operations:**
-- **Transaction Cleanup**: Removes document links from transactions before deletion
-- **Cascade**: Sets `DocumentId` to null for linked transactions
-- **Permanent**: Document records permanently removed from database
