@@ -113,7 +113,7 @@ The application uses Microsoft Identity Web with EntraId:
 
 ## LlamaIndex Document Processing
 
-The application uses LlamaIndex Cloud for AI-powered document processing with a configured. 
+The application uses LlamaIndex Cloud for AI-powered document processing with a configured agent specialized for German tax documents. This integration allows for structured extraction of key invoice data such as amounts, dates, and tax rates.
 The workflow involves multiple API calls in sequence:
 
 ### Processing Pipeline
@@ -294,3 +294,128 @@ During CSV upload, transactions are skipped if matching records exist with ident
 - **Format**: CSV with comma delimiter
 - **Filters**: Only tax-relevant transactions
 - **Document Integration**: Includes linked document names with directional prefixes
+
+## Document Management
+
+The application supports two primary methods for managing documents: automatic synchronization from Google Drive and manual entry/editing through the UI.
+
+### Method 1: Google Drive Synchronization
+
+**Folder Structure Requirements:**
+The Google Drive integration expects a specific folder hierarchy:
+```
+Google Drive/
+├── 2025/           # Year folder
+│   ├── 01/         # Month folder (01-12)
+│   ├── 02/
+│   └── ...
+└── 2024/
+    ├── 01/
+    └── ...
+```
+
+**Synchronization Process:**
+1. **Navigation**: Go to `/documents/{yearMonth}` page
+2. **Sync Button**: Click "Sync from Google Drive" button
+3. **Authentication**: Uses Google Service Account with Base64-encoded credentials
+4. **Folder Traversal**: Finds year folder → month folder → retrieves files
+5. **Database Update**: Creates new document records and marks orphaned documents
+
+**Sync Logic (`SyncService`):**
+- **New Files**: Creates `Document` records for files not in database
+- **Orphaned Detection**: Marks existing documents as orphaned if no longer in Google Drive
+- **File Filtering**: Only processes non-folder files (excludes Google Apps folder MIME type)
+- **External Reference**: Stores Google Drive file ID as `ExternalRef`
+
+**Google Drive Service Features:**
+- **Authentication**: OAuth2 with service account credentials
+- **Scopes**: Read-only access (`DriveService.Scope.DriveReadonly`)
+- **File Operations**: List files, download file content
+- **Folder Navigation**: Recursive folder ID lookup by name
+
+### Method 2: Manual Document Entry/Editing
+
+**Document Edit Component (`DocumentEditComponent`):**
+- **Form Fields**: Complete document information editing
+- **Usage**: Can edit existing documents or add new ones
+- **API Integration**: Uses `POST /api/documents/updatedocument` and `POST /api/documents/adddocument`
+
+**Editable Document Fields:**
+```typescript
+{
+  nameControl: FormControl,           // Document name
+  totalControl: FormControl,          // Gross amount (Brutto)
+  subTotalControl: FormControl,       // Net amount (Netto)
+  taxAmountControl: FormControl,      // Tax amount
+  taxRateControl: FormControl,        // Tax rate percentage
+  skontoControl: FormControl,         // Early payment discount
+  invoiceDateControl: FormControl,    // Invoice date
+  invoiceNumberControl: FormControl,  // Invoice number
+  parsedControl: FormControl          // Parsed status checkbox
+}
+```
+
+**Manual Entry Process:**
+1. **Add Document**: Use `AddDocumentDto` for creating new documents
+2. **Form Validation**: Name and ExternalRef are required fields
+3. **Editing**: Click "Edit" button in documents grid to modify existing documents
+4. **Save**: Form data is validated and posted to backend
+
+### Document Processing Workflow
+
+**From Google Drive:**
+1. **Sync**: Files discovered in Google Drive folders
+2. **Database Creation**: Document records created with Google Drive file ID
+3. **Download**: Files downloaded on-demand for processing
+4. **Parse**: LlamaIndex extracts structured data
+5. **Link**: Documents linked to transactions manually
+
+**Manual Entry:**
+1. **Create**: Manual document entry with required fields
+2. **Edit**: Modify document details through form interface
+3. **Validation**: Backend validates required fields (Name, ExternalRef)
+4. **Storage**: Document metadata stored in SQLite database
+
+### API Endpoints
+
+**Google Drive Operations:**
+- **Sync**: `POST /api/documents/syncfiles/{yearMonth}`
+- **Download**: `GET /api/documents/downloaddocument/{documentId}`
+
+**Manual Document Operations:**
+- **List**: `GET /api/documents/getdocuments`
+- **Get**: `GET /api/documents/getdocument/{documentId}`
+- **Add**: `POST /api/documents/adddocument`
+- **Update**: `POST /api/documents/updatedocument`
+- **Delete**: `DELETE /api/documents/deletedocument/{id}`
+- **Parse**: `POST /api/documents/parse/{documentId}`
+
+### Document Status Management
+
+**Orphaned Documents:**
+- **Detection**: Documents marked as orphaned when no longer found in Google Drive
+- **Status**: `Orphaned` boolean flag tracks availability
+- **Cleanup**: Manual cleanup required for orphaned documents
+
+**Parsed Status:**
+- **Flag**: `Parsed` boolean indicates if LlamaIndex has processed the document
+- **Processing**: Parse button triggers LlamaIndex extraction
+- **Data Population**: Successful parsing populates tax amounts, dates, and invoice numbers
+
+**Connection Status:**
+- **Unconnected**: Documents not yet linked to transactions
+- **Connected**: Documents with active transaction relationships
+- **Display**: Grid shows connection status for easy identification
+
+### File Operations
+
+**Download Functionality:**
+- **Source**: Downloads from Google Drive using file ID
+- **Format**: Returns PDF files with proper MIME types
+- **Range Support**: Supports HTTP range requests for large files
+- **Authentication**: Downloads require valid user authentication
+
+**Delete Operations:**
+- **Transaction Cleanup**: Removes document links from transactions before deletion
+- **Cascade**: Sets `DocumentId` to null for linked transactions
+- **Permanent**: Document records permanently removed from database
