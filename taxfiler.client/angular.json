@@ -34,11 +34,7 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "browser": "src/main.ts",
-            "inlineStyleLanguage": "scss",
-            "optimization": {
-              "fonts": false
-            }
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -54,10 +50,15 @@
                   "maximumError": "4kb"
                 }
               ],
+              "optimization": {
+                "fonts": false
+              },
               "outputHashing": "all"
             },
             "development": {
-              "optimization": false,
+              "optimization": {
+                "fonts": false
+              },
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
