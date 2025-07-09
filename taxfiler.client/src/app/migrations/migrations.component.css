@@ -64,7 +64,7 @@ h1 {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 15px;
-  font-family: 'Courier New', monospace;
+  font-family: 'Arial', sans-serif;
   font-size: 12px;
   line-height: 1.4;
   max-height: 200px;
@@ -75,16 +75,22 @@ h1 {
 
 /* Snackbar styling */
 ::ng-deep .success-snack {
-  background-color: #4caf50 !important;
-  color: white !important;
+  background-color: #d4edda !important;
+  color: #155724 !important;
+  font-family: 'Arial', sans-serif !important;
+  border: 1px solid #c3e6cb !important;
 }
 
 ::ng-deep .warning-snack {
-  background-color: #ff9800 !important;
-  color: white !important;
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  font-family: 'Arial', sans-serif !important;
+  border: 1px solid #ffeaa7 !important;
 }
 
 ::ng-deep .error-snack {
-  background-color: #f44336 !important;
-  color: white !important;
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  font-family: 'Arial', sans-serif !important;
+  border: 1px solid #f5c6cb !important;
 }
