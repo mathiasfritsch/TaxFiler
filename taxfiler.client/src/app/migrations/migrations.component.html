@@ -1,0 +1,30 @@
+<div class="migrations-container">
+  <h1>Database Migrations</h1>
+  
+  <div class="navigation">
+    <a routerLink="/transactions" mat-button>Transaktionen</a>
+    <a routerLink="/documents" mat-button>Dokumente</a>
+    <a routerLink="/accounts" mat-button>Konten</a>
+  </div>
+  
+  <div class="migration-section">
+    <p>Use this tool to run database migrations. This will update the database schema to the latest version.</p>
+    
+    <div class="migration-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="runMigrations()" 
+        [disabled]="isRunning">
+        <mat-icon *ngIf="isRunning">hourglass_empty</mat-icon>
+        <mat-icon *ngIf="!isRunning">build</mat-icon>
+        {{ isRunning ? 'Running Migrations...' : 'Run Migrations' }}
+      </button>
+    </div>
+    
+    <div class="result-section" *ngIf="lastResult">
+      <h3>Last Migration Result:</h3>
+      <pre class="result-text">{{ lastResult }}</pre>
+    </div>
+  </div>
+</div>
