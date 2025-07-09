@@ -64,7 +64,7 @@ h1 {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 15px;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Courier New', monospace;
   font-size: 12px;
   line-height: 1.4;
   max-height: 200px;
@@ -73,3 +73,18 @@ h1 {
   word-break: break-all;
 }
 
+/* Snackbar styling */
+::ng-deep .success-snack {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+::ng-deep .warning-snack {
+  background-color: #ff9800 !important;
+  color: white !important;
+}
+
+::ng-deep .error-snack {
+  background-color: #f44336 !important;
+  color: white !important;
+}
