@@ -32,7 +32,7 @@ export class MigrationsComponent {
     this.isRunning = true;
     this.lastResult = '';
     
-    this.http.get<string>('/api/db/RunMigrations').subscribe({
+    this.http.get('/api/db/RunMigrations', { responseType: 'text' }).subscribe({
       next: (result) => {
         this.isRunning = false;
         this.lastResult = result;
