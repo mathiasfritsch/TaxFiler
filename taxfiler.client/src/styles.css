@@ -32,3 +32,73 @@ tr:nth-child(even) {
 tr:hover {
   background-color: #f1f1f1;
 }
+
+/* Snackbar styling for light theme */
+.success-snack {
+  --mdc-snackbar-container-color: #d4edda;
+  --mdc-snackbar-supporting-text-color: #155724;
+  border: 1px solid #c3e6cb;
+  font-family: 'Arial', sans-serif;
+}
+
+.success-snack .mdc-snackbar__surface {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.success-snack .mdc-snackbar__label {
+  font-family: 'Arial', sans-serif;
+  color: #155724;
+}
+
+.success-snack .mdc-snackbar__action {
+  color: #155724;
+  font-family: 'Arial', sans-serif;
+}
+
+.warning-snack {
+  --mdc-snackbar-container-color: #fff3cd;
+  --mdc-snackbar-supporting-text-color: #856404;
+  border: 1px solid #ffeaa7;
+  font-family: 'Arial', sans-serif;
+}
+
+.warning-snack .mdc-snackbar__surface {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.warning-snack .mdc-snackbar__label {
+  font-family: 'Arial', sans-serif;
+  color: #856404;
+}
+
+.warning-snack .mdc-snackbar__action {
+  color: #856404;
+  font-family: 'Arial', sans-serif;
+}
+
+.error-snack {
+  --mdc-snackbar-container-color: #f8d7da;
+  --mdc-snackbar-supporting-text-color: #721c24;
+  border: 1px solid #f5c6cb;
+  font-family: 'Arial', sans-serif;
+}
+
+.error-snack .mdc-snackbar__surface {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.error-snack .mdc-snackbar__label {
+  font-family: 'Arial', sans-serif;
+  color: #721c24;
+}
+
+.error-snack .mdc-snackbar__action {
+  color: #721c24;
+  font-family: 'Arial', sans-serif;
+}
