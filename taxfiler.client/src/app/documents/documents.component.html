@@ -3,6 +3,7 @@
 <div>
   <button (click)="synchronize()" mat-button>Sync from Google Drive</button>
   <a mat-button [routerLink]="['/transactions', yearMonth]">Transaktionen</a>
+  <a routerLink="/migrations" mat-button>Migrations</a>
 </div>
 <ag-grid-angular class="ag-theme-quartz" style="height: 600px;" [rowData]="documents$ | async" [columnDefs]="colDefs"
   [defaultColDef]="defaultColDef" editType="fullRow" [localeText]="localeText">
