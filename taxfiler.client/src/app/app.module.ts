@@ -8,6 +8,7 @@ import { TransactionsComponent } from './transactions/transactions.component';
 import {RouterModule} from "@angular/router";
 import { routes } from './app.routes';
 import { DocumentsComponent } from './documents/documents.component';
+import { NavigationComponent } from './navigation/navigation.component';
 import {MatAnchor, MatButton} from "@angular/material/button";
 import {MatDialogTitle} from "@angular/material/dialog";
 import {MatTable} from "@angular/material/table";
@@ -19,6 +20,7 @@ import {MatTable} from "@angular/material/table";
   imports: [BrowserModule, RouterModule.forRoot(routes),
     DocumentsComponent,
     TransactionsComponent,
+    NavigationComponent,
     MatAnchor,
     MatButton,
     MatDialogTitle,
