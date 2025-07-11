@@ -1,20 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using TaxFiler.DB.Model;
 
 namespace TaxFiler.DB
 {
     public class TaxFilerContext : DbContext
     {
-        protected readonly IConfiguration Configuration;
-
-        public TaxFilerContext(IConfiguration configuration)
+        public TaxFilerContext()
         {
-            Configuration = configuration;
         }
+
+        public TaxFilerContext(DbContextOptions<TaxFilerContext> options) : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseNpgsql(Configuration.GetConnectionString("TaxFilerNeonDB"));
+            options.UseNpgsql(Environment.GetEnvironmentVariable("POSTGRESQLCONNSTR_TaxFilerNeonDB"));
         }
         public DbSet<Document> Documents { get; set; }
         
