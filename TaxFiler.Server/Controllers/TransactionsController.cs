@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using TaxFiler.Mapper;
 using TaxFiler.Model.Dto;
 using TaxFiler.Models;
@@ -30,7 +31,9 @@ public class TransactionsController(ITransactionService transactionService) : Co
 
         return File(memoryStream, "text/csv", fileName);
     }
-
+    
+    
+    [SwaggerIgnore]
     [HttpPost("Upload")]
     public async Task Upload([FromForm]IFormFile file)
     {
