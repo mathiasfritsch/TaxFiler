@@ -14,7 +14,7 @@ namespace TaxFiler.DB
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlite(Configuration.GetConnectionString("TaxFilerDB"));
+            options.UseNpgsql(Configuration.GetConnectionString("TaxFilerNeonDB"));
         }
         public DbSet<Document> Documents { get; set; }
         
