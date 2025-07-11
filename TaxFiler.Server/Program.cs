@@ -118,8 +118,8 @@ public class Program
         app.UseStaticFiles();
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
+        // if (app.Environment.IsDevelopment())
+        // {
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -128,7 +128,7 @@ public class Program
                 c.OAuthUsePkce();
                 c.OAuthScopeSeparator(" ");
             });
-        }
+        //}
 
         app.UseHttpsRedirection();
         app.UseAuthentication();
