@@ -2,7 +2,6 @@ using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaxFiler.Model.Dto;
-using TaxFiler.Model.Llama;
 using TaxFiler.Service;
 using TaxFiler.Service.LlamaClient;
 using TaxFiler.Service.LlamaIndex;
@@ -99,5 +98,12 @@ public class DocumentsController(
     public async Task<Result<LlamaIndexJobResultResponse>> Parse([FromRoute] int documentId)
     {
         return await parseService.ParseFilesAsync(documentId);
+    }
+
+    [HttpGet("FolderStructure")]
+    public async Task<ActionResult<GoogleDriveFolderStructureDto>> GetFolderStructure()
+    {
+        var folderStructure = await googleDriveService.GetFolderStructureAsync();
+        return Ok(folderStructure);
     }
 }
