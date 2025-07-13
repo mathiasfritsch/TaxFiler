@@ -40,8 +40,8 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
         
         var transactions = await taxFilerContext
             .Transactions.Include(t => t.Document)
-            .Where(t => t.TransactionDateTime >= startOfMonth && t.TransactionDateTime <= endOfMonth)
-            .Where(t => t.IsSalesTaxRelevant || t.IsIncomeTaxRelevant)
+            .Where(t => t.TransactionDateTime >= startOfMonth && t.TransactionDateTime <= endOfMonth
+                  && (t.IsSalesTaxRelevant == true || t.IsIncomeTaxRelevant == true))
             .OrderBy(t => t.TransactionDateTime)
             .ToListAsync();
 
@@ -49,16 +49,16 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
             (
                 t => new TranactionReportDto
                 {
-                    NetAmount = t.NetAmount,
+                    NetAmount = t.NetAmount ?? 0m,
                     GrossAmount = t.GrossAmount,
-                    TaxAmount = t.TaxAmount,
-                    TaxRate = t.TaxRate,
+                    TaxAmount = t.TaxAmount ?? 0m,
+                    TaxRate = t.TaxRate?? 0m,
                     TransactionReference = t.TransactionReference,
                     TransactionDateTime = t.TransactionDateTime,
                     TransactionNote = t.TransactionNote,
                     IsOutgoing = t.IsOutgoing,
-                    IsIncomeTaxRelevant = t.IsIncomeTaxRelevant,
-                    IsSalesTaxRelevant = t.IsSalesTaxRelevant,
+                    IsIncomeTaxRelevant = t.IsIncomeTaxRelevant ?? false,
+                    IsSalesTaxRelevant = t.IsSalesTaxRelevant ?? false,
                     DocumentName = t.IsOutgoing? $"Rechnungseingang/{t.Document?.Name}":$"Rechnungsausgang/{t.Document?.Name}",
                     SenderReceiver = t.SenderReceiver
                 }

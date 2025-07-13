@@ -11,10 +11,10 @@ public class Transaction
     [ForeignKey(nameof(Account))]
     public int AccountId { get; set; }
     public Account Account { get; set; }
-    public decimal NetAmount { get; set; }
+    public decimal? NetAmount { get; set; }
     public decimal GrossAmount { get; set; }
-    public decimal TaxAmount { get; set; }
-    public decimal TaxRate { get; set; }
+    public decimal? TaxAmount { get; set; }
+    public decimal? TaxRate { get; set; }
     [MaxLength(200)]
     public String Counterparty { get; set; }
 
@@ -23,8 +23,8 @@ public class Transaction
     [MaxLength(200)]
     public string TransactionNote { get; set; }
     public bool IsOutgoing { get; set; }
-    public bool IsIncomeTaxRelevant { get; set; }
-    public bool IsSalesTaxRelevant { get; set; }
+    public bool? IsIncomeTaxRelevant { get; set; }
+    public bool? IsSalesTaxRelevant { get; set; }
     public int? TaxMonth { get; set; } = 0;
     public int? TaxYear { get; set; } = 0;
     
