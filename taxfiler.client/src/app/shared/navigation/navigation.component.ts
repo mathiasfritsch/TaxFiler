@@ -17,16 +17,7 @@ export interface NavigationAction {
 })
 export class NavigationComponent {
   @Input() yearMonth?: string;
-  @Input() showDocuments: boolean = false;
-  @Input() showTransactions: boolean = false;
-  @Input() showAccounts: boolean = false;
-  @Input() showMigrations: boolean = true;
-  @Input() showSync: boolean = false;
   @Input() showMonthNavigation: boolean = false;
-  @Input() showUpload: boolean = false;
-  @Input() showDownloadReport: boolean = false;
-  @Input() customActions: NavigationAction[] = [];
-
   @Output() syncClicked = new EventEmitter<void>();
   @Output() monthChanged = new EventEmitter<number>();
   @Output() fileSelected = new EventEmitter<Event>();
@@ -46,9 +37,5 @@ export class NavigationComponent {
 
   onDownloadReportClick(): void {
     this.downloadReportClicked.emit();
-  }
-
-  onCustomAction(action: NavigationAction): void {
-    action.action();
   }
 }
