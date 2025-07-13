@@ -18,7 +18,7 @@ namespace TaxFiler.DB.Model
             DateOnly? invoiceDate,
             string? invoiceNumber,
             bool parsed,
-            decimal skonto){
+            decimal? skonto){
             Name = name;
             ExternalRef = externalRef;
             Orphaned = orphaned;
@@ -29,6 +29,7 @@ namespace TaxFiler.DB.Model
             InvoiceDate = invoiceDate;
             InvoiceNumber = invoiceNumber;
             Parsed = parsed;
+            Skonto = skonto;
         }
 
         [Key] public int Id { get; set; }

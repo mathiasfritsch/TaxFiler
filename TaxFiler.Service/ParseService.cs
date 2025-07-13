@@ -46,6 +46,7 @@ public class ParseService : IParseService
         document.SubTotal = parseResult.data.SubTotal;
         document.TaxAmount = parseResult.data.TaxAmount;
         document.TaxRate = parseResult.data.TaxRate;
+        document.Skonto = parseResult.data.Skonto;
 
         document.Parsed = true;
 

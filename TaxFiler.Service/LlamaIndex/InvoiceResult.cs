@@ -8,4 +8,5 @@ public class InvoiceResult
     public decimal Total { get; set; }
     public decimal SubTotal { get; set; }
     public string InvoiceDate { get; set; }
+    public decimal? Skonto { get; set; }
 }
