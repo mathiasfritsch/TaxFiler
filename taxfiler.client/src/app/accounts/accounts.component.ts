@@ -9,6 +9,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import { ColDef, GridReadyEvent } from 'ag-grid-community';
 import { ButtonCellRendererComponent } from '../button-cell-renderer/button-cell-renderer.component';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { NavigationComponent } from '../shared/navigation/navigation.component';
 
 @Component({
   selector: 'app-accounts',
@@ -20,6 +21,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
     MatDialogModule,
     AgGridModule,
     RouterModule,
+    NavigationComponent,
   ],
   templateUrl: './accounts.component.html',
   styleUrls: ['./accounts.component.css']

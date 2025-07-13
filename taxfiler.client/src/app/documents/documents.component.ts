@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {ColDef} from 'ag-grid-community';
 import {AllCommunityModule, ModuleRegistry} from 'ag-grid-community';
 import {AG_GRID_LOCALE_DE} from '@ag-grid-community/locale';
@@ -13,6 +13,7 @@ import {ButtonCellRendererComponent} from '../button-cell-renderer/button-cell-r
 import {DocumentEditComponent} from '../document-edit/document-edit.component';
 import {Document} from '../model/document';
 import {Observable} from 'rxjs';
+import {NavigationComponent} from '../shared/navigation/navigation.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -30,12 +31,10 @@ function formatPrice(value: any): string {
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.css'],
   imports: [
-    RouterLink,
     AgGridAngular,
     MatDialogTitle,
-    MatAnchor,
-    MatButton,
     CommonModule,
+    NavigationComponent,
   ],
   standalone: true,
 })

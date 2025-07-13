@@ -1,14 +1,16 @@
 <h1 id="tableLabel" mat-dialog-title >Transaktionen   {{ yearMonth }}</h1>
-<div>
-  <a [routerLink]="['/documents', yearMonth]"  mat-button >Dokumente</a>
-  <a [routerLink]="['/accounts', yearMonth]" mat-button>Konten</a>
-  <a routerLink="/migrations" mat-button>Migrations</a>
-  <button (click)="switchMonth(-1)" mat-button ><< Vorheriger Monat</button>
-  <button (click)="switchMonth(1)"  mat-button >Nächster Monat >></button>
-  <input type="file" (change)="onFileSelected($event)" style="display: none;" #fileInput>
-  <button (click)="fileInput.click()" mat-button>Upload</button>
-  <button (click)="downloadReport()" mat-button>Download Report</button>
-</div>
+<app-navigation
+  [yearMonth]="yearMonth"
+  [showDocuments]="true"
+  [showAccounts]="true"
+  [showMigrations]="true"
+  [showMonthNavigation]="true"
+  [showUpload]="true"
+  [showDownloadReport]="true"
+  (monthChanged)="switchMonth($event)"
+  (fileSelected)="onFileSelected($event)"
+  (downloadReportClicked)="downloadReport()">
+</app-navigation>
 <p *ngIf="!transactions"><em>Loading... </em></p>
 
 <ag-grid-angular

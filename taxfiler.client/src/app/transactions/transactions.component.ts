@@ -1,16 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import {NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
-import {MatAnchor, MatButton} from "@angular/material/button";
+
 import {AG_GRID_LOCALE_DE} from "@ag-grid-community/locale";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 import {TransactionEditComponent} from "../transaction-edit/transaction-edit.component";
 import {Transaction} from "../model/transaction";
+import {NavigationComponent} from '../shared/navigation/navigation.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -27,12 +28,10 @@ function formatPrice(value: any):string{
     styleUrls: ['./transactions.component.css'],
     standalone: true,
   imports: [
-    RouterLink,
     NgIf,
     AgGridAngular,
     MatDialogTitle,
-    MatAnchor,
-    MatButton,
+    NavigationComponent,
   ]
 })
 export class TransactionsComponent  implements  OnInit{

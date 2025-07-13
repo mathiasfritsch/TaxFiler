@@ -1,11 +1,12 @@
 <div class="accounts-container">
   <h1>Accounts</h1>
-  
-  <div>
-    <a [routerLink]="['/transactions', yearMonth]" mat-button>Transactions</a>
-    <a routerLink="/migrations" mat-button>Migrations</a>
-  </div>
-  
+
+  <app-navigation
+    [yearMonth]="yearMonth"
+    [showTransactions]="true"
+    [showMigrations]="true">
+  </app-navigation>
+
   <ag-grid-angular
     class="ag-theme-quartz"
     style="height: 600px;"
@@ -15,4 +16,4 @@
     [localeText]="localeText"
   >
   </ag-grid-angular>
-</div> 
+</div>

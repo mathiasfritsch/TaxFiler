@@ -1,0 +1,71 @@
+<div class="navigation-container">
+  <!-- Documents Link -->
+  <a *ngIf="showDocuments && yearMonth" 
+     [routerLink]="['/documents', yearMonth]" 
+     mat-button>
+    Dokumente
+  </a>
+
+  <!-- Transactions Link -->
+  <a *ngIf="showTransactions && yearMonth" 
+     [routerLink]="['/transactions', yearMonth]" 
+     mat-button>
+    Transaktionen
+  </a>
+
+  <!-- Accounts Link -->
+  <a *ngIf="showAccounts && yearMonth" 
+     [routerLink]="['/accounts', yearMonth]" 
+     mat-button>
+    Konten
+  </a>
+
+  <!-- Migrations Link -->
+  <a *ngIf="showMigrations" 
+     routerLink="/migrations" 
+     mat-button>
+    Migrations
+  </a>
+
+  <!-- Sync Button -->
+  <button *ngIf="showSync" 
+          (click)="onSyncClick()" 
+          mat-button>
+    Sync from Google Drive
+  </button>
+
+  <!-- Month Navigation -->
+  <ng-container *ngIf="showMonthNavigation">
+    <button (click)="onMonthChange(-1)" mat-button>
+      << Vorheriger Monat
+    </button>
+    <button (click)="onMonthChange(1)" mat-button>
+      Nächster Monat >>
+    </button>
+  </ng-container>
+
+  <!-- Upload Button -->
+  <ng-container *ngIf="showUpload">
+    <input type="file" 
+           (change)="onFileSelected($event)" 
+           style="display: none;" 
+           #fileInput>
+    <button (click)="fileInput.click()" mat-button>
+      Upload
+    </button>
+  </ng-container>
+
+  <!-- Download Report Button -->
+  <button *ngIf="showDownloadReport" 
+          (click)="onDownloadReportClick()" 
+          mat-button>
+    Download Report
+  </button>
+
+  <!-- Custom Actions -->
+  <button *ngFor="let action of customActions" 
+          (click)="onCustomAction(action)" 
+          mat-button>
+    {{ action.label }}
+  </button>
+</div>
