@@ -6,6 +6,7 @@ namespace TaxFiler.Service;
 public class SyncService(TaxFilerContext context, IGoogleDriveService googleDriveService)
     : ISyncService
 {
+    
     public async Task SyncFilesAsync(DateOnly date)
     {
         var files = await googleDriveService.GetFilesAsync(date);
@@ -37,5 +38,23 @@ public class SyncService(TaxFilerContext context, IGoogleDriveService googleDriv
         }
         
         await context.SaveChangesAsync();
+    }
+
+    public async Task SyncAllFoldersAsync()
+    {
+        var folderStructure = await googleDriveService.GetFolderStructureAsync();
+
+        foreach (var yearFolder in folderStructure.YearFolders)
+        {
+            foreach (var monthFolder in yearFolder.MonthFolders)
+            {
+                if (int.TryParse(yearFolder.Year, out var year) &&
+                    int.TryParse(monthFolder.Month, out var month))
+                {
+                    var date = new DateOnly(year, month, 1);
+                    await SyncFilesAsync(date);
+                }
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ public static class TransactionMapper
             SenderReceiver = transaction.SenderReceiver,
             Counterparty = transaction.CounterPartyIBAN,
             TransactionNote = transaction.Comment,
-            TransactionDateTime = transaction.BookingDate,
+            TransactionDateTime = DateTime.SpecifyKind(transaction.BookingDate, DateTimeKind.Utc),
             IsOutgoing = transaction.Amount < 0,
             IsIncomeTaxRelevant = false,
             IsSalesTaxRelevant = false

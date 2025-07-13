@@ -23,7 +23,7 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
             
             t => new TransactionDto
             {
-                BookingDate = t.BookingDate,
+                BookingDate = DateTime.SpecifyKind(t.BookingDate, DateTimeKind.Utc),
                 SenderReceiver = t.SenderReceiver,
                 CounterPartyBIC = t.CounterPartyBIC,
                 CounterPartyIBAN = t.CounterPartyIBAN,
@@ -85,25 +85,34 @@ public class TransactionService(TaxFilerContext taxFilerContext):ITransactionSer
 
     public async Task AddTransactionsAsync(IEnumerable<TransactionDto> transactions)
     {
-        foreach (var transaction in transactions)
+        try
         {
-            if(taxFilerContext.Transactions.Any(
-                   t => t.TransactionDateTime == transaction.BookingDate 
-                        && t.Counterparty == transaction.CounterPartyIBAN
-                        && t.TransactionNote == transaction.Comment
-                        && t.GrossAmount == transaction.Amount))
+            foreach (var transaction in transactions)
             {
-                continue;
-            }
+                if(taxFilerContext.Transactions.Any(
+                       t => t.TransactionDateTime == transaction.BookingDate 
+                            && t.Counterparty == transaction.CounterPartyIBAN
+                            && t.TransactionNote == transaction.Comment
+                            && t.GrossAmount == Math.Abs(transaction.Amount)))
+                {
+                    continue;
+                }
             
-            var transactionDb = transaction.ToTransaction();
-            transactionDb.IsOutgoing = transactionDb.GrossAmount < 0;
-            transactionDb.GrossAmount = Math.Abs(transactionDb.GrossAmount);
+                var transactionDb = transaction.ToTransaction();
+                transactionDb.IsOutgoing = transactionDb.GrossAmount < 0;
+                transactionDb.GrossAmount = Math.Abs(transactionDb.GrossAmount);
             
-            taxFilerContext.Transactions.Add(transactionDb);
-        }   
+                taxFilerContext.Transactions.Add(transactionDb);
+            }   
         
-        await taxFilerContext.SaveChangesAsync();
+            await taxFilerContext.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
     }
     
 

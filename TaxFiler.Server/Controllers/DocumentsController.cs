@@ -41,18 +41,7 @@ public class DocumentsController(
 
         return File(fileBytes, contentType, fileName, enableRangeProcessing: true);
     }
-
-    [HttpGet("UploadFileForParsing")]
-    public async Task<string> UploadFileForParsing(CancellationToken cancellationToken)
-    {
-        // var filePath = "C:/documents/file.PDF";
-        // await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        // var filePart = new StreamPart(fileStream, Path.GetFileName(filePath), "application/pdf");
-        // await llamaApiClient.UploadFileForParsingAsync(filePart);
-        string res = await llamaApiClient.GetAgents();
-
-        return res;
-    }
+    
 
     [HttpGet("")]
     [HttpGet("GetDocuments")]
@@ -87,11 +76,35 @@ public class DocumentsController(
     {
         await documentService.DeleteDocumentAsync(id);
     }
-
+    
+    [HttpPost("SyncAllFoldersAsync")]
+    public async Task SyncAllFoldersAsync()
+    {
+        await syncService.SyncAllFoldersAsync();
+    }
+    
     [HttpPost("SyncFiles/{yearMonth}")]
     public async Task SyncFiles(DateOnly yearMonth)
     {
         await syncService.SyncFilesAsync(yearMonth);
+    }
+
+    [HttpPost("SyncAllFolders")]
+    public async Task<ActionResult> SyncAllFolders()
+    {
+        try
+        {
+            await syncService.SyncAllFoldersAsync();
+            return Ok(new { Message = "All folders synced successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                Error = "Failed to sync all folders",
+                Message = ex.Message
+            });
+        }
     }
 
     [HttpPost("Parse/{documentId}")]
@@ -103,7 +116,18 @@ public class DocumentsController(
     [HttpGet("FolderStructure")]
     public async Task<ActionResult<GoogleDriveFolderStructureDto>> GetFolderStructure()
     {
-        var folderStructure = await googleDriveService.GetFolderStructureAsync();
-        return Ok(folderStructure);
+        try
+        {
+            var folderStructure = await googleDriveService.GetFolderStructureAsync();
+            return Ok(folderStructure);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                Error = "Failed to retrieve folder structure from Google Drive",
+                Message = ex.Message
+            });
+        }
     }
 }
