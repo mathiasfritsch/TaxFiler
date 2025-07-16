@@ -21,6 +21,7 @@ public static class DocumentMapper
             Parsed = document.Parsed,
             Skonto = document.Skonto,
             VendorName = document.VendorName,
+            InvoiceDateFromFolder = document.InvoiceDateFromFolder,
             Unconnected = !documentsWithTransactions.Contains(document.Id)
         };
 
