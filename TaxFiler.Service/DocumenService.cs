@@ -14,7 +14,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         await context.SaveChangesAsync();
     }
 
-    async Task<IEnumerable<DocumentDto>> IDocumentService.GetDocumentsAsync()
+    async Task<IEnumerable<DocumentDto>> IDocumentService.GetDocumentsAsync(DateOnly? yearMonth = null)
     {
         var documentsWithTransactions = context.Transactions
             .Where(t => t.DocumentId != null)
@@ -22,10 +22,18 @@ public class DocumenService(TaxFilerContext context):IDocumentService
             .Distinct()
             .ToArray();
         
-        return await context.Documents
+        var query = context.Documents.AsQueryable();
+        
+        if (yearMonth.HasValue)
+        {
+            query = query.Where(d => d.InvoiceDateFromFolder.HasValue && 
+                                     d.InvoiceDateFromFolder.Value.Year == yearMonth.Value.Year &&
+                                     d.InvoiceDateFromFolder.Value.Month == yearMonth.Value.Month);
+        }
+        
+        return await query
             .Select(d => d.ToDto(documentsWithTransactions))
             .ToArrayAsync();
-        
     }
 
 

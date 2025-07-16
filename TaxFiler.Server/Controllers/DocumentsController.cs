@@ -45,9 +45,9 @@ public class DocumentsController(
 
     [HttpGet("")]
     [HttpGet("GetDocuments")]
-    public async Task<IEnumerable<DocumentDto>> List()
+    public async Task<IEnumerable<DocumentDto>> List(DateOnly? yearMonth = null)
     {
-        return await documentService.GetDocumentsAsync();
+        return await documentService.GetDocumentsAsync(yearMonth);
     }
 
     [HttpGet("GetDocument/{documentId}")]
