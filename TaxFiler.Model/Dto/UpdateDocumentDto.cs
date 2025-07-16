@@ -11,4 +11,5 @@ public class UpdateDocumentDto
     public string? InvoiceNumber { get; set; }
     public bool Parsed { get; set; }
     public decimal? Skonto { get; set; }
+    public string? VendorName { get; set; }
 }

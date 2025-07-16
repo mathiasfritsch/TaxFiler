@@ -20,6 +20,7 @@ public static class DocumentMapper
             InvoiceNumber = document.InvoiceNumber,
             Parsed = document.Parsed,
             Skonto = document.Skonto,
+            VendorName = document.VendorName,
             Unconnected = !documentsWithTransactions.Contains(document.Id)
         };
 
@@ -35,7 +36,8 @@ public static class DocumentMapper
             invoiceDate: addDocumentDto.InvoiceDate,
             invoiceNumber: addDocumentDto.InvoiceNumber, 
             parsed: addDocumentDto.Parsed,
-            skonto: addDocumentDto.Skonto);
+            skonto: addDocumentDto.Skonto,
+            vendorName: addDocumentDto.VendorName);
     }
     
     public static void UpdateDocument(this Document document, UpdateDocumentDto documentDto)
@@ -49,5 +51,6 @@ public static class DocumentMapper
         document.InvoiceNumber = documentDto.InvoiceNumber;
         document.Parsed = documentDto.Parsed;
         document.Skonto = documentDto.Skonto;
+        document.VendorName = documentDto.VendorName;
     }
 }

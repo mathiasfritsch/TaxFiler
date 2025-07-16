@@ -9,4 +9,10 @@ public class InvoiceResult
     public decimal SubTotal { get; set; }
     public string InvoiceDate { get; set; }
     public decimal? Skonto { get; set; }
+    public MerchantInfo? Merchant { get; set; }
+}
+
+public class MerchantInfo
+{
+    public string Name { get; set; }
 }
