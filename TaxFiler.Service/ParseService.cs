@@ -47,6 +47,7 @@ public class ParseService : IParseService
         document.TaxAmount = parseResult.data.TaxAmount;
         document.TaxRate = parseResult.data.TaxRate;
         document.Skonto = parseResult.data.Skonto;
+        document.VendorName = parseResult.data.Merchant?.Name;
 
         document.Parsed = true;
 
