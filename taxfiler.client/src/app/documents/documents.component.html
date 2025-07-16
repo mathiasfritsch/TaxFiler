@@ -2,7 +2,9 @@
 <!--<p *ngIf="!$documents"><em>Loading...</em></p>-->
 <app-navigation
   [yearMonth]="yearMonth"
-  (syncClicked)="synchronize()">
+  [showMonthNavigation]="true"
+  (syncClicked)="synchronize()"
+  (monthChanged)="switchMonth($event)">
 </app-navigation>
 <ag-grid-angular class="ag-theme-quartz" style="height: 600px;" [rowData]="documents$ | async" [columnDefs]="colDefs"
   [defaultColDef]="defaultColDef" editType="fullRow" [localeText]="localeText">

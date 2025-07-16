@@ -3,6 +3,7 @@
   [yearMonth]="yearMonth"
   (monthChanged)="switchMonth($event)"
   (fileSelected)="onFileSelected($event)"
+  [showMonthNavigation]="true"
   (downloadReportClicked)="downloadReport()">
 </app-navigation>
 <p *ngIf="!transactions"><em>Loading... </em></p>
