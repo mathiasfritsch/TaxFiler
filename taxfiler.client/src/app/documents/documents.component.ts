@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ColDef} from 'ag-grid-community';
 import {AllCommunityModule, ModuleRegistry} from 'ag-grid-community';
 import {AG_GRID_LOCALE_DE} from '@ag-grid-community/locale';
@@ -167,6 +167,7 @@ export class DocumentsComponent implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private route: ActivatedRoute,
+    private router: Router,
     @Inject(LOCALE_ID) public locale: string
   ) {
   }
@@ -222,5 +223,13 @@ export class DocumentsComponent implements OnInit {
           alert('There was an error deleting the document');
         },
       });
+  }
+
+  switchMonth(offset: number) {
+    const [year, month] = this.yearMonth.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    const newYearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+
+    this.router.navigate([`/documents/${newYearMonth}`]).then();
   }
 }

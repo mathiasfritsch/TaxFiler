@@ -1,14 +1,9 @@
 <h1 id="tableLabel" mat-dialog-title >Transaktionen   {{ yearMonth }}</h1>
 <app-navigation
   [yearMonth]="yearMonth"
-  [showDocuments]="true"
-  [showAccounts]="true"
-  [showMigrations]="true"
-  [showMonthNavigation]="true"
-  [showUpload]="true"
-  [showDownloadReport]="true"
   (monthChanged)="switchMonth($event)"
   (fileSelected)="onFileSelected($event)"
+  [showMonthNavigation]="true"
   (downloadReportClicked)="downloadReport()">
 </app-navigation>
 <p *ngIf="!transactions"><em>Loading... </em></p>
