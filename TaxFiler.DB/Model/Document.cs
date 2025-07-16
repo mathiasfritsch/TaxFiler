@@ -19,6 +19,7 @@ namespace TaxFiler.DB.Model
             string? invoiceNumber,
             bool parsed,
             decimal? skonto,
+            string? vendorName = null,
             DateOnly? invoiceDateFromFolder = null){
             Name = name;
             ExternalRef = externalRef;
@@ -31,6 +32,7 @@ namespace TaxFiler.DB.Model
             InvoiceNumber = invoiceNumber;
             Parsed = parsed;
             Skonto = skonto;
+            VendorName = vendorName;
             InvoiceDateFromFolder = invoiceDateFromFolder;
         }
 
@@ -46,6 +48,7 @@ namespace TaxFiler.DB.Model
         public decimal? TaxRate { get; set; }
         public decimal? TaxAmount { get; set; }
         public decimal? Skonto { get; set; }
+        [MaxLength(200)] public string? VendorName { get; set; }
         public DateOnly? InvoiceDateFromFolder { get; set; }
     }
 }

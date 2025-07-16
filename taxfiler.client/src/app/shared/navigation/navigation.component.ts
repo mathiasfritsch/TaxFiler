@@ -28,6 +28,9 @@ export class NavigationComponent {
   }
 
   onMonthChange(direction: number): void {
+    console.log('Month change requested: ', direction);
+
+
     this.monthChanged.emit(direction);
   }
 
