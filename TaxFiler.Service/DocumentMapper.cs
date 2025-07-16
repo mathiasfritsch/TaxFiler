@@ -20,6 +20,7 @@ public static class DocumentMapper
             InvoiceNumber = document.InvoiceNumber,
             Parsed = document.Parsed,
             Skonto = document.Skonto,
+            InvoiceDateFromFolder = document.InvoiceDateFromFolder,
             Unconnected = !documentsWithTransactions.Contains(document.Id)
         };
 

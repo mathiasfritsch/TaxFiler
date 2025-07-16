@@ -15,5 +15,6 @@ public class DocumentDto
     public bool Parsed { get; set; }
     public decimal? Skonto { get; set; }
     public bool Unconnected { get; set; }
+    public DateOnly? InvoiceDateFromFolder { get; set; }
     
 }

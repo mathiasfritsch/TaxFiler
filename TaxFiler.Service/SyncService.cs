@@ -32,7 +32,8 @@ public class SyncService(TaxFilerContext context, IGoogleDriveService googleDriv
             {
                 Name = file.Name,
                 ExternalRef = file.Id,
-                Orphaned = false
+                Orphaned = false,
+                InvoiceDateFromFolder = date
             };
             await context.Documents.AddAsync(document);
         }
