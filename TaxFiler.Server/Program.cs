@@ -18,7 +18,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddUserSecrets<Program>();
-        // Add services to the container.
         builder.Services.AddControllersWithViews()
             .AddMicrosoftIdentityUI();
         builder.Services.AddDbContext<TaxFilerContext>();
@@ -29,10 +28,7 @@ public class Program
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<ILlamaIndexService, LlamaIndexService>();
-        
         builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
-        
-        // Register the LlamaBearerTokenHandler and configure the ILlamaApiClient
         builder.Services.AddTransient<LlamaBearerTokenHandler>();
         builder.Services
             .AddRefitClient<ILlamaApiClient>()
@@ -43,7 +39,6 @@ public class Program
             .AddHttpMessageHandler<LlamaBearerTokenHandler>();
             
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, "EntraId");
@@ -96,30 +91,28 @@ public class Program
         });
 
         var app = builder.Build();
-
-        // Run database migrations at startup
-        // using (var scope = app.Services.CreateScope())
-        // {
-        //     var services = scope.ServiceProvider;
-        //     try
-        //     {
-        //         var context = services.GetRequiredService<TaxFilerContext>();
-        //         context.Database.Migrate();
-        //         Console.WriteLine("Database migrations applied successfully.");
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         var logger = services.GetRequiredService<ILogger<Program>>();
-        //         logger.LogError(ex, "An error occurred while migrating the database.");
-        //     }
-        // }
+        
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<TaxFilerContext>();
+                context.Database.Migrate();
+                Console.WriteLine("Database migrations applied successfully.");
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while migrating the database.");
+            }
+        }
 
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
-        // Configure the HTTP request pipeline.
-        // if (app.Environment.IsDevelopment())
-        // {
+        if (app.Environment.IsDevelopment())
+        {
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -128,15 +121,12 @@ public class Program
                 c.OAuthUsePkce();
                 c.OAuthScopeSeparator(" ");
             });
-        //}
+        }
 
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
-
-
         app.MapControllers();
-
         app.MapFallbackToFile("/index.html");
 
         app.Run();
