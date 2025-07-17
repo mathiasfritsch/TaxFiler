@@ -20,7 +20,6 @@
     Konten
   </a>
 
-
   <!-- Sync Button -->
   <button (click)="onSyncClick()" mat-button>
     Sync from Google Drive
@@ -35,16 +34,18 @@
       Upload
     </button>
   </ng-container>
-  <ng-container *ngIf="showMonthNavigation">
-    <button (click)="onMonthChange(-1)" mat-button>
-      << Vorheriger Monat
-    </button>
-    <button (click)="onMonthChange(1)" mat-button>
-      Nächster Monat >>
-    </button>
-  </ng-container>
   <!-- Download Report Button -->
   <button (click)="onDownloadReportClick()" mat-button>
     Download Report
+  </button>
+</div>
+
+<!-- Month Navigation in separate row -->
+<div class="month-navigation-container" *ngIf="showMonthNavigation">
+  <button (click)="onMonthChange(-1)" mat-button>
+    << Vorheriger Monat
+  </button>
+  <button (click)="onMonthChange(1)" mat-button>
+    Nächster Monat >>
   </button>
 </div>
