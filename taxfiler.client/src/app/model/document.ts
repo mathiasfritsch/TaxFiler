@@ -10,4 +10,5 @@
   invoiceNumber: string;
   parsed: boolean;
   unconnected: boolean;
+  invoiceDateFromFolder?: Date;
 }

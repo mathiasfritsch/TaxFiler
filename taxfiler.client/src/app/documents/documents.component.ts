@@ -180,7 +180,11 @@ export class DocumentsComponent implements OnInit {
   }
 
   getDocuments() {
-    this.documents$ = this.http.get<Document[]>(`/api/documents/getdocuments`);
+    let url = `/api/documents/getdocuments`;
+    if (this.yearMonth) {
+      url += `?yearMonth=${this.yearMonth}`;
+    }
+    this.documents$ = this.http.get<Document[]>(url);
   }
 
   private parseDocument(
