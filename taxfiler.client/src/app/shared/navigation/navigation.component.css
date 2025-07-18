@@ -11,6 +11,18 @@
   margin-right: 8px;
 }
 
+.month-navigation-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  justify-content: flex-start; /* Left align as requested */
+}
+
+.month-navigation-container button {
+  margin-right: 8px;
+}
+
 @media (max-width: 768px) {
   .navigation-container {
     flex-direction: column;
@@ -19,6 +31,17 @@
   
   .navigation-container button,
   .navigation-container a {
+    margin-right: 0;
+    margin-bottom: 4px;
+    width: 100%;
+  }
+
+  .month-navigation-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .month-navigation-container button {
     margin-right: 0;
     margin-bottom: 4px;
     width: 100%;
