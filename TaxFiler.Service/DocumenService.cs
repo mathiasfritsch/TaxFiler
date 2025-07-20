@@ -14,7 +14,40 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         await context.SaveChangesAsync();
     }
 
-    async Task<IEnumerable<DocumentDto>> IDocumentService.GetDocumentsAsync(DateOnly? yearMonth = null)
+    public async Task<DocumentDto[]> GetAllUnmatchedDocumentsAsync()
+    {
+        // Get all document IDs that are linked to transactions
+        var linkedDocumentIds = await context.Transactions
+            .Where(t => t.DocumentId.HasValue)
+            .Select(t => t.DocumentId.Value)
+            .Distinct()
+            .ToListAsync();
+
+        // Get all documents that are NOT in the linked documents list
+        var unmatchedDocuments = await context.Documents
+            .Where(d => !linkedDocumentIds.Contains(d.Id))
+            .ToListAsync();
+
+        // Convert to DTOs
+        return unmatchedDocuments.Select(d => new DocumentDto
+        {
+            Id = d.Id,
+            Name = d.Name,
+            ExternalRef = d.ExternalRef,
+            Orphaned = d.Orphaned,
+            Parsed = d.Parsed,
+            InvoiceNumber = d.InvoiceNumber,
+            InvoiceDate = d.InvoiceDate,
+            SubTotal = d.SubTotal,
+            Total = d.Total,
+            TaxRate = d.TaxRate,
+            TaxAmount = d.TaxAmount,
+            Skonto = d.Skonto,
+            Unconnected = true // These are unmatched, so they are unconnected
+        }).ToArray();
+    }
+    
+    public async Task<IEnumerable<DocumentDto>> GetDocumentsAsync(DateOnly? yearMonth = null)
     {
         var documentsWithTransactions = context.Transactions
             .Where(t => t.DocumentId != null)

@@ -28,6 +28,7 @@ public class Program
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<ILlamaIndexService, LlamaIndexService>();
+        builder.Services.AddScoped<ITransactionDocumentMatcherService, TransactionDocumentMatcherService>();
         builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
         builder.Services.AddTransient<LlamaBearerTokenHandler>();
         builder.Services

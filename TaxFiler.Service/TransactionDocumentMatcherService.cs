@@ -1,37 +1,16 @@
 ﻿using System.Collections.Immutable;
+using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
 using TaxFiler.Model.Dto;
 using TransactionDto = TaxFiler.Model.Csv.TransactionDto;
 
 namespace TaxFiler.Service;
-public class TransactionDocumentMatcherService(TaxFilerContext context):ITransactionDocumentMatcherService
+public class TransactionDocumentMatcherService(IDocumentService documentService):ITransactionDocumentMatcherService
 {
-    public DocumentDto[] MatchTransactionToDocument(TransactionDto transaction)
+    public async Task<DocumentDto?> MatchTransactionToDocumentAsync(TransactionDto transaction)
     {
-        var transactionDocumentMatchers = context
-            .TransactionDocumentMatchers
-            .Where( m=> m.TransactionReceiver == transaction.SenderReceiver)
-            .ToImmutableArray();
+        var unmatchedDocuments = await documentService.GetAllUnmatchedDocumentsAsync();
         
-        var matchedDocuments = context
-            .Transactions
-            .Where(t => t.DocumentId != null)
-            .Select( t => t.DocumentId)
-            .Distinct()
-            .ToArray();
-            
-        var documentsUnmatched = context
-            .Documents
-            .Where(d => !matchedDocuments.Contains(d.Id))
-            .Where(d => d.Parsed && d.InvoiceNumber != null);
-        
-        foreach (var transactionDocumentMatcher in transactionDocumentMatchers)
-        {
-            
-            
-        }
-            
-
-        throw new NotImplementedException();
+        return unmatchedDocuments[0];
     }
 }

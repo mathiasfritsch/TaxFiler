@@ -7,7 +7,7 @@ namespace TaxFiler.DB
     public class TaxFilerContext : DbContext
     {
         protected readonly IConfiguration Configuration;
-        
+
         public TaxFilerContext(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -30,6 +30,5 @@ namespace TaxFiler.DB
 
         public DbSet<Account> Accounts { get; set; }
         
-        public DbSet<TransactionDocumentMatcher> TransactionDocumentMatchers { get; set; }
-    }
+      }
 }

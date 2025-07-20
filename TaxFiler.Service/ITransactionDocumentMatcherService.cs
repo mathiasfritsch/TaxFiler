@@ -5,5 +5,5 @@ namespace TaxFiler.Service;
 
 public interface ITransactionDocumentMatcherService
 {
-    public DocumentDto[] MatchTransactionToDocument(TransactionDto transaction);
+    public Task<DocumentDto?> MatchTransactionToDocumentAsync(TransactionDto transaction);
 }
