@@ -32,3 +32,50 @@ tr:nth-child(even) {
 tr:hover {
   background-color: #f1f1f1;
 }
+
+/* Global button styling - make all buttons blue */
+.mat-mdc-button, 
+.mat-mdc-raised-button, 
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button,
+.mdc-button,
+button[mat-button],
+a[mat-button] {
+  --mdc-text-button-label-text-color: #1976d2 !important;
+  --mdc-outlined-button-label-text-color: #1976d2 !important;
+  --mdc-filled-button-container-color: #1976d2 !important;
+  --mdc-filled-button-label-text-color: white !important;
+  background-color: #1976d2 !important;
+  color: white !important;
+  border-color: #1976d2 !important;
+}
+
+.mat-mdc-button:hover,
+.mat-mdc-raised-button:hover,
+.mat-mdc-outlined-button:hover,
+.mat-mdc-unelevated-button:hover,
+.mdc-button:hover,
+button[mat-button]:hover,
+a[mat-button]:hover {
+  --mdc-text-button-label-text-color: #1565c0 !important;
+  --mdc-outlined-button-label-text-color: #1565c0 !important;
+  --mdc-filled-button-container-color: #1565c0 !important;
+  background-color: #1565c0 !important;
+  color: white !important;
+  border-color: #1565c0 !important;
+}
+
+.mat-mdc-button:disabled,
+.mat-mdc-raised-button:disabled,
+.mat-mdc-outlined-button:disabled,
+.mat-mdc-unelevated-button:disabled,
+.mdc-button:disabled,
+button[mat-button]:disabled,
+a[mat-button]:disabled {
+  --mdc-text-button-disabled-label-text-color: rgba(25, 118, 210, 0.38) !important;
+  --mdc-filled-button-disabled-container-color: rgba(25, 118, 210, 0.12) !important;
+  --mdc-filled-button-disabled-label-text-color: rgba(25, 118, 210, 0.38) !important;
+  background-color: rgba(25, 118, 210, 0.12) !important;
+  color: rgba(25, 118, 210, 0.38) !important;
+  border-color: rgba(25, 118, 210, 0.12) !important;
+}
