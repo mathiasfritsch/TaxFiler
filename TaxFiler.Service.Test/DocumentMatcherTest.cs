@@ -1,9 +1,8 @@
+using System.Diagnostics;
 using NSubstitute;
-using TaxFiler.DB;
-using TaxFiler.DB.Model;
-using Microsoft.Extensions.Configuration;
 using TaxFiler.Model.Dto;
 using TransactionDto = TaxFiler.Model.Csv.TransactionDto;
+
 
 namespace TaxFiler.Service.Test;
 
@@ -21,12 +20,32 @@ public class DocumentMatcherTest
         _service = new TransactionDocumentMatcherService(_mockDocumentService);
     }
 
+    [Test]
+    public async Task TestMatchTransactionToDocumentAsync()
+    {
+        // Arrange
+        
+        var transaction = new TransactionDto
+        {
+            Amount = 238.0m,
+            BookingDate = new DateTime(2024, 2, 10),
+            Comment = "Payment inv GoodVendor I45789AB"
+        };
+        
+        // Act
+        
+        var res = await _service.MatchTransactionToDocumentAsync(transaction);
+        
+        // Assert
+        var matchedDocument = res;
+        Debug.Assert(matchedDocument != null, nameof(matchedDocument) + " != null");
+        Assert.That(matchedDocument.Id, Is.EqualTo(3), "Matched document ID should be 3");
+    }
+    
     private void SetupGetAllUnmatchedDocumentsAsyncMock()
     {
-        // Create comprehensive test data for unmatched documents including different matching scenarios
-        var unmatchedDocuments = new DocumentDto[]
+         var unmatchedDocuments = new DocumentDto[]
         {
-            // Basic unmatched documents
             new DocumentDto
             {
                 Id = 3,
@@ -34,19 +53,20 @@ public class DocumentMatcherTest
                 ExternalRef = "ext_003",
                 Orphaned = false,
                 Parsed = true,
-                InvoiceNumber = "BILL-003",
+                InvoiceNumber = "I45789AB",
                 InvoiceDate = new DateOnly(2024, 2, 10),
                 SubTotal = 200.0m,
                 Total = 238.0m,
                 TaxRate = 19.0m,
                 TaxAmount = 38.0m,
                 Skonto = 0m,
-                Unconnected = true
+                Unconnected = true,
+                VendorName = "GoodVendor",
             },
             new DocumentDto
             {
                 Id = 4,
-                Name = "Invoice_004.pdf",
+                Name = "Invoice_1B.pdf",
                 ExternalRef = "ext_004",
                 Orphaned = false,
                 Parsed = true,
@@ -57,9 +77,10 @@ public class DocumentMatcherTest
                 TaxRate = 19.0m,
                 TaxAmount = 57.0m,
                 Skonto = 0m,
-                Unconnected = true
+                Unconnected = true,
+                VendorName = "AnotherVendor",
             },
-
+    
             // 1. Exact amount match scenario - Document with total that exactly matches a transaction amount
             new DocumentDto
             {
@@ -77,7 +98,7 @@ public class DocumentMatcherTest
                 Skonto = 0m,
                 Unconnected = true
             },
-
+    
             // 2. Date proximity match scenario - Document with date close to a transaction date
             new DocumentDto
             {
@@ -95,7 +116,7 @@ public class DocumentMatcherTest
                 Skonto = 0m,
                 Unconnected = true
             },
-
+    
             // 3. Partial text match scenario - Document with vendor/reference that partially matches transaction
             new DocumentDto
             {
@@ -114,11 +135,7 @@ public class DocumentMatcherTest
                 Unconnected = true
             }
         };
-
-        // Setup the mock to return the comprehensive test data
+         
         _mockDocumentService.GetAllUnmatchedDocumentsAsync().Returns(Task.FromResult(unmatchedDocuments));
     }
-
-
-    
 }

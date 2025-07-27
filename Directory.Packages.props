@@ -11,6 +11,7 @@
     </PackageVersion>
     <PackageVersion Include="Microsoft.Identity.Web.UI" Version="3.9.4" />
     <PackageVersion Include="Microsoft.ML" Version="4.0.2" />
+    <PackageVersion Include="Microsoft.ML.FastTree" Version="4.0.2" />
     <PackageVersion Include="Microsoft.OpenApi" Version="1.6.24" />
     <PackageVersion Include="Refit" Version="8.0.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="8.0.0" />

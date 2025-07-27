@@ -4,6 +4,7 @@
     <PackageReference Include="FluentResults" />
     <PackageReference Include="Google.Apis.Drive.v3" />
     <PackageReference Include="Microsoft.ML" />
+    <PackageReference Include="Microsoft.ML.FastTree" />
     <PackageReference Include="Refit" />
 
   </ItemGroup>

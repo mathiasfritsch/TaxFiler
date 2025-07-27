@@ -8,7 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.ML" />
         <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.ML.FastTree" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="NSubstitute" />
         <PackageReference Include="NUnit" />
