@@ -8,6 +8,7 @@ TaxFiler is a tax document processing application built as a full-stack solution
 - **Backend**: ASP.NET Core 9.0 Web API with Entity Framework Core and SQLite
 - **Frontend**: Angular 19 SPA with ag-Grid for data display
 - **Document Processing**: LlamaIndex integration for AI-powered document parsing and tax information extraction
+- **Machine Learning**: ML.NET for automated document-transaction matching
 - **Authentication**: Microsoft Identity Web (EntraId/Azure AD)
 
 ## Project Structure
@@ -19,9 +20,9 @@ The solution follows a clean architecture pattern:
 - **TaxFiler.Model** - DTOs and data transfer objects
 - **TaxFiler.Service** - Business logic and external service integrations
 - **TaxFiler.Service.Test** - Unit tests for service layer
+- **TaxFiler.Predictor** - ML.NET machine learning models for document-transaction matching
+- **TaxFiler.Predictor.Tests** - Unit tests for ML.NET predictor functionality
 - **taxfiler.client** - Angular frontend application
-- **LlamaIndex.Core** - Custom LlamaIndex retriever implementation
-- **LlamaParse** - Document parsing service integration
 
 ## Common Development Commands
 
@@ -40,8 +41,15 @@ npm start
 
 ### Testing
 ```bash
-# Run .NET tests
+# Run all .NET tests
 dotnet test
+
+# Run specific test project
+dotnet test TaxFiler.Service.Test
+dotnet test TaxFiler.Predictor.Tests
+
+# Run single test class
+dotnet test --filter "FullyQualifiedName~DocumentMatcherTest"
 
 # Run Angular tests
 cd taxfiler.client
@@ -70,6 +78,14 @@ dotnet ef database update --project TaxFiler.DB --startup-project TaxFiler.Serve
 3. **Match**: `TransactionDocumentMatcherService` links documents to transactions
 4. **Store**: Processed data stored in SQLite via Entity Framework
 
+### ML.NET Document-Transaction Matching
+The application includes a machine learning component built with ML.NET:
+- **TaxFiler.Predictor**: Contains ML models for automated document-transaction matching
+- **Training Data**: Uses CSV files with transaction and document data for model training
+- **FastTree Algorithm**: Employs ML.NET's FastTree regression for prediction scoring
+- **Feature Engineering**: Extracts features from transaction amounts, dates, and document metadata
+- **Model Output**: Produces confidence scores for document-transaction pairs
+
 ### External Integrations
 - **LlamaIndex API**: Document parsing and extraction (`LlamaIndexService`)
 - **Google Drive**: Document synchronization (`GoogleDriveService`)
@@ -78,10 +94,16 @@ dotnet ef database update --project TaxFiler.DB --startup-project TaxFiler.Serve
 ### Database Design
 Core entities: `Document`, `Transaction`, `Account`, `TransactionDocumentMatcher`
 - Uses Entity Framework migrations for schema management
-- SQLite database for local development and in Production
+- SQLite database for local development and production
 - Automatic migration on application startup
 
 ## Configuration
+
+### Centralized Package Management
+The solution uses centralized NuGet package management:
+- **Directory.Build.props**: Defines common project properties (.NET 9.0, nullable enable, x64 platform)
+- **Directory.Packages.props**: Centrally manages all package versions across projects
+- **Benefits**: Ensures consistent package versions, simplified maintenance, transitive dependency control
 
 ### Required User Secrets
 ```bash
@@ -95,6 +117,13 @@ dotnet user-secrets set "GoogleDriveSettings:ClientSecret" "your-client-secret"
 - Uses Angular CLI with proxy configuration for API calls
 - Material Design components for UI
 - ag-Grid for data tables with custom cell renderers
+
+### Testing Framework
+- **Backend Testing**: NUnit framework with NSubstitute for mocking
+- **Test Structure**: Tests organized in separate projects (*.Test)
+- **Mocking**: NSubstitute provides flexible mocking capabilities for service interfaces
+- **Coverage**: Coverlet for code coverage collection
+- **Test Discovery**: NUnit3TestAdapter for Visual Studio integration
 
 ## Development Workflow
 
@@ -136,7 +165,7 @@ The workflow involves multiple API calls in sequence:
 ### Refit Integration
 
 **Current State:**
-The codebase now uses Refit for all LlamaIndex API calls, providing type safety and automatic serialization.
+The codebase uses Refit for all LlamaIndex API calls, providing type safety and automatic serialization.
 
 **Existing Refit Setup:**
 ```csharp
@@ -171,12 +200,12 @@ public interface ILlamaApiClient
 ```
 
 **Implementation Details:**
-- **LlamaIndexService**: Now injects `ILlamaApiClient` instead of creating `HttpClient`
+- **LlamaIndexService**: Injects `ILlamaApiClient` instead of creating `HttpClient`
 - **Authentication**: `LlamaBearerTokenHandler` reads API key from `LlamaParse:ApiKey` configuration
 - **Type Safety**: All API calls use strongly typed request/response models
 - **Error Handling**: Refit provides consistent HTTP error handling
 
-**Benefits Achieved:**
+**Benefits:**
 - **Type Safety**: Strongly typed request/response models eliminate manual JSON handling
 - **Automatic Serialization**: JSON serialization/deserialization handled by Refit
 - **Authentication**: Bearer token automatically added via `LlamaBearerTokenHandler` 
@@ -207,13 +236,6 @@ public class InvoiceResult
 5. Date parsing handles German locale (`de-DE`)
 
 The fixed agent approach ensures consistent extraction quality for German tax documents without requiring per-document configuration.
-
-## Refactoring Tasks
-
-### Service Integrations
-- **Change LlamaIndexService to use Refit**: Migrate the current API integration to use Refit for type-safe HTTP calls
-- Refactor API interactions to use Refit interfaces for better type safety and simpler HTTP request management
-- Update dependency injection to register Refit-based service implementations
 
 ## Document-Transaction Matching
 
