@@ -49,7 +49,7 @@ class Program
             Directory.CreateDirectory("Models");
 
             // Save trained model
-            modelTrainer.SaveModel(model, "Models/document_transaction_matcher.zip");
+            modelTrainer.SaveModel(model, "Models/document_transaction_matcher1.zip");
             
             // Demonstrate predictions
             Console.WriteLine("\nDemonstrating predictions on known matches:");

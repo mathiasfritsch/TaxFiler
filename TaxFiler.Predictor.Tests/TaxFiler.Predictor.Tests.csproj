@@ -1,12 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector"/>
+        <PackageReference Include="Microsoft.ML"/>
+        <PackageReference Include="Microsoft.ML.FastTree"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="NUnit"/>
         <PackageReference Include="NUnit.Analyzers"/>
@@ -19,6 +23,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TaxFiler.Predictor\TaxFiler.Predictor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="document_transaction_matcher.zip">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
