@@ -258,7 +258,7 @@ public class FeatureExtractor
     {
         if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2)) return 0f;
         
-        var distance = LevenshteinDistance(str1, str2);
+        var distance = LevenshteinDistance(str1.ToLowerInvariant(), str2.ToLowerInvariant());
         var maxLength = Math.Max(str1.Length, str2.Length);
         
         return 1f - (float)distance / maxLength;
