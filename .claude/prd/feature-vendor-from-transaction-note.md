@@ -15,6 +15,7 @@ var transVendorName = transaction.SenderReceiver?.Trim() ?? string.Empty;
 This approach has limitations:
 - `SenderReceiver` often contains payment processor names (e.g., "PAYPAL", "STRIPE") rather than actual merchants
 - The real vendor information is embedded in `transaction.TransactionNote` (e.g., "PAYPAL *AMAZONSERVICES")
+- Document vendor names are often good quality but not being compared against the transaction note content
 - Results in poor vendor similarity scores and reduced document-transaction matching accuracy
 
 ## Current vs Desired Behavior
@@ -27,68 +28,52 @@ This approach has limitations:
 
 ### Desired Behavior
 - Transaction Note: `"PAYPAL *AMAZONSERVICES 402-935-7733 WA"`
-- Extracted Vendor: `"AMAZONSERVICES"` � normalized to `"Amazon"`
 - Document Vendor: `"Amazon"`
-- Result: High similarity score (comparing "Amazon" vs "Amazon")
+- Comparison: Compare "Amazon" with each word in transaction note ["PAYPAL", "AMAZONSERVICES", "402-935-7733", "WA"]
+- Result: High similarity score (Levenshtein distance between "Amazon" and "AMAZONSERVICES" shows strong match)
 
 ## Goals
 
 ## Technical Requirements
 
-### Pattern Recognition Support
-The enhanced method should handle common transaction note patterns:
+### Word-Based Comparison Approach
+Instead of complex regex pattern extraction, use simple word-by-word comparison:
 
-**Payment Processors:**
-- `PAYPAL *MERCHANTNAME` � extract `MERCHANTNAME`
-- `STRIPE PAYMENT - MERCHANTNAME` � extract `MERCHANTNAME`
-- `SQ *MERCHANTNAME` � extract `MERCHANTNAME`
-- `APPLE PAY MERCHANTNAME` � extract `MERCHANTNAME`
-
-**Direct Merchants:**
-- `WALMART SUPERCENTER #1234` � extract `WALMART`
-- `AMAZON.COM AMZN.COM/BILL` � extract `AMAZON`
-- `COSTCO WHOLESALE #0123` � extract `COSTCO`
-
-**POS/Debit Transactions:**
-- `POS DEBIT MERCHANTNAME LOCATION` � extract `MERCHANTNAME`
-- `DEBIT PURCHASE MERCHANTNAME` � extract `MERCHANTNAME`
-
-**ATM/Bank Transactions:**
-- `ATM WITHDRAWAL BANK NAME` � extract `BANK NAME`
+1. **Extract document vendor name** (from `VendorName` field or document name)
+2. **Split transaction note into words** (split by spaces and common delimiters)
+3. **Compare document vendor with each word** using Levenshtein distance
+4. **Return highest similarity score** found among all words
+5. **Fallback to SenderReceiver** if transaction note is empty or no good matches found
 
 ### Implementation Approach
 
-1. **Fallback Strategy**: Try transaction note extraction first, fall back to `SenderReceiver` if extraction fails
-2. **Pattern Matching**: Use regex patterns to identify and extract merchant names
-3. **Normalization**: Basic string cleaning (remove numbers, special characters, common suffixes)
-4. **Vendor Name Cleaning**: Remove common business suffixes (LLC, INC, CORP, GMBH, etc.)
+1. **Word Extraction**: Split transaction note by spaces, remove special characters and numbers
+2.  **SenderReceiver**: Use `SenderReceiver` as just another word to add to the comparison set
+3.  **String Similarity**: Use existing `CalculateStringSimilarity` method with Levenshtein distance
+4.  **Best Match**: Return the highest similarity score found when comparing document vendor to all words
+5.  **Minimum Length Filter**: Only compare words of reasonable length (3+ characters)
 
 ### Method Signature
 ```csharp
 private float CalculateVendorSimilarity(DocumentModel document, TransactionModel transaction)
 {
-    // Enhanced implementation with transaction note parsing
-}
-
-// Helper method for vendor extraction
-private string ExtractVendorFromTransactionNote(string transactionNote)
-{
-    // Pattern-based vendor extraction logic
+    // Compare document vendor with all words in transaction note
+    // Return best similarity score found
 }
 ```
 
 ## Implementation Details
 
 ### Phase 1: Core Enhancement
-- Add `ExtractVendorFromTransactionNote` helper method
-- Implement common payment processor patterns
-- Update `CalculateVendorSimilarity` to use extracted vendor names
-- Maintain fallback to `SenderReceiver` when extraction fails
+- Update `CalculateVendorSimilarity` to compare document vendor with transaction note words
+- Use existing `CalculateStringSimilarity` method for word comparisons
+- Implement word extraction and filtering logic
+- Maintain fallback to `SenderReceiver` when no good matches found
 
-### Phase 2: Pattern Expansion
-- Add support for additional transaction note formats
-- Implement vendor name normalization
-- Add pattern matching for international formats
+### Phase 2: Optimization
+- Fine-tune minimum similarity thresholds
+- Optimize word filtering and preprocessing
+- Add basic word normalization (case-insensitive, remove common prefixes/suffixes)
 
 ## Testing Strategy
 
@@ -98,11 +83,12 @@ Create test cases for:
 
 ### Test Data Examples
 ```csharp
-[TestCase("PAYPAL *AMAZONSERVICES", "Amazon", ExpectedResult = HighSimilarity)]
-[TestCase("STRIPE PAYMENT - SHOPIFY", "Shopify", ExpectedResult = HighSimilarity)]
-[TestCase("WALMART SUPERCENTER #1234", "Walmart", ExpectedResult = HighSimilarity)]
-[TestCase("RANDOM BANK TRANSFER", "RandomVendor", ExpectedResult = LowSimilarity)]
+[TestCase("PAYPAL *AMAZONSERVICES 402-935-7733", "Amazon", ExpectedResult = true)]
+[TestCase("STRIPE PAYMENT SHOPIFY INC 123-456", "Shopify", ExpectedResult = true)]
+[TestCase("WALMART SUPERCENTER #1234 ANYTOWN", "Walmart", ExpectedResult = true)]
+[TestCase("UNRELATED BANK TRANSFER 999", "Amazon", ExpectedResult = false)]
 ```
+
 
 ## Out of Scope
 
@@ -114,8 +100,8 @@ Create test cases for:
 
 ## Success Criteria
 
-- [x] Enhanced `CalculateVendorSimilarity` method extracts vendors from transaction notes
-- [x] Maintains backward compatibility with existing logic
-- [x] Handles common payment processor formats (PayPal, Stripe, Square)
-- [x] Includes basic unit tests
-- [x] Improves vendor similarity scores for common transaction types
+- [x] Enhanced `CalculateVendorSimilarity` method compares document vendor with transaction note words
+- [x] Uses Levenshtein distance for word-by-word comparison instead of regex extraction
+- [x] Maintains backward compatibility with existing `SenderReceiver` fallback logic
+- [x] Includes 3 unit tests covering different transaction note formats
+- [x] Improves vendor similarity scores for common transaction types without complex pattern matching
