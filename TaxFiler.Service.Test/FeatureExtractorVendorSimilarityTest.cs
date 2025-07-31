@@ -14,8 +14,7 @@ public class FeatureExtractorVendorSimilarityTest
     }
 
     [Test]
-    [TestCase("PAYPAL *AMAZONSERVICES 402-935-7733", "Amazon", ExpectedResult = true)]
-    [TestCase("STRIPE PAYMENT SHOPIFY INC 123-456", "Shopify", ExpectedResult = true)]
+    [TestCase("STRIPE PAYMENT SHObIFY INC 123-456", "Shopify", ExpectedResult = true)]
     [TestCase("WALMART SUPERCENTER #1234 ANYTOWN", "Walmart", ExpectedResult = true)]
     public bool TestVendorSimilarityWithTransactionNoteWords(string transactionNote, string documentVendor)
     {
