@@ -70,10 +70,10 @@ public class FeatureExtractor
     
     private float CalculateInvoiceNumberMatch(DocumentModel document, TransactionModel transaction)
     {
-        var docInvoiceNumber = document.InvoiceNumber?.Trim();
+        string? docInvoiceNumber = document.InvoiceNumber?.Trim();
         
         
-        if (transaction.TransactionNote?.Contains(docInvoiceNumber, StringComparison.OrdinalIgnoreCase) == true)
+        if (!String.IsNullOrEmpty(docInvoiceNumber) && transaction.TransactionNote?.Contains(docInvoiceNumber, StringComparison.OrdinalIgnoreCase) == true)
             return 0.9f;
         
 
@@ -101,13 +101,64 @@ public class FeatureExtractor
             ? document.VendorName.Trim()
             : ExtractVendorNameFromDocument(document.Name);
             
-        var transVendorName = transaction.SenderReceiver?.Trim() ?? string.Empty;
-        
-        if (string.IsNullOrEmpty(docVendorName) || string.IsNullOrEmpty(transVendorName))
+        if (string.IsNullOrEmpty(docVendorName))
             return 0f;
         
-        // Use existing string similarity calculation
-        return CalculateStringSimilarity(docVendorName, transVendorName);
+        // Extract words from transaction note and include SenderReceiver
+        var wordsToCompare = new List<string>();
+        
+        // Add words from transaction note
+        if (!string.IsNullOrEmpty(transaction.TransactionNote))
+        {
+            var noteWords = ExtractWordsFromTransactionNote(transaction.TransactionNote);
+            wordsToCompare.AddRange(noteWords);
+        }
+        
+        // Add SenderReceiver as another word to compare
+        if (!string.IsNullOrEmpty(transaction.SenderReceiver))
+        {
+            wordsToCompare.Add(transaction.SenderReceiver.Trim());
+        }
+        
+        if (!wordsToCompare.Any())
+            return 0f;
+        
+        // Compare document vendor with all words and return highest similarity
+        var maxSimilarity = 0f;
+        foreach (var word in wordsToCompare)
+        {
+            var similarity = CalculateStringSimilarity(docVendorName, word);
+            if (similarity > maxSimilarity)
+            {
+                maxSimilarity = similarity;
+            }
+        }
+        
+        return maxSimilarity;
+    }
+    
+    private List<string> ExtractWordsFromTransactionNote(string transactionNote)
+    {
+        if (string.IsNullOrEmpty(transactionNote))
+            return new List<string>();
+        
+        // Split by common delimiters and filter meaningful words
+        var words = transactionNote
+            .Split(new[] { ' ', '*', '-', '_', '.', '/', '\\', ':', ';', ',', '(', ')', '[', ']' }, 
+                   StringSplitOptions.RemoveEmptyEntries)
+            .Where(word => word.Length >= 3 && !IsNumericOrSpecialChars(word))
+            .Select(word => word.Trim())
+            .Where(word => !string.IsNullOrEmpty(word))
+            .ToList();
+        
+        return words;
+    }
+    
+    private bool IsNumericOrSpecialChars(string word)
+    {
+        // Filter out words that are mostly numbers or special characters
+        var letterCount = word.Count(char.IsLetter);
+        return letterCount < word.Length * 0.5; // At least 50% should be letters
     }
     
     private string ExtractVendorNameFromDocument(string documentName)
