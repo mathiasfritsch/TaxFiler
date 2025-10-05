@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import {NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
@@ -9,6 +9,7 @@ import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
 
 import {AG_GRID_LOCALE_DE} from "@ag-grid-community/locale";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
+import {CheckboxCellRendererComponent} from "../checkbox-cell-renderer/checkbox-cell-renderer.component";
 import {TransactionEditComponent} from "../transaction-edit/transaction-edit.component";
 import {Transaction} from "../model/transaction";
 import {NavigationComponent} from '../shared/navigation/navigation.component';
@@ -75,10 +76,22 @@ export class TransactionsComponent  implements  OnInit{
     {
       field: 'isSalesTaxRelevant',
       headerName: 'Umsatzsteuerrelevant',
+      cellRenderer: CheckboxCellRendererComponent,
+      editable: true,
+      cellStyle: {
+        textAlign: 'center',
+        paddingRight: '0px'
+      }
     },
     {
       field: 'isIncomeTaxRelevant',
       headerName: 'Einkommenssteuerrelevant',
+      cellRenderer: CheckboxCellRendererComponent,
+      editable: true,
+      cellStyle: {
+        textAlign: 'center',
+        paddingRight: '0px'
+      }
     },
     {
       headerName: 'Edit',
@@ -218,5 +231,43 @@ export class TransactionsComponent  implements  OnInit{
       url += `&accountId=${this.accountId}`;
     }
     window.location.href = url;
+  }
+
+  onCellValueChanged(event: CellValueChangedEvent) {
+    // Only handle changes to the tax relevant fields
+    if (event.colDef.field === 'isSalesTaxRelevant' || event.colDef.field === 'isIncomeTaxRelevant') {
+      const transaction = event.data;
+      
+      // Prepare the update DTO with all required fields
+      const updatedTransaction = {
+        id: transaction.id,
+        grossAmount: transaction.grossAmount,
+        netAmount: transaction.netAmount,
+        taxAmount: transaction.taxAmount,
+        taxRate: transaction.taxRate,
+        counterparty: transaction.counterparty,
+        transactionNote: transaction.transactionNote,
+        transactionReference: transaction.transactionReference,
+        transactionDateTime: transaction.transactionDateTime,
+        isOutgoing: transaction.isOutgoing,
+        isSalesTaxRelevant: transaction.isSalesTaxRelevant,
+        isIncomeTaxRelevant: transaction.isIncomeTaxRelevant,
+        documentId: transaction.documentId,
+        senderReceiver: transaction.senderReceiver,
+        accountId: transaction.accountId
+      };
+
+      // Post the update to the backend
+      this.http.post('/api/transactions/updatetransaction', updatedTransaction).subscribe({
+        next: () => {
+          console.log('Transaction updated successfully');
+        },
+        error: error => {
+          console.error('Error updating transaction:', error);
+          // Revert the change in the grid on error
+          event.node.setDataValue(event.colDef.field!, event.oldValue);
+        }
+      });
+    }
   }
 }
