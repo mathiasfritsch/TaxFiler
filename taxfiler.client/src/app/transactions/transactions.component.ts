@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import {NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
@@ -224,24 +224,10 @@ export class TransactionsComponent  implements  OnInit{
     window.location.href = url;
   }
 
-  onCellValueChanged(event: any) {
+  onCellValueChanged(event: CellValueChangedEvent) {
     const transaction = event.data;
     const updatedTransaction = {
-      id: transaction.id,
-      grossAmount: transaction.grossAmount,
-      counterparty: transaction.counterparty,
-      transactionNote: transaction.transactionNote,
-      transactionReference: transaction.transactionReference,
-      transactionDateTime: transaction.transactionDateTime,
-      netAmount: transaction.netAmount,
-      taxAmount: transaction.taxAmount,
-      taxRate: transaction.taxRate,
-      isOutgoing: transaction.isOutgoing,
-      isIncomeTaxRelevant: transaction.isIncomeTaxRelevant,
-      documentId: transaction.documentId,
-      isSalesTaxRelevant: transaction.isSalesTaxRelevant,
-      senderReceiver: transaction.senderReceiver,
-      accountId: transaction.accountId
+      ...transaction
     };
 
     this.http.post('/api/transactions/updateTransaction', updatedTransaction)
