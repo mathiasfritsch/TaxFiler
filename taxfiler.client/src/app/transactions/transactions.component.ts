@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import {NgIf} from "@angular/common";
 import {AgGridAngular} from "ag-grid-angular";
@@ -75,10 +75,14 @@ export class TransactionsComponent  implements  OnInit{
     {
       field: 'isSalesTaxRelevant',
       headerName: 'Umsatzsteuerrelevant',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
     },
     {
       field: 'isIncomeTaxRelevant',
       headerName: 'Einkommenssteuerrelevant',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
     },
     {
       headerName: 'Edit',
@@ -218,5 +222,24 @@ export class TransactionsComponent  implements  OnInit{
       url += `&accountId=${this.accountId}`;
     }
     window.location.href = url;
+  }
+
+  onCellValueChanged(event: CellValueChangedEvent) {
+    const transaction = event.data;
+    const updatedTransaction = {
+      ...transaction
+    };
+
+    this.http.post('/api/transactions/updateTransaction', updatedTransaction)
+      .subscribe({
+        next: () => {
+          console.log('Transaction updated successfully');
+        },
+        error: error => {
+          console.error('Error updating transaction:', error);
+          // Refresh the grid to revert changes on error
+          this.getTransactions(this.yearMonth);
+        }
+      });
   }
 }
