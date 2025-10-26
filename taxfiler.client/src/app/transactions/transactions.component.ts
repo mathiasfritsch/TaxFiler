@@ -75,10 +75,14 @@ export class TransactionsComponent  implements  OnInit{
     {
       field: 'isSalesTaxRelevant',
       headerName: 'Umsatzsteuerrelevant',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
     },
     {
       field: 'isIncomeTaxRelevant',
       headerName: 'Einkommenssteuerrelevant',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
     },
     {
       headerName: 'Edit',
@@ -218,5 +222,38 @@ export class TransactionsComponent  implements  OnInit{
       url += `&accountId=${this.accountId}`;
     }
     window.location.href = url;
+  }
+
+  onCellValueChanged(event: any) {
+    const transaction = event.data;
+    const updatedTransaction = {
+      id: transaction.id,
+      grossAmount: transaction.grossAmount,
+      counterparty: transaction.counterparty,
+      transactionNote: transaction.transactionNote,
+      transactionReference: transaction.transactionReference,
+      transactionDateTime: transaction.transactionDateTime,
+      netAmount: transaction.netAmount,
+      taxAmount: transaction.taxAmount,
+      taxRate: transaction.taxRate,
+      isOutgoing: transaction.isOutgoing,
+      isIncomeTaxRelevant: transaction.isIncomeTaxRelevant,
+      documentId: transaction.documentId,
+      isSalesTaxRelevant: transaction.isSalesTaxRelevant,
+      senderReceiver: transaction.senderReceiver,
+      accountId: transaction.accountId
+    };
+
+    this.http.post('/api/transactions/updateTransaction', updatedTransaction)
+      .subscribe({
+        next: () => {
+          console.log('Transaction updated successfully');
+        },
+        error: error => {
+          console.error('Error updating transaction:', error);
+          // Refresh the grid to revert changes on error
+          this.getTransactions(this.yearMonth);
+        }
+      });
   }
 }
