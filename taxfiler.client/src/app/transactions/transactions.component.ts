@@ -81,6 +81,8 @@ export class TransactionsComponent  implements  OnInit{
     {
       field: 'isIncomeTaxRelevant',
       headerName: 'Einkommenssteuerrelevant',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
     },
     {
       headerName: 'Edit',
