@@ -29,19 +29,14 @@ namespace TaxFiler.Service
         
         private async Task<string> FindFolderIdAsync(DriveService service, string folderName, string parentId)
         {
-            var filesRequest = await service.Files.List().ExecuteAsync();
-            
-            if(parentId == "")
-            {
-                return filesRequest.Files
-                    .Where(f => f.MimeType == "application/vnd.google-apps.folder")
-                    .Single(f => f.Name == folderName)
-                    .Id;
-            }
-            
             var request = service.Files.List();
-            request.Q = $"'{parentId}' in parents and name contains '{folderName}'";
-            request.Fields = "nextPageToken, files(id, name, mimeType)";
+            
+            request.Q = string.IsNullOrEmpty(parentId) ? $"mimeType='application/vnd.google-apps.folder' and name='{folderName}' and trashed=false" :
+
+                $"mimeType='application/vnd.google-apps.folder' and '{parentId}' in parents and name='{folderName}' and trashed=false";
+            
+            request.Fields = "files(id, name)";
+            request.PageSize = 1;
             
             var result = await request.ExecuteAsync();
             return result.Files.Single().Id;
