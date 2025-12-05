@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 
@@ -11,7 +11,7 @@ export interface NavigationAction {
 @Component({
   selector: 'app-navigation',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, RouterModule],
+  imports: [MatButtonModule, RouterModule],
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.css']
 })

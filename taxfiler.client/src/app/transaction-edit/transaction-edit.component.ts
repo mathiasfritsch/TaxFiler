@@ -15,7 +15,7 @@ import {MatCheckbox} from "@angular/material/checkbox";
 import {HttpClient} from "@angular/common/http";
 import {Transaction} from "../model/transaction";
 import {MatOption, MatSelect} from "@angular/material/select";
-import {AsyncPipe, NgForOf} from "@angular/common";
+import { AsyncPipe } from "@angular/common";
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { Observable } from "rxjs";
 import {map, startWith} from 'rxjs/operators';
@@ -34,12 +34,11 @@ import { Account } from "../model/account";
     MatInput,
     MatLabel,
     MatOption,
-    NgForOf,
     MatCheckbox,
     MatAutocompleteModule,
     AsyncPipe,
     MatSelect
-  ],
+],
   templateUrl: './transaction-edit.component.html',
   standalone: true,
   styleUrl: './transaction-edit.component.css'

@@ -1,20 +1,22 @@
 <div class="migrations-container">
   <h1 mat-dialog-title>Database Migrations</h1>
-  
+
   <div>
     <a [routerLink]="['/transactions', getStartOfMonth()]" mat-button>Transaktionen</a>
     <a [routerLink]="['/documents', getStartOfMonth()]" mat-button>Dokumente</a>
     <a [routerLink]="['/accounts', getStartOfMonth()]" mat-button>Konten</a>
   </div>
-  
+
   <div>
     <button (click)="runMigrations()" [disabled]="isRunning" mat-button>
       {{ isRunning ? 'Running Migrations...' : 'Run Migrations' }}
     </button>
   </div>
-  
-  <div *ngIf="result" style="margin-top: 20px;">
-    <h3>Result:</h3>
-    <p [style.color]="hasError ? 'red' : 'green'">{{ result }}</p>
-  </div>
+
+  @if (result) {
+    <div style="margin-top: 20px;">
+      <h3>Result:</h3>
+      <p [style.color]="hasError ? 'red' : 'green'">{{ result }}</p>
+    </div>
+  }
 </div>

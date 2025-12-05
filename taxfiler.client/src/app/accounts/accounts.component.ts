@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient } from '@angular/common/http';
 import { Account } from '../model/account';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,14 +15,13 @@ import { NavigationComponent } from '../shared/navigation/navigation.component';
   selector: 'app-accounts',
   standalone: true,
   imports: [
-    CommonModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
     AgGridModule,
     RouterModule,
-    NavigationComponent,
-  ],
+    NavigationComponent
+],
   templateUrl: './accounts.component.html',
   styleUrls: ['./accounts.component.css']
 })

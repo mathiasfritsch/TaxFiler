@@ -27,25 +27,27 @@
   <!-- Upload Button -->
   <ng-container>
     <input type="file"
-           (change)="onFileSelected($event)"
-           style="display: none;"
-           #fileInput>
-    <button (click)="fileInput.click()" mat-button>
-      Upload
+      (change)="onFileSelected($event)"
+      style="display: none;"
+      #fileInput>
+      <button (click)="fileInput.click()" mat-button>
+        Upload
+      </button>
+    </ng-container>
+    <!-- Download Report Button -->
+    <button (click)="onDownloadReportClick()" mat-button>
+      Download Report
     </button>
-  </ng-container>
-  <!-- Download Report Button -->
-  <button (click)="onDownloadReportClick()" mat-button>
-    Download Report
-  </button>
-</div>
+  </div>
 
-<!-- Month Navigation in separate row -->
-<div class="month-navigation-container" *ngIf="showMonthNavigation">
-  <button (click)="onMonthChange(-1)" mat-button>
-    << Vorheriger Monat
-  </button>
-  <button (click)="onMonthChange(1)" mat-button>
-    Nächster Monat >>
-  </button>
-</div>
+  <!-- Month Navigation in separate row -->
+  @if (showMonthNavigation) {
+    <div class="month-navigation-container">
+      <button (click)="onMonthChange(-1)" mat-button>
+        << Vorheriger Monat
+      </button>
+      <button (click)="onMonthChange(1)" mat-button>
+        Nächster Monat >>
+      </button>
+    </div>
+  }

@@ -33,48 +33,52 @@
     </div>
     <div>
       <mat-label>Dokument</mat-label>
-        nur unconnected
-        <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
+      nur unconnected
+      <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
       <mat-form-field>
         <input type="text"
-               matInput formControlName="documentControl"
-               [matAutocomplete]="auto">
-        <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
-          <mat-option *ngFor="let document of filteredDocuments | async" [value]="document">
-            <span>{{ document.name }}</span>|
-            <span>{{ document.total }}</span>|
-            <span>{{ document.invoiceDate }}</span>
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
-    </div>
-    <div>
-      <mat-label>Datum</mat-label>
-      <mat-form-field>
-        <input id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
-      </mat-form-field>
-    </div>
-    <div>
-      <mat-label>Umsatzsteuerrelevant</mat-label>
-      <mat-checkbox id="isSalesTaxRelevant" formControlName="isSalesTaxRelevantControl"></mat-checkbox>
-    </div>
-    <div>
-      <mat-label>Einkommenssteuerrelevant</mat-label>
-      <mat-checkbox id="isIncomeTaxRelevant" formControlName="isIncomeTaxRelevantControl"></mat-checkbox>
-    </div>
-    <div>
-      <mat-label>Konto</mat-label>
-      <mat-form-field>
-        <mat-select id="account" formControlName="accountControl">
-          <mat-option *ngFor="let account of accounts" [value]="account.id">
-            {{account.name}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </form>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button  (click)="onSaveClick()">Save</button>
-</div>
+          matInput formControlName="documentControl"
+          [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
+            @for (document of filteredDocuments | async; track document) {
+              <mat-option [value]="document">
+                <span>{{ document.name }}</span>|
+                <span>{{ document.total }}</span>|
+                <span>{{ document.invoiceDate }}</span>
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-label>Datum</mat-label>
+        <mat-form-field>
+          <input id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-label>Umsatzsteuerrelevant</mat-label>
+        <mat-checkbox id="isSalesTaxRelevant" formControlName="isSalesTaxRelevantControl"></mat-checkbox>
+      </div>
+      <div>
+        <mat-label>Einkommenssteuerrelevant</mat-label>
+        <mat-checkbox id="isIncomeTaxRelevant" formControlName="isIncomeTaxRelevantControl"></mat-checkbox>
+      </div>
+      <div>
+        <mat-label>Konto</mat-label>
+        <mat-form-field>
+          <mat-select id="account" formControlName="accountControl">
+            @for (account of accounts; track account) {
+              <mat-option [value]="account.id">
+                {{account.name}}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </form>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onCancelClick()">Cancel</button>
+    <button mat-button  (click)="onSaveClick()">Save</button>
+  </div>

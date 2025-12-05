@@ -3,16 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { MatDialogTitle } from '@angular/material/dialog';
-import { NgIf } from '@angular/common';
+
 
 @Component({
   selector: 'app-migrations',
   imports: [
     RouterLink,
     MatButton,
-    MatDialogTitle,
-    NgIf
-  ],
+    MatDialogTitle
+],
   templateUrl: './migrations.component.html',
   styleUrl: './migrations.component.css'
 })

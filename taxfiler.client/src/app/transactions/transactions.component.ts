@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import {NgIf} from "@angular/common";
+
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
 
@@ -28,11 +28,10 @@ function formatPrice(value: any):string{
     styleUrls: ['./transactions.component.css'],
     standalone: true,
   imports: [
-    NgIf,
     AgGridAngular,
     MatDialogTitle,
-    NavigationComponent,
-  ]
+    NavigationComponent
+]
 })
 export class TransactionsComponent  implements  OnInit{
   public transactions: any[] = [];

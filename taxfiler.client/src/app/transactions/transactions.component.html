@@ -6,7 +6,9 @@
   [showMonthNavigation]="true"
   (downloadReportClicked)="downloadReport()">
 </app-navigation>
-<p *ngIf="!transactions"><em>Loading... </em></p>
+@if (!transactions) {
+  <p><em>Loading... </em></p>
+}
 
 <ag-grid-angular
   class="ag-theme-quartz"
@@ -17,7 +19,7 @@
   editType="fullRow"
   [localeText]="localeText"
   (cellValueChanged)="onCellValueChanged($event)"
->
+  >
 </ag-grid-angular>
 
 

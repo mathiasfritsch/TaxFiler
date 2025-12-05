@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ColDef} from 'ag-grid-community';
 import {AllCommunityModule, ModuleRegistry} from 'ag-grid-community';
 import {AG_GRID_LOCALE_DE} from '@ag-grid-community/locale';
-import {CommonModule, NgIf} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {AgGridAngular} from 'ag-grid-angular';
 import {Component, OnInit, LOCALE_ID, Inject} from '@angular/core';
 import {MatDialog, MatDialogTitle} from '@angular/material/dialog';
