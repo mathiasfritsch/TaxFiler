@@ -54,16 +54,18 @@ namespace TaxFiler.Service
 
         public async Task<GoogleDriveFolderStructureDto> GetFolderStructureAsync()
         {
-            var service =  CreateDriveService();
+            var service = CreateDriveService();
 
-            var rootFoldersRequest = service.Files.List();
-            rootFoldersRequest.Q = "mimeType='application/vnd.google-apps.folder'";
-            rootFoldersRequest.Fields = "files(id, name)";
-            rootFoldersRequest.PageSize = 100;
+            var taxFilerFolderId = await FindFolderIdAsync(service, "TaxFiler", "");
 
-            var rootFolders = await rootFoldersRequest.ExecuteAsync();
+            var yearFoldersRequest = service.Files.List();
+            yearFoldersRequest.Q = $"mimeType='application/vnd.google-apps.folder' and '{taxFilerFolderId}' in parents and trashed=false";
+            yearFoldersRequest.Fields = "files(id, name)";
+            yearFoldersRequest.PageSize = 100;
 
-            var yearFolders = rootFolders.Files
+            var yearFoldersResult = await yearFoldersRequest.ExecuteAsync();
+
+            var yearFolders = yearFoldersResult.Files
                 .Where(f => IsYearFolder(f.Name))
                 .OrderByDescending(f => f.Name)
                 .ToList();
