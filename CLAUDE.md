@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Overview
 
 TaxFiler is a tax document processing application built as a full-stack solution with:
-- **Backend**: ASP.NET Core 9.0 Web API with Entity Framework Core and SQLite
+- **Backend**: ASP.NET Core 10.0 Web API with Entity Framework Core and SQLite
 - **Frontend**: Angular 19 SPA with ag-Grid for data display
 - **Document Processing**: LlamaIndex integration for AI-powered document parsing and tax information extraction
 - **Authentication**: Microsoft Identity Web (EntraId/Azure AD)

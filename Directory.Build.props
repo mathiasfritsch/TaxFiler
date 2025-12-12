@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
         <Deterministic>true</Deterministic>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Company>Mathias Fritsch</Company>
         <Product>Taxfiler</Product>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
