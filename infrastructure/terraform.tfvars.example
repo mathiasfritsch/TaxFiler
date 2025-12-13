@@ -1,0 +1,16 @@
+# Terraform environment-specific values
+# Copy this file to terraform.tfvars and customize as needed
+
+# subscription_id = "25010af9-7f24-4aca-9123-f7054c0566f7"
+# resource_group_name = "TaxFiler_group"
+# location = "germanywestcentral"
+# web_app_name = "TaxFiler"
+# app_service_plan_name = "ASP-TaxFilergroup-a6ab"
+# app_service_plan_sku = "B1"
+
+# tags = {
+#   Environment = "Production"
+#   Project     = "TaxFiler"
+#   ManagedBy   = "Terraform"
+# }
+

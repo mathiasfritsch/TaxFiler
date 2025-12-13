@@ -1,0 +1,119 @@
+name: Deploy Infrastructure and Application
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: TaxFiler
+  AZURE_RESOURCE_GROUP: TaxFiler_group
+  AZURE_LOCATION: germanywestcentral
+  DOTNET_VERSION: '10.0.x'
+  TF_VERSION: '1.9.0'
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    outputs:
+      webapp-name: ${{ steps.terraform-output.outputs.webapp_name }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        working-directory: ./infrastructure
+        run: terraform init
+
+      - name: Terraform Format Check
+        working-directory: ./infrastructure
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Validate
+        working-directory: ./infrastructure
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ./infrastructure
+        run: terraform plan -out=tfplan
+        env:
+          ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+
+      - name: Terraform Apply
+        working-directory: ./infrastructure
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+
+      - name: Get Terraform Outputs
+        id: terraform-output
+        working-directory: ./infrastructure
+        run: |
+          echo "webapp_name=$(terraform output -raw web_app_name)" >> $GITHUB_OUTPUT
+          echo "webapp_url=$(terraform output -raw web_app_url)" >> $GITHUB_OUTPUT
+        env:
+          ARM_CLIENT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          ARM_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+
+      - name: Azure Logout
+        run: az logout
+        if: always()
+
+  build-and-deploy-app:
+    needs: deploy-infrastructure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish TaxFiler.Server/TaxFiler.Server.csproj -c Release -o ${{env.DOTNET_ROOT}}/publish
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ needs.deploy-infrastructure.outputs.webapp-name }}
+          package: ${{env.DOTNET_ROOT}}/publish
+
+      - name: Azure Logout
+        run: az logout
+        if: always()
