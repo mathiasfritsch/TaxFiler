@@ -1,7 +1,7 @@
 # Technology Stack
 
 ## Backend (.NET)
-- **.NET 9.0**: Target framework with latest C# language features
+- **.NET 10.0**: Target framework with latest C# language features
 - **ASP.NET Core**: Web API and MVC framework
 - **Entity Framework Core**: ORM with PostgreSQL and SQLite support
 - **Microsoft Identity Web**: Azure AD/Entra ID authentication

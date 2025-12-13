@@ -1,6 +1,6 @@
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TaxFiler.DB;
 using TaxFiler.Model;
@@ -71,18 +71,11 @@ public class Program
                     }
                 }
             });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            c.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
             {
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "oauth2"
-                        }
-                    },
-                    new[]
+                    new OpenApiSecuritySchemeReference("oauth2", doc, null!),
+                    new List<string>
                     {
                         "api://533594db-31dc-4f88-83e9-b9c0f3a47922/default_access"
                     }
