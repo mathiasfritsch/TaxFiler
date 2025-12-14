@@ -88,6 +88,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'TaxFilerTF'
+          app-name: 'TaxFiler'
           slot-name: 'Production'
           package: .
