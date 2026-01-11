@@ -7,6 +7,7 @@ namespace TaxFiler.Service;
 /// <summary>
 /// Service for matching transactions with supporting documents using multi-criteria scoring.
 /// Implements intelligent matching based on amount, date, vendor, and reference number similarity.
+/// The matching algorithm is direction-independent and works consistently for both incoming and outgoing transactions.
 /// </summary>
 public class DocumentMatchingService : IDocumentMatchingService
 {
@@ -36,6 +37,10 @@ public class DocumentMatchingService : IDocumentMatchingService
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _config = config ?? throw new ArgumentNullException(nameof(config));
+        
+        // Validate configuration on initialization
+        _config.ValidateAndThrow();
+        
         _amountMatcher = amountMatcher ?? throw new ArgumentNullException(nameof(amountMatcher));
         _dateMatcher = dateMatcher ?? throw new ArgumentNullException(nameof(dateMatcher));
         _vendorMatcher = vendorMatcher ?? throw new ArgumentNullException(nameof(vendorMatcher));

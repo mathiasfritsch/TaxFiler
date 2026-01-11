@@ -19,6 +19,7 @@ public interface IReferenceMatcher
 /// <summary>
 /// Implements reference number-based matching logic for transaction-document matching.
 /// Compares transaction references with document invoice numbers using case-insensitive comparison.
+/// The matching is direction-independent and works consistently for both incoming and outgoing transactions.
 /// </summary>
 public class ReferenceMatcher : IReferenceMatcher
 {

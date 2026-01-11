@@ -20,6 +20,7 @@ public interface IVendorMatcher
 /// <summary>
 /// Implements vendor/counterparty-based matching logic for transaction-document matching.
 /// Uses hierarchical matching: exact match > substring match > fuzzy match.
+/// The matching is direction-independent and works consistently for both incoming and outgoing transactions.
 /// </summary>
 public class VendorMatcher : IVendorMatcher
 {

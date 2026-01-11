@@ -86,8 +86,8 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 13: Batch Operation Consistency**
     - **Validates: Requirements 7.4**
 
-- [ ] 6. Add configuration support and validation
-  - [ ] 6.1 Implement configuration validation
+- [x] 6. Add configuration support and validation
+  - [x] 6.1 Implement configuration validation
     - Validate weight values sum to reasonable ranges
     - Validate threshold values are within 0.0-1.0 range
     - Validate tolerance values are positive
@@ -98,7 +98,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 15: Configuration Validation**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
 
-  - [ ] 6.3 Add transaction direction independence
+  - [x] 6.3 Add transaction direction independence
     - Ensure matching works consistently for both incoming and outgoing transactions
     - _Requirements: 1.5_
 

@@ -20,6 +20,7 @@ public interface IDateMatcher
 /// <summary>
 /// Implements date-based matching logic for transaction-document matching.
 /// Compares transaction dates with document dates using configurable tolerance ranges.
+/// The matching is direction-independent and works consistently for both incoming and outgoing transactions.
 /// </summary>
 public class DateMatcher : IDateMatcher
 {

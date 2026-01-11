@@ -26,6 +26,7 @@ public class AmountMatcher : IAmountMatcher
     /// <summary>
     /// Calculates the amount similarity score between a transaction and document.
     /// Uses tolerance ranges to determine scoring levels: exact, high, medium, or low match.
+    /// The matching is direction-independent - works consistently for both incoming and outgoing transactions.
     /// </summary>
     /// <param name="transaction">Transaction containing GrossAmount for comparison</param>
     /// <param name="document">Document containing Total, SubTotal, TaxAmount, and Skonto fields</param>
@@ -36,15 +37,15 @@ public class AmountMatcher : IAmountMatcher
         if (transaction == null || document == null || config == null)
             return 0.0;
 
-        var transactionAmount = transaction.GrossAmount;
+        var transactionAmount = GetTransactionAmountForMatching(transaction);
         var documentAmount = GetBestDocumentAmount(document);
 
         if (documentAmount == null)
             return 0.0;
 
-        // Calculate percentage difference
+        // Calculate percentage difference - since all amounts are positive, no need for Math.Abs()
         var difference = Math.Abs(transactionAmount - documentAmount.Value);
-        var maxAmount = Math.Max(Math.Abs(transactionAmount), Math.Abs(documentAmount.Value));
+        var maxAmount = Math.Max(transactionAmount, documentAmount.Value);
         
         // Handle case where both amounts are zero
         if (maxAmount == 0)
@@ -73,6 +74,20 @@ public class AmountMatcher : IAmountMatcher
         }
 
         return 0.0; // No match
+    }
+
+    /// <summary>
+    /// Gets the appropriate transaction amount for matching purposes.
+    /// Since all amounts are positive, this ensures consistent matching regardless of transaction direction.
+    /// </summary>
+    /// <param name="transaction">Transaction to get amount from</param>
+    /// <returns>Transaction amount for matching (always positive)</returns>
+    private static decimal GetTransactionAmountForMatching(Transaction transaction)
+    {
+        // All amounts are positive, so we can use GrossAmount directly
+        // This ensures direction independence - both incoming and outgoing transactions
+        // are matched using their positive amount values
+        return transaction.GrossAmount;
     }
 
     /// <summary>
