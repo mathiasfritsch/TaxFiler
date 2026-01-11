@@ -106,7 +106,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 4: Transaction Direction Independence**
     - **Validates: Requirements 1.5**
 
-- [ ] 7. Checkpoint - Ensure core service tests pass
+- [x] 7. Checkpoint - Ensure core service tests pass
   - Ensure all core service tests pass, ask the user if questions arise.
 
 - [ ] 8. Integration and dependency injection setup
