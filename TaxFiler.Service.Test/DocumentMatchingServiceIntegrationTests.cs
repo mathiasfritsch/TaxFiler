@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
+using NSubstitute;
 using TaxFiler.DB;
 using TaxFiler.DB.Model;
 
@@ -11,8 +12,15 @@ namespace TaxFiler.Service.Test;
 /// </summary>
 public class TestTaxFilerContext : TaxFilerContext
 {
-    public TestTaxFilerContext() : base(new ConfigurationBuilder().Build())
+    public TestTaxFilerContext() : base(CreateMockConfiguration())
     {
+    }
+
+    private static IConfiguration CreateMockConfiguration()
+    {
+        var config = Substitute.For<IConfiguration>();
+        config.GetConnectionString("TaxFilerNeonDB").Returns((string?)null);
+        return config;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
