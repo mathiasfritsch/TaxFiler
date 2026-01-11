@@ -28,6 +28,22 @@ public class Program
         builder.Services.AddScoped<ITransactionService, TransactionService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<ILlamaIndexService, LlamaIndexService>();
+        
+        // Document Matching Services
+        builder.Services.AddScoped<IDocumentMatchingService, DocumentMatchingService>();
+        builder.Services.AddScoped<IAmountMatcher, AmountMatcher>();
+        builder.Services.AddScoped<IDateMatcher, DateMatcher>();
+        builder.Services.AddScoped<IVendorMatcher, VendorMatcher>();
+        builder.Services.AddScoped<IReferenceMatcher, ReferenceMatcher>();
+        
+        // Document Matching Configuration
+        builder.Services.AddSingleton<MatchingConfiguration>(provider =>
+        {
+            var config = new MatchingConfiguration();
+            // Configure default matching configuration
+            // These values can be overridden via configuration files or environment variables
+            return config;
+        });
         builder.Services.Configure<GoogleDriveSettings>(builder.Configuration.GetSection("GoogleDriveSettings"));
         builder.Services.AddTransient<LlamaBearerTokenHandler>();
         builder.Services

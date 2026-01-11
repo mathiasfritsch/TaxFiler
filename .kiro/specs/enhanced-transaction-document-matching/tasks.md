@@ -109,14 +109,14 @@ This implementation plan converts the Enhanced Transaction Document Matching des
 - [x] 7. Checkpoint - Ensure core service tests pass
   - Ensure all core service tests pass, ask the user if questions arise.
 
-- [ ] 8. Integration and dependency injection setup
-  - [ ] 8.1 Register services in dependency injection container
+- [x] 8. Integration and dependency injection setup
+  - [x] 8.1 Register services in dependency injection container
     - Add service registrations in `Program.cs`
     - Configure default matching configuration
     - Set up Entity Framework integration
     - _Requirements: 1.1_
 
-  - [ ] 8.2 Create API controller for document matching
+  - [x] 8.2 Create API controller for document matching
     - Add `DocumentMatchingController` with endpoints for single and batch matching
     - Implement proper error handling and response formatting
     - Add API documentation with Swagger annotations
