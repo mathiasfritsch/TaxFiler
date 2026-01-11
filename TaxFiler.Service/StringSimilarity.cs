@@ -66,14 +66,20 @@ public static class StringSimilarity
         // Convert to lowercase and trim
         var normalized = input.Trim().ToLowerInvariant();
         
-        // Remove diacritics (important for German text like ä, ö, ü, ß)
+        // Handle German-specific character replacements before general diacritic removal
+        normalized = normalized.Replace("ß", "ss");
+        normalized = normalized.Replace("ä", "ae");
+        normalized = normalized.Replace("ö", "oe");
+        normalized = normalized.Replace("ü", "ue");
+        
+        // Remove diacritics for other characters
         normalized = RemoveDiacritics(normalized);
+        
+        // Remove common punctuation that might interfere with matching
+        normalized = System.Text.RegularExpressions.Regex.Replace(normalized, @"[.,;:!?()[\]{}""'&-]", "");
         
         // Replace multiple whitespace with single space
         normalized = System.Text.RegularExpressions.Regex.Replace(normalized, @"\s+", " ");
-        
-        // Remove common punctuation that might interfere with matching
-        normalized = System.Text.RegularExpressions.Regex.Replace(normalized, @"[.,;:!?()[\]{}""'-]", "");
         
         return normalized.Trim();
     }
