@@ -39,12 +39,18 @@ public class AmountMatcher : IAmountMatcher
         var transactionAmount = transaction.GrossAmount;
         var documentAmount = GetBestDocumentAmount(document);
 
-        if (documentAmount == null || documentAmount == 0)
+        if (documentAmount == null)
             return 0.0;
 
         // Calculate percentage difference
         var difference = Math.Abs(transactionAmount - documentAmount.Value);
-        var percentageDifference = (double)(difference / Math.Max(Math.Abs(transactionAmount), Math.Abs(documentAmount.Value)));
+        var maxAmount = Math.Max(Math.Abs(transactionAmount), Math.Abs(documentAmount.Value));
+        
+        // Handle case where both amounts are zero
+        if (maxAmount == 0)
+            return transactionAmount == documentAmount.Value ? 1.0 : 0.0;
+            
+        var percentageDifference = (double)(difference / maxAmount);
 
         // Determine score based on tolerance ranges
         if (percentageDifference <= config.ExactMatchTolerance)
@@ -79,7 +85,7 @@ public class AmountMatcher : IAmountMatcher
     private static decimal? GetBestDocumentAmount(Document document)
     {
         // Priority 1: Use Total if available (most comprehensive amount)
-        if (document.Total.HasValue && document.Total.Value > 0)
+        if (document.Total.HasValue && document.Total.Value != 0)
         {
             // If Skonto is available, consider it as potential discount
             if (document.Skonto.HasValue && document.Skonto.Value > 0)
@@ -92,8 +98,8 @@ public class AmountMatcher : IAmountMatcher
         }
 
         // Priority 2: Calculate total from SubTotal + TaxAmount if both available
-        if (document.SubTotal.HasValue && document.SubTotal.Value > 0 && 
-            document.TaxAmount.HasValue && document.TaxAmount.Value > 0)
+        if (document.SubTotal.HasValue && document.SubTotal.Value != 0 && 
+            document.TaxAmount.HasValue && document.TaxAmount.Value != 0)
         {
             var calculatedTotal = document.SubTotal.Value + document.TaxAmount.Value;
             
@@ -106,13 +112,13 @@ public class AmountMatcher : IAmountMatcher
         }
 
         // Priority 3: Use SubTotal if available
-        if (document.SubTotal.HasValue && document.SubTotal.Value > 0)
+        if (document.SubTotal.HasValue && document.SubTotal.Value != 0)
         {
             return document.SubTotal.Value;
         }
 
         // Priority 4: Use TaxAmount as last resort (least reliable for matching)
-        if (document.TaxAmount.HasValue && document.TaxAmount.Value > 0)
+        if (document.TaxAmount.HasValue && document.TaxAmount.Value != 0)
         {
             return document.TaxAmount.Value;
         }

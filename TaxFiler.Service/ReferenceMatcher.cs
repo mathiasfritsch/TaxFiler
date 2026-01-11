@@ -292,9 +292,9 @@ public class ReferenceMatcher : IReferenceMatcher
         if (!normalized.Any(char.IsLetterOrDigit))
             return false;
 
-        // Exclude common generic references
+        // Exclude common generic references (check both original and normalized)
         var genericRefs = new[] { "N/A", "NA", "NONE", "NULL", "UNKNOWN", "TBD", "PENDING" };
-        if (genericRefs.Contains(normalized))
+        if (genericRefs.Contains(reference.Trim().ToUpperInvariant()) || genericRefs.Contains(normalized))
             return false;
 
         return true;
