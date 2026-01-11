@@ -62,8 +62,8 @@ This implementation plan converts the Enhanced Transaction Document Matching des
 - [x] 4. Checkpoint - Ensure individual matcher tests pass
   - Ensure all individual matcher tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement core document matching service
-  - [ ] 5.1 Create `DocumentMatchingService` class
+- [x] 5. Implement core document matching service
+  - [x] 5.1 Create `DocumentMatchingService` class
     - Implement `DocumentMatchesAsync` method for single transactions
     - Implement composite scoring algorithm with configurable weights
     - Apply bonus multiplier for high individual scores
@@ -77,7 +77,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 12: Bonus Score Application**
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 6.1, 6.2, 6.3, 6.5**
 
-  - [ ] 5.3 Implement batch matching functionality
+  - [x] 5.3 Implement batch matching functionality
     - Add `BatchDocumentMatchesAsync` method for multiple transactions
     - Ensure batch operations produce consistent results with individual matching
     - _Requirements: 7.4_
