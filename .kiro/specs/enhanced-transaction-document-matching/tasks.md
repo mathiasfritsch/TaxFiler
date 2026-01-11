@@ -22,8 +22,8 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 11: Reference Number Matching**
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5**
 
-- [ ] 3. Implement individual matching components
-  - [ ] 3.1 Create `AmountMatcher` class
+- [x] 3. Implement individual matching components
+  - [x] 3.1 Create `AmountMatcher` class
     - Implement amount comparison logic with tolerance ranges
     - Handle SubTotal, Total, TaxAmount, and Skonto fields
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
@@ -33,7 +33,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 6: Document Amount Field Handling**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6**
 
-  - [ ] 3.3 Create `DateMatcher` class
+  - [x] 3.3 Create `DateMatcher` class
     - Implement date proximity scoring with configurable tolerances
     - Handle InvoiceDate and InvoiceDateFromFolder priority
     - Handle null/missing date fields gracefully
@@ -44,7 +44,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 8: Date Field Priority and Null Handling**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6**
 
-  - [ ] 3.5 Create `VendorMatcher` class
+  - [x] 3.5 Create `VendorMatcher` class
     - Implement vendor name matching hierarchy (exact, substring, fuzzy)
     - Use both Counterparty and SenderReceiver fields from transactions
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
@@ -54,7 +54,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
     - **Property 10: Multiple Vendor Field Usage**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.6**
 
-  - [ ] 3.7 Create `ReferenceMatcher` class
+  - [x] 3.7 Create `ReferenceMatcher` class
     - Implement reference number matching with case-insensitive comparison
     - Handle null/empty reference fields
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
