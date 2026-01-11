@@ -6,7 +6,7 @@ This implementation plan converts the Enhanced Transaction Document Matching des
 
 ## Tasks
 
-- [ ] 1. Set up core interfaces and configuration models
+- [x] 1. Set up core interfaces and configuration models
   - Create `IDocumentMatchingService` interface in TaxFiler.Service
   - Create configuration classes (`MatchingConfiguration`, `AmountMatchingConfig`, etc.)
   - Create result classes (`DocumentMatch`, `MatchScoreBreakdown`)
