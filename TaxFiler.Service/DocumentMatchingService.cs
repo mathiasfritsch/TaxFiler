@@ -58,9 +58,10 @@ public class DocumentMatchingService : IDocumentMatchingService
         if (transaction == null)
             return Enumerable.Empty<DocumentMatch>();
 
-        // Get all documents from database
+        // Get all documents from database that are not already matched to a transaction
         var documents = await _context.Documents
             .AsNoTracking()
+            .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
             .ToListAsync(cancellationToken);
 
         // Calculate matches for all documents
@@ -110,9 +111,10 @@ public class DocumentMatchingService : IDocumentMatchingService
 
         var result = new Dictionary<int, IEnumerable<DocumentMatch>>();
 
-        // Get all documents once for efficiency
+        // Get all documents once for efficiency (only unmatched documents)
         var documents = await _context.Documents
             .AsNoTracking()
+            .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
             .ToListAsync(cancellationToken);
 
         // Process each transaction
