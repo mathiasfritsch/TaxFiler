@@ -10,7 +10,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Microsoft.Identity.Web.UI" Version="4.2.0" />
-    <PackageVersion Include="Microsoft.OpenApi" Version="3.1.2" />
     <PackageVersion Include="Refit" Version="9.0.2" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="9.0.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.1.0" />
