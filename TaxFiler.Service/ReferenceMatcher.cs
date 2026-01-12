@@ -27,8 +27,9 @@ public class ReferenceMatcher : IReferenceMatcher
     /// Calculates the reference similarity score between a transaction and document.
     /// Uses hierarchical matching: exact match > substring match > reverse substring match.
     /// All comparisons are case-insensitive and handle null/empty values gracefully.
+    /// Checks the TransactionNote field for invoice numbers.
     /// </summary>
-    /// <param name="transaction">Transaction containing TransactionReference field</param>
+    /// <param name="transaction">Transaction containing TransactionNote field</param>
     /// <param name="document">Document containing InvoiceNumber field</param>
     /// <returns>Score between 0.0 and 1.0, where 1.0 indicates exact reference match</returns>
     public double CalculateReferenceScore(Transaction transaction, Document document)
@@ -36,7 +37,7 @@ public class ReferenceMatcher : IReferenceMatcher
         if (transaction == null || document == null)
             return 0.0;
 
-        var transactionRef = transaction.TransactionReference;
+        var transactionRef = transaction.TransactionNote;
         var documentRef = document.InvoiceNumber;
 
         // Handle null/empty reference fields gracefully

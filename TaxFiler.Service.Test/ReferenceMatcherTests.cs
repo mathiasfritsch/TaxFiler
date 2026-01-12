@@ -17,7 +17,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_ExactMatch_ReturnsOne()
     {
-        var transaction = new Transaction { TransactionReference = "INV-2024-001" };
+        var transaction = new Transaction { TransactionNote = "INV-2024-001" };
         var document = new Document { InvoiceNumber = "INV-2024-001" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
@@ -28,7 +28,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_ExactMatchIgnoreCase_ReturnsOne()
     {
-        var transaction = new Transaction { TransactionReference = "inv-2024-001" };
+        var transaction = new Transaction { TransactionNote = "inv-2024-001" };
         var document = new Document { InvoiceNumber = "INV-2024-001" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
@@ -39,7 +39,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_TransactionContainsInvoice_ReturnsHighScore()
     {
-        var transaction = new Transaction { TransactionReference = "Payment for INV-2024-001" };
+        var transaction = new Transaction { TransactionNote = "Payment for INV-2024-001" };
         var document = new Document { InvoiceNumber = "INV-2024-001" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
