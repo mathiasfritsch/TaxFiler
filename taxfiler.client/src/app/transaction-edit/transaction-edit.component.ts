@@ -20,6 +20,7 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { Observable } from "rxjs";
 import {map, startWith} from 'rxjs/operators';
 import { Account } from "../model/account";
+import { DocumentMatch } from "../model/document-match";
 
 @Component({
   selector: 'app-transaction-edit',
@@ -134,10 +135,15 @@ export class TransactionEditComponent implements OnInit{
   }
 
   getDocuments() {
-    this.http.get<any[]>(`/api/documents/getdocuments`).subscribe(
+    if (!this.transaction || !this.transaction.id) {
+      console.error('Transaction ID is required to fetch document matches');
+      return;
+    }
+    
+    this.http.get<DocumentMatch[]>(`/api/documentmatching/matches/${this.transaction.id}`).subscribe(
       {
-        next: documents => {
-          this.documents = documents;
+        next: documentMatches => {
+          this.documents = documentMatches.map(match => match.document);
         },
         error: error => {
           console.error('There was an error!', error);
