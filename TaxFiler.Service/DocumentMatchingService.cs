@@ -51,18 +51,23 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// Finds and ranks matching documents for a given transaction.
     /// </summary>
     /// <param name="transaction">The transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by score (highest first)</returns>
-    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(Transaction transaction, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(Transaction transaction, bool unconnectedOnly = true, CancellationToken cancellationToken = default)
     {
         if (transaction == null)
             return Enumerable.Empty<DocumentMatch>();
 
-        // Get all documents from database that are not already matched to a transaction
-        var documents = await _context.Documents
-            .AsNoTracking()
-            .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
-            .ToListAsync(cancellationToken);
+        // Get documents from database, optionally filtering out those already matched to a transaction
+        var query = _context.Documents.AsNoTracking();
+        
+        if (unconnectedOnly)
+        {
+            query = query.Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id));
+        }
+        
+        var documents = await query.ToListAsync(cancellationToken);
 
         // Get list of document IDs that have transactions for calculating Unconnected field
         var documentsWithTransactions = await _context.Transactions
@@ -90,9 +95,10 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// Finds and ranks matching documents for a transaction by ID.
     /// </summary>
     /// <param name="transactionId">The ID of the transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by score (highest first)</returns>
-    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(int transactionId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(int transactionId, bool unconnectedOnly = true, CancellationToken cancellationToken = default)
     {
         var transaction = await _context.Transactions
             .AsNoTracking()
@@ -101,7 +107,7 @@ public class DocumentMatchingService : IDocumentMatchingService
         if (transaction == null)
             return Enumerable.Empty<DocumentMatch>();
 
-        return await DocumentMatchesAsync(transaction, cancellationToken);
+        return await DocumentMatchesAsync(transaction, unconnectedOnly, cancellationToken);
     }
 
     /// <summary>

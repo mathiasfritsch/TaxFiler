@@ -28,6 +28,7 @@ public class DocumentMatchingController : ControllerBase
     /// Finds and ranks matching documents for a specific transaction.
     /// </summary>
     /// <param name="transactionId">The ID of the transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions (default: true)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by confidence score (highest first)</returns>
     /// <response code="200">Returns the list of matching documents</response>
@@ -38,12 +39,13 @@ public class DocumentMatchingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<DocumentMatch>>> GetDocumentMatches(
-        int transactionId, 
+        int transactionId,
+        [FromQuery] bool unconnectedOnly = true,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var matches = await _documentMatchingService.DocumentMatchesAsync(transactionId, cancellationToken);
+            var matches = await _documentMatchingService.DocumentMatchesAsync(transactionId, unconnectedOnly, cancellationToken);
             return Ok(matches);
         }
         catch (ArgumentException ex)

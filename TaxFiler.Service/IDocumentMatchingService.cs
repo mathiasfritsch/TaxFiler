@@ -11,17 +11,19 @@ public interface IDocumentMatchingService
     /// Finds and ranks matching documents for a given transaction.
     /// </summary>
     /// <param name="transaction">The transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by score (highest first)</returns>
-    Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(Transaction transaction, CancellationToken cancellationToken = default);
+    Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(Transaction transaction, bool unconnectedOnly = true, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Finds and ranks matching documents for a transaction by ID.
     /// </summary>
     /// <param name="transactionId">The ID of the transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by score (highest first)</returns>
-    Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(int transactionId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(int transactionId, bool unconnectedOnly = true, CancellationToken cancellationToken = default);
     
     /// <summary>
     /// Performs batch matching for multiple transactions.
