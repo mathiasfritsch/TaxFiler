@@ -147,7 +147,7 @@ public class TransactionService(TaxFilerContext taxFilerContext) : ITransactionS
 
     public async Task<modelDto.TransactionDto> GetTransactionAsync(int transactionId)
     {
-        var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == transactionId);
+        var transaction = await taxFilerContext.Transactions.Include(a => a.Account).SingleAsync(t => t.Id == transactionId);
         return transaction.TransactionDto();
     }
 
