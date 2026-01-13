@@ -64,12 +64,18 @@ public class DocumentMatchingService : IDocumentMatchingService
             .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
             .ToListAsync(cancellationToken);
 
+        // Get list of document IDs that have transactions for calculating Unconnected field
+        var documentsWithTransactions = await _context.Transactions
+            .Where(t => t.DocumentId != null)
+            .Select(t => t.DocumentId)
+            .ToArrayAsync(cancellationToken);
+
         // Calculate matches for all documents
         var matches = new List<DocumentMatch>();
         
         foreach (var document in documents)
         {
-            var match = CalculateDocumentMatch(transaction, document);
+            var match = CalculateDocumentMatch(transaction, document, documentsWithTransactions);
             if (match.MatchScore >= _config.MinimumMatchScore)
             {
                 matches.Add(match);
@@ -117,6 +123,12 @@ public class DocumentMatchingService : IDocumentMatchingService
             .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
             .ToListAsync(cancellationToken);
 
+        // Get list of document IDs that have transactions for calculating Unconnected field
+        var documentsWithTransactions = await _context.Transactions
+            .Where(t => t.DocumentId != null)
+            .Select(t => t.DocumentId)
+            .ToArrayAsync(cancellationToken);
+
         // Process each transaction
         foreach (var transaction in transactions)
         {
@@ -127,7 +139,7 @@ public class DocumentMatchingService : IDocumentMatchingService
             
             foreach (var document in documents)
             {
-                var match = CalculateDocumentMatch(transaction, document);
+                var match = CalculateDocumentMatch(transaction, document, documentsWithTransactions);
                 if (match.MatchScore >= _config.MinimumMatchScore)
                 {
                     matches.Add(match);
@@ -146,8 +158,9 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// </summary>
     /// <param name="transaction">Transaction to match</param>
     /// <param name="document">Document to match against</param>
+    /// <param name="documentsWithTransactions">Array of document IDs that have transactions</param>
     /// <returns>DocumentMatch with calculated scores</returns>
-    private DocumentMatch CalculateDocumentMatch(Transaction transaction, Document document)
+    private DocumentMatch CalculateDocumentMatch(Transaction transaction, Document document, int?[] documentsWithTransactions)
     {
         // Calculate individual criterion scores
         var amountScore = _amountMatcher.CalculateAmountScore(transaction, document, _config.AmountConfig);
@@ -164,9 +177,12 @@ public class DocumentMatchingService : IDocumentMatchingService
         // Ensure score is within valid range
         finalScore = Math.Max(0.0, Math.Min(1.0, finalScore));
 
+        // Convert Document entity to DocumentDto with Unconnected field
+        var documentDto = document.ToDto(documentsWithTransactions);
+
         return new DocumentMatch
         {
-            Document = document,
+            Document = documentDto,
             MatchScore = finalScore,
             ScoreBreakdown = new MatchScoreBreakdown
             {

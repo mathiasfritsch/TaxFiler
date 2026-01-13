@@ -76,13 +76,21 @@ export class TransactionEditComponent implements OnInit{
       accountControl: new FormControl(transaction.accountId)
     });
     this.filteredDocuments = this.transactionFormGroup.controls['documentControl'].valueChanges.pipe(
+      startWith(''),
       map(value => this._filterDocuments(value))
     );
   }
   onCancelClick(): void {
     this.dialogRef.close();
   }
-  private _filterDocuments(value: string): Document[] {
+  private _filterDocuments(value: string | Document | null): Document[] {
+    // If value is empty, null, or an object (Document), show all documents
+    if (!value || typeof value !== 'string') {
+      return this.documents.filter(document =>
+        document.unconnected || !this.unconnectedOnly
+      );
+    }
+
     const filterValue = value.toLowerCase();
     const filterValueNumber = parseFloat(value);
     const filterValueDate:Date = new Date(value);
@@ -139,7 +147,7 @@ export class TransactionEditComponent implements OnInit{
       console.error('Transaction ID is required to fetch document matches');
       return;
     }
-    
+
     this.http.get<DocumentMatch[]>(`/api/documentmatching/matches/${this.transaction.id}`).subscribe(
       {
         next: documentMatches => {
@@ -165,5 +173,11 @@ export class TransactionEditComponent implements OnInit{
 
   changeUnconnectedOnly() {
     this.unconnectedOnly = !this.unconnectedOnly;
+  }
+
+  onDocumentControlFocus() {
+    // Trigger the observable to emit current value and show all documents
+    const currentValue = this.transactionFormGroup.controls['documentControl'].value;
+    this.transactionFormGroup.controls['documentControl'].setValue(currentValue);
   }
 }

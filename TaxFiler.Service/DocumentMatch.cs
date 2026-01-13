@@ -1,4 +1,4 @@
-using TaxFiler.DB.Model;
+using TaxFiler.Model.Dto;
 
 namespace TaxFiler.Service;
 
@@ -10,7 +10,7 @@ public class DocumentMatch
     /// <summary>
     /// The matched document.
     /// </summary>
-    public Document Document { get; set; } = null!;
+    public DocumentDto Document { get; set; } = null!;
     
     /// <summary>
     /// Overall match confidence score (0.0 to 1.0).
