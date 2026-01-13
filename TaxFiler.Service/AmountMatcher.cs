@@ -27,6 +27,7 @@ public class AmountMatcher : IAmountMatcher
     /// Calculates the amount similarity score between a transaction and document.
     /// Uses tolerance ranges to determine scoring levels: exact, high, medium, or low match.
     /// The matching is direction-independent - works consistently for both incoming and outgoing transactions.
+    /// Enhanced to handle Skonto (early payment discount) when present in documents.
     /// </summary>
     /// <param name="transaction">Transaction containing GrossAmount for comparison</param>
     /// <param name="document">Document containing Total, SubTotal, TaxAmount, and Skonto fields</param>
@@ -42,6 +43,37 @@ public class AmountMatcher : IAmountMatcher
 
         if (documentAmount == null)
             return 0.0;
+
+        // Enhanced Skonto handling with validation
+        if (SkontoCalculator.HasValidSkonto(document.Skonto))
+        {
+            try
+            {
+                var originalAmount = documentAmount.Value;
+                var discountedAmount = SkontoCalculator.CalculateDiscountedAmount(documentAmount.Value, document.Skonto);
+                
+                // Validate Skonto calculation results
+                if (discountedAmount < 0)
+                {
+                    // If Skonto results in negative amount, use original amount
+                    documentAmount = originalAmount;
+                }
+                else if (discountedAmount > originalAmount && originalAmount > 0)
+                {
+                    // If discounted amount is larger than original (invalid), use original
+                    documentAmount = originalAmount;
+                }
+                else
+                {
+                    // Valid Skonto calculation
+                    documentAmount = discountedAmount;
+                }
+            }
+            catch (Exception)
+            {
+                // If Skonto calculation fails, continue without Skonto
+            }
+        }
 
         // Calculate percentage difference - since all amounts are positive, no need for Math.Abs()
         var difference = Math.Abs(transactionAmount - documentAmount.Value);
@@ -92,8 +124,7 @@ public class AmountMatcher : IAmountMatcher
 
     /// <summary>
     /// Selects the most appropriate amount from document fields for comparison.
-    /// Priority: Total > SubTotal > (SubTotal + TaxAmount) > TaxAmount
-    /// Considers Skonto (early payment discount) when available.
+    /// Priority: Total > SubTotal + TaxAmount > SubTotal > TaxAmount
     /// </summary>
     /// <param name="document">Document containing various amount fields</param>
     /// <returns>Best available amount for matching, or null if no valid amount found</returns>
@@ -102,13 +133,6 @@ public class AmountMatcher : IAmountMatcher
         // Priority 1: Use Total if available (most comprehensive amount)
         if (document.Total.HasValue && document.Total.Value != 0)
         {
-            // If Skonto is available, consider it as potential discount
-            if (document.Skonto.HasValue && document.Skonto.Value > 0)
-            {
-                // Return both original total and total minus skonto for consideration
-                // For now, return the original total as primary comparison
-                return document.Total.Value;
-            }
             return document.Total.Value;
         }
 
@@ -116,14 +140,7 @@ public class AmountMatcher : IAmountMatcher
         if (document.SubTotal.HasValue && document.SubTotal.Value != 0 && 
             document.TaxAmount.HasValue && document.TaxAmount.Value != 0)
         {
-            var calculatedTotal = document.SubTotal.Value + document.TaxAmount.Value;
-            
-            // Apply Skonto if available
-            if (document.Skonto.HasValue && document.Skonto.Value > 0)
-            {
-                return calculatedTotal; // Return full amount, Skonto consideration handled elsewhere
-            }
-            return calculatedTotal;
+            return document.SubTotal.Value + document.TaxAmount.Value;
         }
 
         // Priority 3: Use SubTotal if available
@@ -144,17 +161,19 @@ public class AmountMatcher : IAmountMatcher
 
     /// <summary>
     /// Gets alternative amount considering Skonto discount for additional matching attempts.
-    /// This can be used for secondary matching when primary amount doesn't match well.
+    /// This method is now deprecated as Skonto logic is integrated into CalculateAmountScore.
+    /// Kept for backward compatibility.
     /// </summary>
     /// <param name="document">Document to get alternative amount from</param>
     /// <returns>Amount with Skonto discount applied, or null if not applicable</returns>
+    [Obsolete("Skonto logic is now integrated into CalculateAmountScore. This method is kept for backward compatibility.")]
     public static decimal? GetSkontoAdjustedAmount(Document document)
     {
         var baseAmount = GetBestDocumentAmount(document);
         
-        if (baseAmount.HasValue && document.Skonto.HasValue && document.Skonto.Value > 0)
+        if (baseAmount.HasValue && SkontoCalculator.HasValidSkonto(document.Skonto))
         {
-            return baseAmount.Value - document.Skonto.Value;
+            return SkontoCalculator.CalculateDiscountedAmount(baseAmount.Value, document.Skonto);
         }
 
         return null;

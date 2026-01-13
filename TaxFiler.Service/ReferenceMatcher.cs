@@ -34,9 +34,6 @@ public class ReferenceMatcher : IReferenceMatcher
     /// <returns>Score between 0.0 and 1.0, where 1.0 indicates exact reference match</returns>
     public double CalculateReferenceScore(Transaction transaction, Document document)
     {
-        if (transaction == null || document == null)
-            return 0.0;
-
         var transactionRef = transaction.TransactionNote;
         var documentRef = document.InvoiceNumber;
 

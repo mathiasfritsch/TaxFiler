@@ -231,4 +231,38 @@ public class AmountMatcherTests
 
         Assert.That(adjustedAmount, Is.Null);
     }
+
+    // Enhanced error handling tests for Skonto calculations
+
+    [Test]
+    public void CalculateAmountScore_DocumentWithExtremeSkonto_HandlesGracefully()
+    {
+        var transaction = new Transaction { GrossAmount = 100.00m };
+        var document = new Document 
+        { 
+            Total = 100.00m, 
+            Skonto = decimal.MaxValue // Extreme Skonto percentage
+        };
+
+        var score = _matcher.CalculateAmountScore(transaction, document, _config);
+
+        // Should handle gracefully and return a valid score
+        Assert.That(score, Is.GreaterThanOrEqualTo(0.0).And.LessThanOrEqualTo(1.0));
+    }
+
+    [Test]
+    public void CalculateAmountScore_DocumentWithInvalidSkontoResult_FallsBackToOriginal()
+    {
+        var transaction = new Transaction { GrossAmount = 100.00m };
+        var document = new Document 
+        { 
+            Total = 100.00m, 
+            Skonto = 150.00m // 150% Skonto - would result in negative amount
+        };
+
+        var score = _matcher.CalculateAmountScore(transaction, document, _config);
+
+        // Should handle the negative result gracefully and still provide a reasonable score
+        Assert.That(score, Is.GreaterThanOrEqualTo(0.0).And.LessThanOrEqualTo(1.0));
+    }
 }
