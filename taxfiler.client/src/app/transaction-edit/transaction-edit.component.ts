@@ -135,6 +135,11 @@ export class TransactionEditComponent implements OnInit{
   }
 
   getDocuments() {
+    if (!this.transaction || !this.transaction.id) {
+      console.error('Transaction ID is required to fetch document matches');
+      return;
+    }
+    
     this.http.get<DocumentMatch[]>(`/api/documentmatching/matches/${this.transaction.id}`).subscribe(
       {
         next: documentMatches => {
