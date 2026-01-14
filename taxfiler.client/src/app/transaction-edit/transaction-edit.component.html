@@ -38,7 +38,8 @@
       <mat-form-field>
         <input type="text"
           matInput formControlName="documentControl"
-          [matAutocomplete]="auto">
+          [matAutocomplete]="auto"
+          (focus)="onDocumentControlFocus()">
           <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
             @for (document of filteredDocuments | async; track document) {
               <mat-option [value]="document">

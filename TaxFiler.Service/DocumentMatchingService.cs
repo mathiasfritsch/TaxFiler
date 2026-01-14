@@ -51,25 +51,36 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// Finds and ranks matching documents for a given transaction.
     /// </summary>
     /// <param name="transaction">The transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by score (highest first)</returns>
-    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(Transaction transaction, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(Transaction transaction, bool unconnectedOnly = true, CancellationToken cancellationToken = default)
     {
         if (transaction == null)
             return Enumerable.Empty<DocumentMatch>();
 
-        // Get all documents from database that are not already matched to a transaction
-        var documents = await _context.Documents
-            .AsNoTracking()
-            .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
-            .ToListAsync(cancellationToken);
+        // Get documents from database, optionally filtering out those already matched to a transaction
+        var query = _context.Documents.AsNoTracking();
+        
+        if (unconnectedOnly)
+        {
+            query = query.Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id));
+        }
+        
+        var documents = await query.ToListAsync(cancellationToken);
+
+        // Get list of document IDs that have transactions for calculating Unconnected field
+        var documentsWithTransactions = await _context.Transactions
+            .Where(t => t.DocumentId != null)
+            .Select(t => t.DocumentId)
+            .ToArrayAsync(cancellationToken);
 
         // Calculate matches for all documents
         var matches = new List<DocumentMatch>();
         
         foreach (var document in documents)
         {
-            var match = CalculateDocumentMatch(transaction, document);
+            var match = CalculateDocumentMatch(transaction, document, documentsWithTransactions);
             if (match.MatchScore >= _config.MinimumMatchScore)
             {
                 matches.Add(match);
@@ -84,9 +95,10 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// Finds and ranks matching documents for a transaction by ID.
     /// </summary>
     /// <param name="transactionId">The ID of the transaction to find matches for</param>
+    /// <param name="unconnectedOnly">If true, only return documents not already connected to transactions</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Ranked list of document matches ordered by score (highest first)</returns>
-    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(int transactionId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<DocumentMatch>> DocumentMatchesAsync(int transactionId, bool unconnectedOnly = true, CancellationToken cancellationToken = default)
     {
         var transaction = await _context.Transactions
             .AsNoTracking()
@@ -95,7 +107,7 @@ public class DocumentMatchingService : IDocumentMatchingService
         if (transaction == null)
             return Enumerable.Empty<DocumentMatch>();
 
-        return await DocumentMatchesAsync(transaction, cancellationToken);
+        return await DocumentMatchesAsync(transaction, unconnectedOnly, cancellationToken);
     }
 
     /// <summary>
@@ -117,6 +129,12 @@ public class DocumentMatchingService : IDocumentMatchingService
             .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
             .ToListAsync(cancellationToken);
 
+        // Get list of document IDs that have transactions for calculating Unconnected field
+        var documentsWithTransactions = await _context.Transactions
+            .Where(t => t.DocumentId != null)
+            .Select(t => t.DocumentId)
+            .ToArrayAsync(cancellationToken);
+
         // Process each transaction
         foreach (var transaction in transactions)
         {
@@ -127,7 +145,7 @@ public class DocumentMatchingService : IDocumentMatchingService
             
             foreach (var document in documents)
             {
-                var match = CalculateDocumentMatch(transaction, document);
+                var match = CalculateDocumentMatch(transaction, document, documentsWithTransactions);
                 if (match.MatchScore >= _config.MinimumMatchScore)
                 {
                     matches.Add(match);
@@ -146,8 +164,9 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// </summary>
     /// <param name="transaction">Transaction to match</param>
     /// <param name="document">Document to match against</param>
+    /// <param name="documentsWithTransactions">Array of document IDs that have transactions</param>
     /// <returns>DocumentMatch with calculated scores</returns>
-    private DocumentMatch CalculateDocumentMatch(Transaction transaction, Document document)
+    private DocumentMatch CalculateDocumentMatch(Transaction transaction, Document document, int?[] documentsWithTransactions)
     {
         // Calculate individual criterion scores
         var amountScore = _amountMatcher.CalculateAmountScore(transaction, document, _config.AmountConfig);
@@ -164,9 +183,12 @@ public class DocumentMatchingService : IDocumentMatchingService
         // Ensure score is within valid range
         finalScore = Math.Max(0.0, Math.Min(1.0, finalScore));
 
+        // Convert Document entity to DocumentDto with Unconnected field
+        var documentDto = document.ToDto(documentsWithTransactions);
+
         return new DocumentMatch
         {
-            Document = document,
+            Document = documentDto,
             MatchScore = finalScore,
             ScoreBreakdown = new MatchScoreBreakdown
             {
