@@ -61,4 +61,34 @@ public class TransactionsController(ITransactionService transactionService) : Co
     {
         await transactionService.UpdateTransactionAsync(updateTransactionDto);
     }
+
+    /// <summary>
+    /// Auto-assigns documents to unmatched transactions in a given month.
+    /// </summary>
+    /// <param name="yearMonth">The year-month to process (format: yyyy-MM-dd)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Summary of auto-assignment results</returns>
+    [HttpPost("auto-assign")]
+    [ProducesResponseType(typeof(AutoAssignResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<AutoAssignResult>> AutoAssignDocuments(
+        [FromQuery] DateOnly yearMonth,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await transactionService.AutoAssignDocumentsAsync(
+                yearMonth, 
+                cancellationToken);
+            
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(
+                StatusCodes.Status500InternalServerError, 
+                $"An error occurred during auto-assignment: {ex.Message}");
+        }
+    }
 }

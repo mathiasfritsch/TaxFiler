@@ -11,4 +11,12 @@ public interface ITransactionService
     Task UpdateTransactionAsync(dtoModel.UpdateTransactionDto transactionDto);
     Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonthh);
     Task DeleteTransactionAsync(int id);
+    
+    /// <summary>
+    /// Auto-assigns documents to unmatched transactions in a given month.
+    /// </summary>
+    /// <param name="yearMonth">The year-month to process</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result summary with counts of processed, assigned, and skipped transactions</returns>
+    Task<dtoModel.AutoAssignResult> AutoAssignDocumentsAsync(DateOnly yearMonth, CancellationToken cancellationToken = default);
 }
