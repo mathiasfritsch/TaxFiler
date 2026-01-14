@@ -9,7 +9,7 @@ using modelDto = TaxFiler.Model.Dto;
 
 namespace TaxFiler.Service;
 
-public class TransactionService(TaxFilerContext taxFilerContext) : ITransactionService
+public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchingService documentMatchingService) : ITransactionService
 {
     public IEnumerable<TransactionDto> ParseTransactions(TextReader reader)
     {
@@ -185,4 +185,73 @@ public class TransactionService(TaxFilerContext taxFilerContext) : ITransactionS
             .Transactions
             .Where(t => t.TaxYear == yearMonth.Year && t.TaxMonth == yearMonth.Month)
             .ExecuteDeleteAsync();
+
+    public async Task<modelDto.AutoAssignResult> AutoAssignDocumentsAsync(DateOnly yearMonth, CancellationToken cancellationToken = default)
+    {
+        // 1. Query unmatched transactions for the month
+        var unmatchedTransactions = await taxFilerContext.Transactions
+            .Where(t => t.TransactionDateTime.Year == yearMonth.Year 
+                     && t.TransactionDateTime.Month == yearMonth.Month
+                     && t.DocumentId == null)
+            .OrderBy(t => t.TransactionDateTime)
+            .ToListAsync(cancellationToken);
+        
+        // 2. Use batch matching to get candidates for all transactions
+        var matchesByTransaction = await documentMatchingService
+            .BatchDocumentMatchesAsync(unmatchedTransactions, cancellationToken);
+        
+        // 3. Process each transaction and assign best match if score >= 0.5
+        int assignedCount = 0;
+        int skippedCount = 0;
+        var errors = new List<string>();
+        
+        foreach (var transaction in unmatchedTransactions)
+        {
+            if (cancellationToken.IsCancellationRequested)
+                break;
+                
+            try
+            {
+                if (matchesByTransaction.TryGetValue(transaction.Id, out var matches))
+                {
+                    var bestMatch = matches.FirstOrDefault();
+                    
+                    if (bestMatch != null && bestMatch.MatchScore >= 0.5)
+                    {
+                        transaction.DocumentId = bestMatch.Document.Id;
+                        assignedCount++;
+                    }
+                    else
+                    {
+                        skippedCount++;
+                    }
+                }
+                else
+                {
+                    skippedCount++;
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Transaction {transaction.Id}: {ex.Message}");
+                skippedCount++;
+                // Continue processing remaining transactions
+            }
+        }
+        
+        // 4. Save all changes in a single transaction
+        if (assignedCount > 0)
+        {
+            await taxFilerContext.SaveChangesAsync(cancellationToken);
+        }
+        
+        // 5. Return summary
+        return new modelDto.AutoAssignResult
+        {
+            TotalProcessed = unmatchedTransactions.Count,
+            AssignedCount = assignedCount,
+            SkippedCount = skippedCount,
+            Errors = errors
+        };
+    }
 }
