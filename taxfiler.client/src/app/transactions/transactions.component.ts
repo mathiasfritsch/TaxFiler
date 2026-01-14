@@ -1,9 +1,10 @@
-import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
@@ -16,13 +17,6 @@ import {NavigationComponent} from '../shared/navigation/navigation.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-function formatPrice(value: any):string{
-  return value.value ? value.value.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) : '';
-}
-
 @Component({
     selector: 'app-transactions',
     templateUrl: './transactions.component.html',
@@ -31,14 +25,14 @@ function formatPrice(value: any):string{
   imports: [
     AgGridAngular,
     MatDialogTitle,
-    NavigationComponent
+    NavigationComponent,
+    CommonModule
 ]
 })
 export class TransactionsComponent  implements  OnInit{
-  public transactions: any[] = [];
+  public transactions$: Observable<any[]> | undefined;
   public yearMonth: any;
   public accountId: number | null = null;
-  public isLoading: boolean = true;
   localeText = AG_GRID_LOCALE_DE;
   colDefs: ColDef[] = [
     {
@@ -137,8 +131,7 @@ export class TransactionsComponent  implements  OnInit{
   constructor(private http: HttpClient,
               private route: ActivatedRoute,
               private router: Router,
-              private dialog: MatDialog,
-              private cdr: ChangeDetectorRef) {}
+              private dialog: MatDialog) {}
 
   ngOnInit() {
     console.log('TransactionsComponent ngOnInit called');
@@ -157,24 +150,11 @@ export class TransactionsComponent  implements  OnInit{
 
   getTransactions(yearMonth: any) {
     console.log('getTransactions called with:', yearMonth);
-    this.isLoading = true;
     let url = `/api/transactions/gettransactions?yearMonth=${yearMonth}`;
     if (this.accountId) {
       url += `&accountId=${this.accountId}`;
     }
-    this.http.get<any[]>(url).subscribe(
-      {
-        next: transactions => {
-          this.transactions = transactions;
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        },
-        error: error => {
-          console.error('There was an error!', error);
-          this.isLoading = false;
-        }
-      }
-    );
+    this.transactions$ = this.http.get<any[]>(url);
   }
 
   switchMonth(offset: number) {

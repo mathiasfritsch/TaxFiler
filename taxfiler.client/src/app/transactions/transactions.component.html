@@ -6,14 +6,11 @@
   [showMonthNavigation]="true"
   (downloadReportClicked)="downloadReport()">
 </app-navigation>
-@if (isLoading) {
-  <p><em>Loading... </em></p>
-}
 
 <ag-grid-angular
   class="ag-theme-quartz"
   style="height: 600px;"
-  [rowData]="transactions"
+  [rowData]="transactions$ | async"
   [columnDefs]="colDefs"
   [defaultColDef]="defaultColDef"
   editType="fullRow"

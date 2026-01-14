@@ -8,7 +8,6 @@ import {AgGridAngular} from 'ag-grid-angular';
 import {Component, OnInit, LOCALE_ID, Inject} from '@angular/core';
 import {MatDialog, MatDialogTitle} from '@angular/material/dialog';
 import {FormBuilder} from '@angular/forms';
-import {MatAnchor, MatButton} from '@angular/material/button';
 import {ButtonCellRendererComponent} from '../button-cell-renderer/button-cell-renderer.component';
 import {DocumentEditComponent} from '../document-edit/document-edit.component';
 import {Document} from '../model/document';
