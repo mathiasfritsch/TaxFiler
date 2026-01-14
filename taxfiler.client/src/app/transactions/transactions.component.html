@@ -6,7 +6,7 @@
   [showMonthNavigation]="true"
   (downloadReportClicked)="downloadReport()">
 </app-navigation>
-@if (!transactions) {
+@if (isLoading) {
   <p><em>Loading... </em></p>
 }
 

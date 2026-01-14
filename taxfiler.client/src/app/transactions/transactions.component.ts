@@ -1,8 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { combineLatest } from 'rxjs';
 
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
@@ -37,6 +38,7 @@ export class TransactionsComponent  implements  OnInit{
   public transactions: any[] = [];
   public yearMonth: any;
   public accountId: number | null = null;
+  public isLoading: boolean = true;
   localeText = AG_GRID_LOCALE_DE;
   colDefs: ColDef[] = [
     {
@@ -135,16 +137,18 @@ export class TransactionsComponent  implements  OnInit{
   constructor(private http: HttpClient,
               private route: ActivatedRoute,
               private router: Router,
-              private dialog: MatDialog) {}
+              private dialog: MatDialog,
+              private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    console.log('TransactionsComponent ngOnInit called');
+    combineLatest([
+      this.route.paramMap,
+      this.route.queryParams
+    ]).subscribe(([params, queryParams]) => {
       this.yearMonth = params.get('yearMonth');
-      this.getTransactions(this.yearMonth);
-    });
-
-    this.route.queryParams.subscribe(params => {
-      this.accountId = params['accountId'] ? parseInt(params['accountId']) : null;
+      this.accountId = queryParams['accountId'] ? parseInt(queryParams['accountId']) : null;
+      console.log('Route params changed:', { yearMonth: this.yearMonth, accountId: this.accountId });
       if (this.yearMonth) {
         this.getTransactions(this.yearMonth);
       }
@@ -152,7 +156,8 @@ export class TransactionsComponent  implements  OnInit{
   }
 
   getTransactions(yearMonth: any) {
-    console.log(yearMonth);
+    console.log('getTransactions called with:', yearMonth);
+    this.isLoading = true;
     let url = `/api/transactions/gettransactions?yearMonth=${yearMonth}`;
     if (this.accountId) {
       url += `&accountId=${this.accountId}`;
@@ -161,9 +166,12 @@ export class TransactionsComponent  implements  OnInit{
       {
         next: transactions => {
           this.transactions = transactions;
+          this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: error => {
           console.error('There was an error!', error);
+          this.isLoading = false;
         }
       }
     );
