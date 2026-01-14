@@ -86,9 +86,7 @@ export class TransactionEditComponent implements OnInit{
   private _filterDocuments(value: string | Document | null): Document[] {
     // If value is empty, null, or an object (Document), show all documents
     if (!value || typeof value !== 'string') {
-      return this.documents.filter(document =>
-        document.unconnected || !this.unconnectedOnly
-      );
+      return this.documents;
     }
 
     const filterValue = value.toLowerCase();
@@ -100,9 +98,6 @@ export class TransactionEditComponent implements OnInit{
         document.name.toLowerCase().includes(filterValue) ||
         document.total == filterValueNumber ||
         document.invoiceDate == filterValueDate
-      ) &&
-      (
-        document.unconnected || !this.unconnectedOnly
       )
     );
   }
@@ -148,7 +143,7 @@ export class TransactionEditComponent implements OnInit{
       return;
     }
 
-    this.http.get<DocumentMatch[]>(`/api/documentmatching/matches/${this.transaction.id}`).subscribe(
+    this.http.get<DocumentMatch[]>(`/api/documentmatching/matches/${this.transaction.id}?unconnectedOnly=${this.unconnectedOnly}`).subscribe(
       {
         next: documentMatches => {
           this.documents = documentMatches.map(match => match.document);
@@ -173,6 +168,7 @@ export class TransactionEditComponent implements OnInit{
 
   changeUnconnectedOnly() {
     this.unconnectedOnly = !this.unconnectedOnly;
+    this.getDocuments(); // Reload documents with new filter
   }
 
   onDocumentControlFocus() {
