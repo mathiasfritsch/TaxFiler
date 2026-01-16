@@ -15,10 +15,14 @@
 <!--    (click)="autoAssignDocuments()"-->
 <!--    [disabled]="isAutoAssigning || !(hasUnmatchedTransactions | async)"-->
 <!--    [matTooltip]="getAutoAssignTooltip()">-->
-<!--    <mat-icon *ngIf="isAutoAssigning">-->
-<!--      <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>-->
-<!--    </mat-icon>-->
-<!--    <mat-icon *ngIf="!isAutoAssigning">auto_fix_high</mat-icon>-->
+<!--    @if (isAutoAssigning) {-->
+<!--      <mat-icon>-->
+<!--        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>-->
+<!--      </mat-icon>-->
+<!--    }-->
+<!--    @if (!isAutoAssigning) {-->
+<!--      <mat-icon>auto_fix_high</mat-icon>-->
+<!--    }-->
 <!--    Auto-Assign Documents-->
 <!--  </button>-->
 <!--</div>-->
@@ -46,23 +50,3 @@
 >
 </ag-grid-angular>
 
-
-
-<!-- Results Dialog -->
-<div *ngIf="autoAssignResult" class="auto-assign-result-dialog">
-  <div class="dialog-content">
-    <h3>Auto-Assignment Complete</h3>
-    <div class="result-summary">
-      <p><strong>Total transactions processed:</strong> {{ autoAssignResult.totalProcessed }}</p>
-      <p><strong>Successfully assigned:</strong> {{ autoAssignResult.assignedCount }}</p>
-      <p><strong>Skipped (no match):</strong> {{ autoAssignResult.skippedCount }}</p>
-    </div>
-    <div *ngIf="autoAssignResult.errors.length > 0" class="errors-section">
-      <h4>Errors:</h4>
-      <ul>
-        <li *ngFor="let error of autoAssignResult.errors">{{ error }}</li>
-      </ul>
-    </div>
-    <button mat-button (click)="dismissAutoAssignResult()">Close</button>
-  </div>
-</div>
