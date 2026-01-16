@@ -4,7 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { combineLatest, Observable } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
@@ -20,6 +20,7 @@ import {Transaction} from "../model/transaction";
 import {NavigationComponent} from '../shared/navigation/navigation.component';
 import {AutoAssignResult} from "../model/auto-assign-result";
 import {map} from 'rxjs/operators';
+import {AutoAssignResultDialogComponent} from "../auto-assign-result-dialog/auto-assign-result-dialog.component";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -33,6 +34,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
     MatDialogTitle,
     NavigationComponent,
     CommonModule,
+    AsyncPipe,
     MatButton,
     //MatIcon,
     //MatProgressSpinner,
@@ -47,7 +49,6 @@ export class TransactionsComponent  implements  OnInit{
 
   // Auto-assign properties
   isAutoAssigning = false;
-  autoAssignResult: AutoAssignResult | null = null;
 
   colDefs: ColDef[] = [
     {
@@ -251,13 +252,19 @@ export class TransactionsComponent  implements  OnInit{
     }
 
     this.isAutoAssigning = true;
-    this.autoAssignResult = null;
 
     try {
       const url = `/api/transactions/auto-assign?yearMonth=${this.yearMonth}`;
 
       const result = await this.http.post<AutoAssignResult>(url, {}).toPromise();
-      this.autoAssignResult = result ?? null;
+
+      // Open the Material Dialog to show results
+      if (result) {
+        this.dialog.open(AutoAssignResultDialogComponent, {
+          width: '500px',
+          data: result
+        });
+      }
 
       // Refresh the grid to show updated assignments
       this.getTransactions(this.yearMonth);
@@ -278,9 +285,6 @@ export class TransactionsComponent  implements  OnInit{
     );
   }
 
-  dismissAutoAssignResult(): void {
-    this.autoAssignResult = null;
-  }
 
   getAutoAssignTooltip(): string {
     if (this.isAutoAssigning) {

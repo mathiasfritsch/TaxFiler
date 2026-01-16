@@ -1,0 +1,31 @@
+.result-summary {
+  margin: 20px 0;
+}
+
+.result-summary p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.errors-section {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+.errors-section h4 {
+  margin-top: 0;
+  color: #c62828;
+}
+
+.errors-section ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.errors-section li {
+  margin: 5px 0;
+  color: #d32f2f;
+}
+
