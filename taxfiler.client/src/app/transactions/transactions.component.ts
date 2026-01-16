@@ -3,41 +3,52 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { combineLatest, Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 import {AgGridAngular} from "ag-grid-angular";
 import {MatDialog, MatDialogTitle} from "@angular/material/dialog";
+import {MatButton} from "@angular/material/button";
+//import {MatIcon} from "@angular/material/icon";
+//import {MatProgressSpinner} from "@angular/material/progress-spinner";
+import {MatTooltip} from "@angular/material/tooltip";
 
 import {AG_GRID_LOCALE_DE} from "@ag-grid-community/locale";
 import {ButtonCellRendererComponent} from "../button-cell-renderer/button-cell-renderer.component";
 import {TransactionEditComponent} from "../transaction-edit/transaction-edit.component";
 import {Transaction} from "../model/transaction";
 import {NavigationComponent} from '../shared/navigation/navigation.component';
+import {AutoAssignResult} from "../model/auto-assign-result";
+import {map} from 'rxjs/operators';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-function formatPrice(value: any):string{
-  return value.value ? value.value.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) : '';
-}
-
 @Component({
-    selector: 'app-transactions',
-    templateUrl: './transactions.component.html',
-    styleUrls: ['./transactions.component.css'],
-    standalone: true,
+  selector: 'app-transactions',
+  templateUrl: './transactions.component.html',
+  styleUrls: ['./transactions.component.css'],
+  standalone: true,
   imports: [
     AgGridAngular,
     MatDialogTitle,
-    NavigationComponent
-]
+    NavigationComponent,
+    CommonModule,
+    MatButton,
+    //MatIcon,
+    //MatProgressSpinner,
+    MatTooltip
+  ]
 })
 export class TransactionsComponent  implements  OnInit{
-  public transactions: any[] = [];
+  public transactions$: Observable<any[]> | undefined;
   public yearMonth: any;
   public accountId: number | null = null;
   localeText = AG_GRID_LOCALE_DE;
+
+  // Auto-assign properties
+  isAutoAssigning = false;
+  autoAssignResult: AutoAssignResult | null = null;
+
   colDefs: ColDef[] = [
     {
       field: 'netAmount',
@@ -138,13 +149,14 @@ export class TransactionsComponent  implements  OnInit{
               private dialog: MatDialog) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    console.log('TransactionsComponent ngOnInit called');
+    combineLatest([
+      this.route.paramMap,
+      this.route.queryParams
+    ]).subscribe(([params, queryParams]) => {
       this.yearMonth = params.get('yearMonth');
-      this.getTransactions(this.yearMonth);
-    });
-
-    this.route.queryParams.subscribe(params => {
-      this.accountId = params['accountId'] ? parseInt(params['accountId']) : null;
+      this.accountId = queryParams['accountId'] ? parseInt(queryParams['accountId']) : null;
+      console.log('Route params changed:', { yearMonth: this.yearMonth, accountId: this.accountId });
       if (this.yearMonth) {
         this.getTransactions(this.yearMonth);
       }
@@ -152,21 +164,12 @@ export class TransactionsComponent  implements  OnInit{
   }
 
   getTransactions(yearMonth: any) {
-    console.log(yearMonth);
+    console.log('getTransactions called with:', yearMonth);
     let url = `/api/transactions/gettransactions?yearMonth=${yearMonth}`;
     if (this.accountId) {
       url += `&accountId=${this.accountId}`;
     }
-    this.http.get<any[]>(url).subscribe(
-      {
-        next: transactions => {
-          this.transactions = transactions;
-        },
-        error: error => {
-          console.error('There was an error!', error);
-        }
-      }
-    );
+    this.transactions$ = this.http.get<any[]>(url);
   }
 
   switchMonth(offset: number) {
@@ -240,5 +243,51 @@ export class TransactionsComponent  implements  OnInit{
           this.getTransactions(this.yearMonth);
         }
       });
+  }
+
+  async autoAssignDocuments(): Promise<void> {
+    if (this.isAutoAssigning) {
+      return;
+    }
+
+    this.isAutoAssigning = true;
+    this.autoAssignResult = null;
+
+    try {
+      const url = `/api/transactions/auto-assign?yearMonth=${this.yearMonth}`;
+
+      const result = await this.http.post<AutoAssignResult>(url, {}).toPromise();
+      this.autoAssignResult = result ?? null;
+
+      // Refresh the grid to show updated assignments
+      this.getTransactions(this.yearMonth);
+    } catch (error) {
+      console.error('Error during auto-assignment:', error);
+      alert('An error occurred during auto-assignment. Please try again.');
+    } finally {
+      this.isAutoAssigning = false;
+    }
+  }
+
+  get hasUnmatchedTransactions(): Observable<boolean> {
+    if (!this.transactions$) {
+      return new Observable(observer => observer.next(false));
+    }
+    return this.transactions$.pipe(
+      map(txns => txns.some(t => !t.documentId))
+    );
+  }
+
+  dismissAutoAssignResult(): void {
+    this.autoAssignResult = null;
+  }
+
+  getAutoAssignTooltip(): string {
+    if (this.isAutoAssigning) {
+      return 'Auto-assignment in progress...';
+    }
+    // Note: This is a synchronous method but hasUnmatchedTransactions is async
+    // For the tooltip, we'll provide a generic message
+    return 'Automatically assign documents to unmatched transactions';
   }
 }
