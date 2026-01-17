@@ -61,8 +61,8 @@ jobs:
         working-directory: ./taxfiler.client
 
       # Install Playwright browsers
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
         working-directory: ./taxfiler.client
 
       # Run .NET unit tests
