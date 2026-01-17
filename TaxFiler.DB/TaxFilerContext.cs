@@ -29,7 +29,5 @@ namespace TaxFiler.DB
         public DbSet<Transaction> Transactions { get; set; }
 
         public DbSet<Account> Accounts { get; set; }
-        
-        public DbSet<TransactionDocumentMatcher> TransactionDocumentMatchers { get; set; }
     }
 }
