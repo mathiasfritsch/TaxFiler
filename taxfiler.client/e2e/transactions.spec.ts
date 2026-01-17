@@ -68,12 +68,16 @@ test.describe('Transactions Page', () => {
   });
 
 
-  test('should display correct number of transactions from test data', async ({ page }) => {
+  test('should display correct number of transactions from test data', async ({ page }, testInfo) => {
     // Wait for the grid to load
     await expect(page.locator('[role="grid"]')).toBeVisible();
     
-    // Take a screenshot after the page loads
-    await page.screenshot({ path: 'test-results/transactions-page-loaded.png', fullPage: true });
+    // Take a screenshot after the page loads and attach to report
+    const pageScreenshot = await page.screenshot({ fullPage: true });
+    await testInfo.attach('Transactions Page Loaded', { 
+      body: pageScreenshot, 
+      contentType: 'image/png' 
+    });
     
     // Count the actual number of transactions in our mock data
     const testDataCount = mockTransactions.length;
@@ -87,8 +91,12 @@ test.describe('Transactions Page', () => {
     await expect(page.locator('text=Büroausstattung Schmidt')).toBeVisible();
     await expect(page.locator('text=Tankstelle Aral')).toBeVisible();
     
-    // Take a screenshot showing the populated grid
-    await page.screenshot({ path: 'test-results/transactions-grid-populated.png', fullPage: true });
+    // Take a screenshot showing the populated grid and attach to report
+    const gridScreenshot = await page.screenshot({ fullPage: true });
+    await testInfo.attach('Grid Populated with Data', { 
+      body: gridScreenshot, 
+      contentType: 'image/png' 
+    });
     
     // Check that Edit and Delete buttons match transaction count
     const editButtons = page.locator('button:has-text("Edit")');
@@ -97,8 +105,12 @@ test.describe('Transactions Page', () => {
     await expect(editButtons).toHaveCount(testDataCount);
     await expect(deleteButtons).toHaveCount(testDataCount);
     
-    // Take a final screenshot for the report
-    await page.screenshot({ path: 'test-results/transactions-final-state.png', fullPage: true });
+    // Take a final screenshot for the report and attach
+    const finalScreenshot = await page.screenshot({ fullPage: true });
+    await testInfo.attach('Final Validation Complete', { 
+      body: finalScreenshot, 
+      contentType: 'image/png' 
+    });
     
     // Log for debugging
     console.log(`Expected transactions: ${testDataCount}, Mock data length: ${mockTransactions.length}`);
