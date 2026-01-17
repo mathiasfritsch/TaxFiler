@@ -69,14 +69,6 @@ jobs:
       - name: Run .NET tests
         run: dotnet test --no-build --configuration Release
 
-      # Start the application for e2e tests
-      - name: Start .NET application
-        run: |
-          dotnet run --project TaxFiler.Server --configuration Release &
-          sleep 30
-        env:
-          ASPNETCORE_ENVIRONMENT: Development
-
       # Start Angular dev server
       - name: Start Angular dev server
         run: |
