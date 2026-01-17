@@ -72,6 +72,9 @@ test.describe('Transactions Page', () => {
     // Wait for the grid to load
     await expect(page.locator('[role="grid"]')).toBeVisible();
     
+    // Take a screenshot after the page loads
+    await page.screenshot({ path: 'test-results/transactions-page-loaded.png', fullPage: true });
+    
     // Count the actual number of transactions in our mock data
     const testDataCount = mockTransactions.length;
     
@@ -84,12 +87,18 @@ test.describe('Transactions Page', () => {
     await expect(page.locator('text=Büroausstattung Schmidt')).toBeVisible();
     await expect(page.locator('text=Tankstelle Aral')).toBeVisible();
     
+    // Take a screenshot showing the populated grid
+    await page.screenshot({ path: 'test-results/transactions-grid-populated.png', fullPage: true });
+    
     // Check that Edit and Delete buttons match transaction count
     const editButtons = page.locator('button:has-text("Edit")');
     const deleteButtons = page.locator('button:has-text("Delete")');
     
     await expect(editButtons).toHaveCount(testDataCount);
     await expect(deleteButtons).toHaveCount(testDataCount);
+    
+    // Take a final screenshot for the report
+    await page.screenshot({ path: 'test-results/transactions-final-state.png', fullPage: true });
     
     // Log for debugging
     console.log(`Expected transactions: ${testDataCount}, Mock data length: ${mockTransactions.length}`);
