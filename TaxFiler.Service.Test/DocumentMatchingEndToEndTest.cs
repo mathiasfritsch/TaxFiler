@@ -67,8 +67,8 @@ public class DocumentMatchingEndToEndTest
             GrossAmount = 100.00m,
             TransactionDateTime = new DateTime(2024, 3, 15),
             Counterparty = "Test Vendor",
-            TransactionReference = "REF-123",
-            TransactionNote = "Test transaction",
+            TransactionReference = "",
+            TransactionNote = "REF-123",
             SenderReceiver = "Test Vendor"
         };
 

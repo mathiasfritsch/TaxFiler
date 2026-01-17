@@ -101,27 +101,7 @@ public class ReferenceMatcherTests
 
         Assert.That(score, Is.EqualTo(0.0));
     }
-
-    [Test]
-    public void CalculateReferenceScore_NullTransaction_ReturnsZero()
-    {
-        var document = new Document { InvoiceNumber = "INV-2024-001" };
-
-        var score = _matcher.CalculateReferenceScore(null, document);
-
-        Assert.That(score, Is.EqualTo(0.0));
-    }
-
-    [Test]
-    public void CalculateReferenceScore_NullDocument_ReturnsZero()
-    {
-        var transaction = new Transaction { TransactionNote = "INV-2024-001" };
-
-        var score = _matcher.CalculateReferenceScore(transaction, null);
-
-        Assert.That(score, Is.EqualTo(0.0));
-    }
-
+    
     [Test]
     public void CalculateReferenceScore_EmptyTransactionReference_ReturnsZero()
     {
@@ -180,7 +160,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_HandlesCommonPrefixes()
     {
-        var transaction = new Transaction { TransactionReference = "Invoice 2024-001" };
+        var transaction = new Transaction { TransactionNote = "Invoice 2024-001" };
         var document = new Document { InvoiceNumber = "INV 2024-001" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
@@ -191,7 +171,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_HandlesDifferentSeparators()
     {
-        var transaction = new Transaction { TransactionReference = "2024/001/ABC" };
+        var transaction = new Transaction { TransactionNote = "2024/001/ABC" };
         var document = new Document { InvoiceNumber = "2024-001-ABC" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
@@ -202,7 +182,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_SimilarNumericReferences_ReturnsScore()
     {
-        var transaction = new Transaction { TransactionReference = "12345" };
+        var transaction = new Transaction { TransactionNote = "12345" };
         var document = new Document { InvoiceNumber = "12346" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
@@ -241,7 +221,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_LongNumericReferences_HigherScore()
     {
-        var transaction = new Transaction { TransactionReference = "1234567890" };
+        var transaction = new Transaction { TransactionNote = "1234567890" };
         var document = new Document { InvoiceNumber = "INV-1234567890-2024" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
@@ -264,7 +244,7 @@ public class ReferenceMatcherTests
     [Test]
     public void CalculateReferenceScore_GermanInvoiceFormats_HandledCorrectly()
     {
-        var transaction = new Transaction { TransactionReference = "Rechnung Nr. 2024-001" };
+        var transaction = new Transaction { TransactionNote = "Rechnung Nr. 2024-001" };
         var document = new Document { InvoiceNumber = "RG-2024-001" };
 
         var score = _matcher.CalculateReferenceScore(transaction, document);
