@@ -69,14 +69,7 @@ jobs:
       - name: Run .NET tests
         run: dotnet test --no-build --configuration Release
 
-      # Start Angular dev server
-      - name: Start Angular dev server
-        run: |
-          npm start &
-          sleep 30
-        working-directory: ./taxfiler.client
-
-      # Run Playwright e2e tests
+      # Run Playwright e2e tests (no server needed - uses mock content in CI)
       - name: Run Playwright tests
         run: npm run test:e2e
         working-directory: ./taxfiler.client
