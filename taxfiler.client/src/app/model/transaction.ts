@@ -12,4 +12,5 @@
   documentId: number;
   accountId: number;
   accountName: string;
+  isTaxMismatch: boolean;
 }

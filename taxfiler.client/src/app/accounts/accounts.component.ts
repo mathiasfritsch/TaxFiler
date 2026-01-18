@@ -42,7 +42,6 @@ export class AccountsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private dialog: MatDialog,
     private route: ActivatedRoute
   ) { }
 

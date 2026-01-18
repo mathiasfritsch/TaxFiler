@@ -163,7 +163,6 @@ export class DocumentsComponent implements OnInit {
 
   constructor(
     private dialog: MatDialog,
-    private fb: FormBuilder,
     private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router,
@@ -192,10 +191,10 @@ export class DocumentsComponent implements OnInit {
   ) {
     button.enabled = false;
     this.http.post<any>(`/api/documents/parse/${document.id}`, {}).subscribe({
-      next: (documents) => {
+      next: () => {
         button.enabled = true;
       },
-      error: (error) => {
+      error: () => {
         button.enabled = true;
         alert('There was an error parsing the document');
       },
@@ -204,7 +203,7 @@ export class DocumentsComponent implements OnInit {
 
   synchronize() {
     this.http.post(`/api/documents/syncfiles/${this.yearMonth}`, {}).subscribe({
-      next: (documents) => {
+      next: () => {
         this.getDocuments();
       },
       error: (error) => {
@@ -218,7 +217,7 @@ export class DocumentsComponent implements OnInit {
     this.http
       .delete<any>(`/api/documents/deleteDocument/${document.id}`, {})
       .subscribe({
-        next: (documents) => {
+        next: () => {
           button.enabled = true;
         },
         error: (error) => {
