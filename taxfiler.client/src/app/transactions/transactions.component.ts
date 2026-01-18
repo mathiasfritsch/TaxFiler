@@ -123,7 +123,8 @@ export class TransactionsComponent  implements  OnInit{
       cellRendererParams: {
         onClickCallback: (data: any) => this.openEditDialog(data),
         buttonText: 'Edit',
-        enabled:true
+        enabled:true,
+        dataId: 'button-edit'
       },
       editable: false,
       colId: 'params',
@@ -135,7 +136,8 @@ export class TransactionsComponent  implements  OnInit{
       cellRendererParams: {
         onClickCallback: (data: any, button:any) => this.deleteTransaction(data, button),
         buttonText: 'Delete',
-        enabled:true
+        enabled:true,
+        dataId: 'button-delete'
       },
       editable: false,
       colId: 'params',
