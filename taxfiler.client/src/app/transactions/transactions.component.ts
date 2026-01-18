@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, firstValueFrom } from 'rxjs';
 import { CommonModule, AsyncPipe } from '@angular/common';
 
 import {AgGridAngular} from "ag-grid-angular";
@@ -90,7 +90,7 @@ export class TransactionsComponent  implements  OnInit{
       },
       cellStyle: (params: any) => {
         if (params.value === true) {
-          return { 
+          return {
             backgroundColor: '#ffebee',
             color: '#c62828',
             textAlign: 'center',
@@ -232,10 +232,6 @@ export class TransactionsComponent  implements  OnInit{
         {
           next: () => {
             button.enabled = true;
-          },
-          error: error => {
-            button.enabled = true;
-            alert("error deleting transaction");
           }
         }
       );
@@ -278,7 +274,7 @@ export class TransactionsComponent  implements  OnInit{
     try {
       const url = `/api/transactions/auto-assign?yearMonth=${this.yearMonth}`;
 
-      const result = await this.http.post<AutoAssignResult>(url, {}).toPromise();
+      const result = await firstValueFrom(this.http.post<AutoAssignResult>(url, {}));
 
       // Open the Material Dialog to show results
       if (result) {
@@ -298,21 +294,11 @@ export class TransactionsComponent  implements  OnInit{
     }
   }
 
-  get hasUnmatchedTransactions(): Observable<boolean> {
-    if (!this.transactions$) {
-      return new Observable(observer => observer.next(false));
-    }
-    return this.transactions$.pipe(
-      map(txns => txns.some(t => !t.documentId))
-    );
-  }
-
-
   getAutoAssignTooltip(): string {
     if (this.isAutoAssigning) {
       return 'Auto-assignment in progress...';
     }
-    // Note: This is a synchronous method but hasUnmatchedTransactions is async
+    // Note: This is a synchronous method, but hasUnmatchedTransactions is async
     // For the tooltip, we'll provide a generic message
     return 'Automatically assign documents to unmatched transactions';
   }
