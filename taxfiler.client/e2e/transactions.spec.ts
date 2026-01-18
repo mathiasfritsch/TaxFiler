@@ -70,7 +70,7 @@ test.describe('Transactions Page', () => {
 
   test('should display correct number of transactions from test data', async ({ page }, testInfo) => {
     // Wait for the grid to load
-    await expect(page.locator('[role="grid"]')).toBeVisible();
+    await expect(page.locator('[data-id="transactions-grid"]')).toBeVisible();
     
     // Take a screenshot after the page loads and attach to report
     const pageScreenshot = await page.screenshot({ fullPage: true });
@@ -83,7 +83,7 @@ test.describe('Transactions Page', () => {
     const testDataCount = mockTransactions.length;
     
     // Verify grid shows exactly that many data rows (plus header)
-    const gridRows = page.locator('[role="grid"] [role="row"]');
+    const gridRows = page.locator('[data-id="transactions-grid"] [role="row"]');
     await expect(gridRows).toHaveCount(testDataCount + 1); // +1 for header row
     
     // Verify specific transaction data is displayed
@@ -99,8 +99,8 @@ test.describe('Transactions Page', () => {
     });
     
     // Check that Edit and Delete buttons match transaction count
-    const editButtons = page.locator('button:has-text("Edit")');
-    const deleteButtons = page.locator('button:has-text("Delete")');
+    const editButtons = page.locator('[data-id="button-edit"]');
+    const deleteButtons = page.locator('[data-id="button-delete"]');
     
     await expect(editButtons).toHaveCount(testDataCount);
     await expect(deleteButtons).toHaveCount(testDataCount);

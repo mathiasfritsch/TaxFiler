@@ -11,7 +11,7 @@ import {MatButton} from "@angular/material/button";
     MatButton
   ],
   template: `
-    <button mat-button (click)="onClick($event)"  [disabled]="!enabled" >{{ buttonText }}</button>`
+    <button mat-button (click)="onClick($event)"  [disabled]="!enabled" [attr.data-id]="'button-' + buttonText?.toLowerCase()" >{{ buttonText }}</button>`
 })
 export class ButtonCellRendererComponent implements ICellRendererAngularComp {
   private params: any;
