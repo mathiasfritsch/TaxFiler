@@ -688,4 +688,332 @@ public class TransactionServiceAutoAssignTests
         var updatedTransaction = await _context.Transactions.FindAsync(1);
         Assert.That(updatedTransaction.DocumentId, Is.Null, "Transaction should remain unassigned");
     }
+
+    /// <summary>
+    /// Test: Tax data is copied from document to transaction without Skonto
+    /// Validates: Should copy TaxRate, TaxAmount, and NetAmount (SubTotal) from document
+    /// </summary>
+    [Test]
+    public async Task AutoAssignDocumentsAsync_WithoutSkonto_CopiesTaxDataFromDocument()
+    {
+        // Arrange
+        var yearMonth = new DateOnly(2024, 3, 1);
+        var account = new Account { Id = 1, Name = "Test Account" };
+        await _context.Accounts.AddAsync(account);
+        
+        var transaction = new Transaction
+        {
+            Id = 1,
+            GrossAmount = 119.00m,
+            TransactionDateTime = new DateTime(2024, 3, 15),
+            Counterparty = "Vendor A",
+            TransactionReference = "INV-001",
+            TransactionNote = "Test transaction",
+            SenderReceiver = "Vendor A",
+            Account = account,
+            DocumentId = null,
+            NetAmount = null, // Should be set by auto-assignment
+            TaxAmount = null, // Should be set by auto-assignment
+            TaxRate = null    // Should be set by auto-assignment
+        };
+        
+        await _context.Transactions.AddAsync(transaction);
+        await _context.SaveChangesAsync();
+        
+        // Setup mock to return match with tax data (no Skonto)
+        var matchesByTransaction = new Dictionary<int, IEnumerable<DocumentMatch>>
+        {
+            { 1, new[] { new DocumentMatch 
+                { 
+                    Document = new Model.Dto.DocumentDto 
+                    { 
+                        Id = 100,
+                        Name = "Invoice-001.pdf",
+                        ExternalRef = "doc-001",
+                        SubTotal = 100.00m,     // NetAmount
+                        TaxAmount = 19.00m,
+                        TaxRate = 19.0m,
+                        Total = 119.00m,
+                        Skonto = null           // No Skonto
+                    }, 
+                    MatchScore = 0.8, 
+                    ScoreBreakdown = new MatchScoreBreakdown() 
+                } 
+            } }
+        };
+        
+        _mockMatchingService.BatchDocumentMatchesAsync(
+            Arg.Any<IEnumerable<Transaction>>(), 
+            Arg.Any<CancellationToken>())
+            .Returns(matchesByTransaction);
+        
+        // Act
+        var result = await _service.AutoAssignDocumentsAsync(yearMonth);
+        
+        // Assert
+        Assert.That(result.AssignedCount, Is.EqualTo(1), "Should assign 1 document");
+        
+        // Verify transaction has tax data copied from document
+        var updatedTransaction = await _context.Transactions.FindAsync(1);
+        Assert.That(updatedTransaction.DocumentId, Is.EqualTo(100), "Transaction should be assigned");
+        Assert.That(updatedTransaction.NetAmount, Is.EqualTo(100.00m), "NetAmount should be copied from SubTotal");
+        Assert.That(updatedTransaction.TaxAmount, Is.EqualTo(19.00m), "TaxAmount should be copied");
+        Assert.That(updatedTransaction.TaxRate, Is.EqualTo(19.0m), "TaxRate should be copied");
+    }
+
+    /// <summary>
+    /// Test: Tax data is calculated with Skonto
+    /// Validates: Should calculate NetAmount with Skonto discount and derive TaxAmount
+    /// </summary>
+    [Test]
+    public async Task AutoAssignDocumentsAsync_WithSkonto_CalculatesTaxDataWithDiscount()
+    {
+        // Arrange
+        var yearMonth = new DateOnly(2024, 3, 1);
+        var account = new Account { Id = 1, Name = "Test Account" };
+        await _context.Accounts.AddAsync(account);
+        
+        var transaction = new Transaction
+        {
+            Id = 1,
+            GrossAmount = 116.62m, // Gross amount after 2% Skonto discount
+            TransactionDateTime = new DateTime(2024, 3, 15),
+            Counterparty = "Vendor A",
+            TransactionReference = "INV-001",
+            TransactionNote = "Test transaction with Skonto",
+            SenderReceiver = "Vendor A",
+            Account = account,
+            DocumentId = null,
+            NetAmount = null, // Should be calculated by auto-assignment
+            TaxAmount = null, // Should be calculated by auto-assignment
+            TaxRate = null    // Should be set by auto-assignment
+        };
+        
+        await _context.Transactions.AddAsync(transaction);
+        await _context.SaveChangesAsync();
+        
+        // Setup mock to return match with tax data and Skonto
+        var matchesByTransaction = new Dictionary<int, IEnumerable<DocumentMatch>>
+        {
+            { 1, new[] { new DocumentMatch 
+                { 
+                    Document = new Model.Dto.DocumentDto 
+                    { 
+                        Id = 100,
+                        Name = "Invoice-001.pdf",
+                        ExternalRef = "doc-001",
+                        SubTotal = 100.00m,     // Original NetAmount before Skonto
+                        TaxAmount = 19.00m,     // Original TaxAmount (will be recalculated)
+                        TaxRate = 19.0m,
+                        Total = 119.00m,        // Original Total before Skonto
+                        Skonto = 2.0m           // 2% early payment discount
+                    }, 
+                    MatchScore = 0.8, 
+                    ScoreBreakdown = new MatchScoreBreakdown() 
+                } 
+            } }
+        };
+        
+        _mockMatchingService.BatchDocumentMatchesAsync(
+            Arg.Any<IEnumerable<Transaction>>(), 
+            Arg.Any<CancellationToken>())
+            .Returns(matchesByTransaction);
+        
+        // Act
+        var result = await _service.AutoAssignDocumentsAsync(yearMonth);
+        
+        // Assert
+        Assert.That(result.AssignedCount, Is.EqualTo(1), "Should assign 1 document");
+        
+        // Verify transaction has tax data calculated with Skonto
+        var updatedTransaction = await _context.Transactions.FindAsync(1);
+        Assert.That(updatedTransaction.DocumentId, Is.EqualTo(100), "Transaction should be assigned");
+        
+        // NetAmount = SubTotal * (100 - Skonto) / 100 = 100.00 * (100 - 2) / 100 = 98.00
+        Assert.That(updatedTransaction.NetAmount, Is.EqualTo(98.00m), "NetAmount should be calculated with Skonto discount");
+        Assert.That(updatedTransaction.TaxRate, Is.EqualTo(19.0m), "TaxRate should be copied");
+        
+        // TaxAmount = GrossAmount - NetAmount = 116.62 - 98.00 = 18.62
+        Assert.That(updatedTransaction.TaxAmount, Is.EqualTo(18.62m), "TaxAmount should be calculated from GrossAmount - NetAmount");
+    }
+
+    /// <summary>
+    /// Test: Multiple transactions get tax data copied
+    /// Validates: Tax data should be copied for all assigned transactions in batch
+    /// </summary>
+    [Test]
+    public async Task AutoAssignDocumentsAsync_WithMultipleTransactions_CopiesTaxDataForAll()
+    {
+        // Arrange
+        var yearMonth = new DateOnly(2024, 3, 1);
+        var account = new Account { Id = 1, Name = "Test Account" };
+        await _context.Accounts.AddAsync(account);
+        
+        var transactions = new[]
+        {
+            new Transaction
+            {
+                Id = 1,
+                GrossAmount = 119.00m,
+                TransactionDateTime = new DateTime(2024, 3, 15),
+                Counterparty = "Vendor A",
+                TransactionReference = "INV-001",
+                TransactionNote = "First transaction",
+                SenderReceiver = "Vendor A",
+                Account = account,
+                DocumentId = null
+            },
+            new Transaction
+            {
+                Id = 2,
+                GrossAmount = 238.00m,
+                TransactionDateTime = new DateTime(2024, 3, 16),
+                Counterparty = "Vendor B",
+                TransactionReference = "INV-002",
+                TransactionNote = "Second transaction",
+                SenderReceiver = "Vendor B",
+                Account = account,
+                DocumentId = null
+            }
+        };
+        
+        await _context.Transactions.AddRangeAsync(transactions);
+        await _context.SaveChangesAsync();
+        
+        // Setup mock to return matches with different tax data
+        var matchesByTransaction = new Dictionary<int, IEnumerable<DocumentMatch>>
+        {
+            { 1, new[] { new DocumentMatch 
+                { 
+                    Document = new Model.Dto.DocumentDto 
+                    { 
+                        Id = 100,
+                        Name = "Invoice-001.pdf",
+                        ExternalRef = "doc-001",
+                        SubTotal = 100.00m,
+                        TaxAmount = 19.00m,
+                        TaxRate = 19.0m,
+                        Total = 119.00m,
+                        Skonto = null
+                    }, 
+                    MatchScore = 0.8, 
+                    ScoreBreakdown = new MatchScoreBreakdown() 
+                } 
+            } },
+            { 2, new[] { new DocumentMatch 
+                { 
+                    Document = new Model.Dto.DocumentDto 
+                    { 
+                        Id = 200,
+                        Name = "Invoice-002.pdf",
+                        ExternalRef = "doc-002",
+                        SubTotal = 200.00m,
+                        TaxAmount = 38.00m,
+                        TaxRate = 19.0m,
+                        Total = 238.00m,
+                        Skonto = null
+                    }, 
+                    MatchScore = 0.9, 
+                    ScoreBreakdown = new MatchScoreBreakdown() 
+                } 
+            } }
+        };
+        
+        _mockMatchingService.BatchDocumentMatchesAsync(
+            Arg.Any<IEnumerable<Transaction>>(), 
+            Arg.Any<CancellationToken>())
+            .Returns(matchesByTransaction);
+        
+        // Act
+        var result = await _service.AutoAssignDocumentsAsync(yearMonth);
+        
+        // Assert
+        Assert.That(result.AssignedCount, Is.EqualTo(2), "Should assign 2 documents");
+        
+        // Verify first transaction
+        var transaction1 = await _context.Transactions.FindAsync(1);
+        Assert.That(transaction1.DocumentId, Is.EqualTo(100), "Transaction 1 should be assigned");
+        Assert.That(transaction1.NetAmount, Is.EqualTo(100.00m), "Transaction 1 NetAmount should be copied");
+        Assert.That(transaction1.TaxAmount, Is.EqualTo(19.00m), "Transaction 1 TaxAmount should be copied");
+        Assert.That(transaction1.TaxRate, Is.EqualTo(19.0m), "Transaction 1 TaxRate should be copied");
+        
+        // Verify second transaction
+        var transaction2 = await _context.Transactions.FindAsync(2);
+        Assert.That(transaction2.DocumentId, Is.EqualTo(200), "Transaction 2 should be assigned");
+        Assert.That(transaction2.NetAmount, Is.EqualTo(200.00m), "Transaction 2 NetAmount should be copied");
+        Assert.That(transaction2.TaxAmount, Is.EqualTo(38.00m), "Transaction 2 TaxAmount should be copied");
+        Assert.That(transaction2.TaxRate, Is.EqualTo(19.0m), "Transaction 2 TaxRate should be copied");
+    }
+
+    /// <summary>
+    /// Test: Skipped transactions don't get tax data modified
+    /// Validates: Transactions below threshold should remain unchanged
+    /// </summary>
+    [Test]
+    public async Task AutoAssignDocumentsAsync_WithSkippedTransactions_DoesNotModifyTaxData()
+    {
+        // Arrange
+        var yearMonth = new DateOnly(2024, 3, 1);
+        var account = new Account { Id = 1, Name = "Test Account" };
+        await _context.Accounts.AddAsync(account);
+        
+        var transaction = new Transaction
+        {
+            Id = 1,
+            GrossAmount = 119.00m,
+            TransactionDateTime = new DateTime(2024, 3, 15),
+            Counterparty = "Vendor A",
+            TransactionReference = "INV-001",
+            TransactionNote = "Low match score",
+            SenderReceiver = "Vendor A",
+            Account = account,
+            DocumentId = null,
+            NetAmount = 50.00m,  // Pre-existing value
+            TaxAmount = 9.50m,   // Pre-existing value
+            TaxRate = 19.0m      // Pre-existing value
+        };
+        
+        await _context.Transactions.AddAsync(transaction);
+        await _context.SaveChangesAsync();
+        
+        // Setup mock to return match below threshold
+        var matchesByTransaction = new Dictionary<int, IEnumerable<DocumentMatch>>
+        {
+            { 1, new[] { new DocumentMatch 
+                { 
+                    Document = new Model.Dto.DocumentDto 
+                    { 
+                        Id = 100,
+                        Name = "Invoice-001.pdf",
+                        ExternalRef = "doc-001",
+                        SubTotal = 100.00m,
+                        TaxAmount = 19.00m,
+                        TaxRate = 19.0m,
+                        Total = 119.00m,
+                        Skonto = null
+                    }, 
+                    MatchScore = 0.3, // Below 0.5 threshold
+                    ScoreBreakdown = new MatchScoreBreakdown() 
+                } 
+            } }
+        };
+        
+        _mockMatchingService.BatchDocumentMatchesAsync(
+            Arg.Any<IEnumerable<Transaction>>(), 
+            Arg.Any<CancellationToken>())
+            .Returns(matchesByTransaction);
+        
+        // Act
+        var result = await _service.AutoAssignDocumentsAsync(yearMonth);
+        
+        // Assert
+        Assert.That(result.SkippedCount, Is.EqualTo(1), "Should skip 1 transaction");
+        
+        // Verify transaction remains unchanged
+        var updatedTransaction = await _context.Transactions.FindAsync(1);
+        Assert.That(updatedTransaction.DocumentId, Is.Null, "Transaction should remain unassigned");
+        Assert.That(updatedTransaction.NetAmount, Is.EqualTo(50.00m), "NetAmount should remain unchanged");
+        Assert.That(updatedTransaction.TaxAmount, Is.EqualTo(9.50m), "TaxAmount should remain unchanged");
+        Assert.That(updatedTransaction.TaxRate, Is.EqualTo(19.0m), "TaxRate should remain unchanged");
+    }
 }
