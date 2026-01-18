@@ -71,47 +71,69 @@ test.describe('Transactions Page', () => {
   test('should display correct number of transactions from test data', async ({ page }, testInfo) => {
     // Wait for the grid to load
     await expect(page.locator('[data-id="transactions-grid"]')).toBeVisible();
-    
+
     // Take a screenshot after the page loads and attach to report
     const pageScreenshot = await page.screenshot({ fullPage: true });
-    await testInfo.attach('Transactions Page Loaded', { 
-      body: pageScreenshot, 
-      contentType: 'image/png' 
+    await testInfo.attach('Transactions Page Loaded', {
+      body: pageScreenshot,
+      contentType: 'image/png'
     });
-    
+
     // Count the actual number of transactions in our mock data
     const testDataCount = mockTransactions.length;
-    
+
     // Verify grid shows exactly that many data rows (plus header)
     const gridRows = page.locator('[data-id="transactions-grid"] [role="row"]');
     await expect(gridRows).toHaveCount(testDataCount + 1); // +1 for header row
-    
+
     // Verify specific transaction data is displayed
     await expect(page.locator('text=Müller GmbH & Co. KG')).toBeVisible();
     await expect(page.locator('text=Büroausstattung Schmidt')).toBeVisible();
     await expect(page.locator('text=Tankstelle Aral')).toBeVisible();
-    
+
     // Take a screenshot showing the populated grid and attach to report
     const gridScreenshot = await page.screenshot({ fullPage: true });
-    await testInfo.attach('Grid Populated with Data', { 
-      body: gridScreenshot, 
-      contentType: 'image/png' 
+    await testInfo.attach('Grid Populated with Data', {
+      body: gridScreenshot,
+      contentType: 'image/png'
     });
-    
+
     // Check that Edit and Delete buttons match transaction count
     const editButtons = page.locator('[data-id="button-edit"]');
     const deleteButtons = page.locator('[data-id="button-delete"]');
-    
+
     await expect(editButtons).toHaveCount(testDataCount);
     await expect(deleteButtons).toHaveCount(testDataCount);
-    
+
+    // Verify all navigation elements are present
+    await expect(page.locator('[data-id="transactions-title"]')).toBeVisible();
+    await expect(page.locator('[data-id="transactions-title"]')).toContainText('Transaktionen');
+    await expect(page.locator('[data-id="transactions-title"]')).toContainText(testYearMonth);
+
+    // Navigation links
+    await expect(page.locator('[data-id="nav-documents"]')).toBeVisible();
+    await expect(page.locator('[data-id="nav-transactions"]')).toBeVisible();
+    await expect(page.locator('[data-id="nav-accounts"]')).toBeVisible();
+
+    // Navigation buttons
+    await expect(page.locator('[data-id="nav-sync-button"]')).toBeVisible();
+    await expect(page.locator('[data-id="nav-upload-button"]')).toBeVisible();
+    await expect(page.locator('[data-id="nav-download-report-button"]')).toBeVisible();
+
+    // Month navigation buttons
+    await expect(page.locator('[data-id="nav-previous-month"]')).toBeVisible();
+    await expect(page.locator('[data-id="nav-next-month"]')).toBeVisible();
+
+    // Auto-assign button
+    await expect(page.locator('[data-id="auto-assign-button"]')).toBeVisible();
+
     // Take a final screenshot for the report and attach
     const finalScreenshot = await page.screenshot({ fullPage: true });
-    await testInfo.attach('Final Validation Complete', { 
-      body: finalScreenshot, 
-      contentType: 'image/png' 
+    await testInfo.attach('Final Validation Complete', {
+      body: finalScreenshot,
+      contentType: 'image/png'
     });
-    
+
     // Log for debugging
     console.log(`Expected transactions: ${testDataCount}, Mock data length: ${mockTransactions.length}`);
   });
