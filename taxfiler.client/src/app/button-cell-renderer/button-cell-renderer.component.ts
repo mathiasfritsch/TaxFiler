@@ -11,13 +11,14 @@ import {MatButton} from "@angular/material/button";
     MatButton
   ],
   template: `
-    <button mat-button (click)="onClick($event)"  [disabled]="!enabled" [attr.data-id]="'button-' + (buttonText || '').toLowerCase().replace(/\s+/g, '-')" >{{ buttonText }}</button>`
+    <button mat-button (click)="onClick($event)"  [disabled]="!enabled" [attr.data-id]="dataId || null" >{{ buttonText }}</button>`
 })
 export class ButtonCellRendererComponent implements ICellRendererAngularComp {
   private params: any;
   @Input() onClickCallback: ((data: any, button: any) => void) | undefined;
   @Input() buttonText: string | undefined;
   @Input() enabled: boolean | undefined = true;
+  @Input() dataId: string | undefined;
 
   constructor(private dialog: MatDialog) {}
 
@@ -26,6 +27,7 @@ export class ButtonCellRendererComponent implements ICellRendererAngularComp {
     this.onClickCallback = params.onClickCallback;
     this.buttonText = params.buttonText;
     this.enabled = params.enabled;
+    this.dataId = params.dataId;
   }
 
   refresh(params: ICellRendererParams): boolean {
