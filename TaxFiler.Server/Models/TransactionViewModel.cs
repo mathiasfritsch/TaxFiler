@@ -19,4 +19,5 @@ public class TransactionViewModel
     public string? DocumentName { get; init; }
     public int AccountId { get; init; }
     public string AccountName { get; init; }
+    public bool IsTaxMismatch { get; init; }
 }

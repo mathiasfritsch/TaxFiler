@@ -19,4 +19,5 @@ public class TransactionDto
     public string SenderReceiver { get; set; }
     public int AccountId { get; set; }
     public string AccountName { get; set; }
+    public bool IsTaxMismatch { get; set; }
 }

@@ -38,8 +38,39 @@ public static class TransactionMapper
             Document = transaction.Document?.ToDto([]),
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
-            AccountName = transaction.Account.Name
+            AccountName = transaction.Account.Name,
+            IsTaxMismatch = CalculateTaxMismatch(transaction)
         };
+    
+    /// <summary>
+    /// Calculates whether the tax amount matches the expected value based on the tax rate and gross amount.
+    /// Returns true if there's a mismatch (i.e., the tax calculation is incorrect).
+    /// </summary>
+    private static bool CalculateTaxMismatch(Transaction transaction)
+    {
+        // Skip validation if any required values are missing or zero
+        if (!transaction.TaxAmount.HasValue || transaction.TaxAmount.Value == 0 ||
+            !transaction.TaxRate.HasValue || transaction.TaxRate.Value == 0 ||
+            transaction.GrossAmount == 0)
+        {
+            return false;
+        }
+
+        var taxRate = transaction.TaxRate.Value;
+        var taxAmount = transaction.TaxAmount.Value;
+        var grossAmount = transaction.GrossAmount;
+
+        // Calculate expected tax amount from gross amount and tax rate
+        // Formula: TaxAmount = GrossAmount * TaxRate / (100 + TaxRate)
+        // This is because GrossAmount = NetAmount + TaxAmount and TaxAmount = NetAmount * TaxRate / 100
+        var expectedTaxAmount = grossAmount * taxRate / (100 + taxRate);
+        
+        // Use a small tolerance (0.02) for rounding differences
+        var tolerance = 0.02m;
+        var difference = Math.Abs(taxAmount - expectedTaxAmount);
+        
+        return difference > tolerance;
+    }
 
     public static void UpdateTransaction( Transaction transaction, UpdateTransactionDto transactionDto)
     {

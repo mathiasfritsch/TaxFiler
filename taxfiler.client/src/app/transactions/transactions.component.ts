@@ -80,6 +80,28 @@ export class TransactionsComponent  implements  OnInit{
       headerName: 'Steuer',
     },
     {
+      field: 'isTaxMismatch',
+      headerName: 'Steuerfehler',
+      cellRenderer: (params: any) => {
+        if (params.value === true) {
+          return '⚠️';
+        }
+        return '';
+      },
+      cellStyle: (params: any) => {
+        if (params.value === true) {
+          return { 
+            backgroundColor: '#ffebee',
+            color: '#c62828',
+            textAlign: 'center',
+            fontSize: '20px'
+          };
+        }
+        return null;
+      },
+      maxWidth: 120
+    },
+    {
       field: 'transactionDateTime',
       headerName: 'Datum',
     },

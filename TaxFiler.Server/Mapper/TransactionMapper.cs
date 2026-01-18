@@ -25,7 +25,8 @@ public static class TransactionMapper
             DocumentName = transaction.Document?.Name,
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
-            AccountName = transaction.AccountName
+            AccountName = transaction.AccountName,
+            IsTaxMismatch = transaction.IsTaxMismatch
         };
     }
 }
