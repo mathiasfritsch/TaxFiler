@@ -218,7 +218,27 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                     
                     if (bestMatch != null && bestMatch.MatchScore >= 0.5)
                     {
-                        transaction.DocumentId = bestMatch.Document.Id;
+                        var document = bestMatch.Document;
+                        transaction.DocumentId = document.Id;
+                        
+                        // Copy tax data from document to transaction (same logic as UpdateTransactionAsync)
+                        var skontoValue = document.Skonto.GetValueOrDefault();
+                        if (skontoValue > 0)
+                        {
+                            var netAmountSkonto = document.SubTotal.GetValueOrDefault() *
+                                (100 - skontoValue) / 100m;
+                            
+                            transaction.NetAmount = Math.Round(netAmountSkonto, 2);
+                            transaction.TaxRate = document.TaxRate.GetValueOrDefault();
+                            transaction.TaxAmount = transaction.GrossAmount - transaction.NetAmount;
+                        }
+                        else
+                        {
+                            transaction.NetAmount = document.SubTotal.GetValueOrDefault();
+                            transaction.TaxAmount = document.TaxAmount.GetValueOrDefault();
+                            transaction.TaxRate = document.TaxRate.GetValueOrDefault();
+                        }
+                        
                         assignedCount++;
                     }
                     else
