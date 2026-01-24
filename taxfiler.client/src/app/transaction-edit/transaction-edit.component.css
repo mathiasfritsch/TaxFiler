@@ -30,6 +30,13 @@ mat-form-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.document-details:hover {
+  color: #1565c0;
 }
 
 .document-details div {

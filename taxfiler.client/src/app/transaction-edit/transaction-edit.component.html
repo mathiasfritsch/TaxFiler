@@ -35,16 +35,7 @@
       <mat-label>Dokument</mat-label>
       @if (hasConnectedDocument && connectedDocument) {
         <!-- Display connected document as non-editable with link -->
-        <div class="connected-document">
-          <button mat-button (click)="openDocumentModal()" type="button" class="document-link">
-            <div class="document-details">
-              <div><strong>{{ connectedDocument.name }}</strong></div>
-              <div>Invoice Number: {{ connectedDocument.invoiceNumber }}</div>
-              <div>Date: {{ connectedDocument.invoiceDate | date:'dd.MM.yyyy' }}</div>
-              <div>Amount: {{ connectedDocument.total | currency:'EUR':'symbol':'1.2-2' }}</div>
-            </div>
-          </button>
-        </div>
+             <div data-id="open-document-details" class="document-details" (click)="openDocumentModal()" >{{ connectedDocument.name }}</div>
       } @else {
         <!-- Show autocomplete for best matches when no document connected -->
         nur unconnected
@@ -69,7 +60,7 @@
       <div>
         <mat-label>Datum</mat-label>
         <mat-form-field>
-          <input id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
+          <input  id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
         </mat-form-field>
       </div>
       <div>
