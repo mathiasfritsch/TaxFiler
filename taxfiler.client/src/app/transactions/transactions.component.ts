@@ -100,13 +100,15 @@ export class TransactionsComponent  implements  OnInit{
         }
         return null;
       },
-      onCellClicked: (params: any) => {
+      onCellClicked: (params: CellValueChangedEvent) => {
         if (params.value === true) {
-          // Confirm the tax mismatch
-          const transaction = params.data;
-          transaction.isTaxMismatchConfirmed = true;
+          // Confirm the tax mismatch - send only the updated transaction
+          const updatedTransaction = {
+            ...params.data,
+            isTaxMismatchConfirmed: true
+          };
           // Update the transaction on the server
-          this.http.post('/api/transactions/updateTransaction', transaction)
+          this.http.post('/api/transactions/updateTransaction', updatedTransaction)
             .subscribe({
               next: () => {
                 console.log('Tax mismatch confirmed successfully');
