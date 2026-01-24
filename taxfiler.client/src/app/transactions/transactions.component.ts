@@ -94,10 +94,32 @@ export class TransactionsComponent  implements  OnInit{
             backgroundColor: '#ffebee',
             color: '#c62828',
             textAlign: 'center',
-            fontSize: '20px'
+            fontSize: '20px',
+            cursor: 'pointer'
           };
         }
         return null;
+      },
+      onCellClicked: (params: any) => {
+        if (params.value === true) {
+          // Confirm the tax mismatch
+          const transaction = params.data;
+          transaction.isTaxMismatchConfirmed = true;
+          // Update the transaction on the server
+          this.http.post('/api/transactions/updateTransaction', transaction)
+            .subscribe({
+              next: () => {
+                console.log('Tax mismatch confirmed successfully');
+                // Refresh the grid to show updated data
+                this.getTransactions(this.yearMonth);
+              },
+              error: error => {
+                console.error('Error confirming tax mismatch:', error);
+                // Refresh the grid to revert changes on error
+                this.getTransactions(this.yearMonth);
+              }
+            });
+        }
       },
       maxWidth: 120
     },

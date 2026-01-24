@@ -128,6 +128,9 @@ namespace TaxFiler.DB.Migrations
                     b.Property<bool?>("IsSalesTaxRelevant")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsTaxMismatchConfirmed")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal?>("NetAmount")
                         .HasColumnType("numeric");
 

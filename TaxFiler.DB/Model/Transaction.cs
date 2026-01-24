@@ -27,6 +27,7 @@ public class Transaction
     public bool? IsSalesTaxRelevant { get; set; }
     public int? TaxMonth { get; set; } = 0;
     public int? TaxYear { get; set; } = 0;
+    public bool IsTaxMismatchConfirmed { get; set; } = false;
     
     [ForeignKey(nameof(Document))]
     public int? DocumentId { get; set; }

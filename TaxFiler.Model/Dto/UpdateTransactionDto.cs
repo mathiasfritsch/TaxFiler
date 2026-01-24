@@ -17,4 +17,5 @@ public class UpdateTransactionDto
     public bool IsSalesTaxRelevant { get; set; }
     public string SenderReceiver { get; set; }
     public int? AccountId { get; set; }
+    public bool IsTaxMismatchConfirmed { get; set; }
 }
