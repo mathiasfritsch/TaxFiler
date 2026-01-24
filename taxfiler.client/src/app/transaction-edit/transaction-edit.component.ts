@@ -115,7 +115,7 @@ export class TransactionEditComponent implements OnInit{
       ...this.transaction,
       documentId: this.hasConnectedDocument 
         ? this.transaction.documentId 
-        : this.transactionFormGroup.value.documentControl.id,
+        : this.transactionFormGroup.value.documentControl?.id,
       transactionNote: this.transactionFormGroup.value.transactionNoteControl,
       netAmount: this.transactionFormGroup.value.netAmountControl,
       grossAmount: this.transactionFormGroup.value.grossAmountControl,
@@ -135,8 +135,6 @@ export class TransactionEditComponent implements OnInit{
         console.error('There was an error!', error);
       }
     });
-
-    this.dialogRef.close();
   }
   ngOnInit(): void {
     // Check if transaction has a connected document
@@ -228,17 +226,17 @@ export class TransactionEditComponent implements OnInit{
     const month = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
     const yearMonth = `${year}-${month}`;
 
-    // Navigate to documents page
+    // Navigate to documents page and open the document edit modal
     this.router.navigate(['/documents', yearMonth]).then(() => {
-      // After navigation, open the document edit modal
-      // We need a small delay to ensure the documents component is loaded
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure the view is rendered before opening the modal
+      // This is more reliable than setTimeout and aligns with the browser's rendering cycle
+      requestAnimationFrame(() => {
         this.dialog.open(DocumentEditComponent, {
           width: '50vw',
           maxWidth: '90vw',
           data: this.connectedDocument,
         });
-      }, 100);
+      });
     });
   }
 }
