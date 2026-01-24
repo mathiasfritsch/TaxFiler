@@ -184,4 +184,28 @@ public class TransactionMapperTests
         // Assert
         Assert.That(dto.IsTaxMismatch, Is.False);
     }
+
+    [Test]
+    public void TransactionDto_WithConfirmedTaxMismatch_IsTaxMismatchIsFalse()
+    {
+        // Arrange: Incorrect tax, but user has confirmed the mismatch
+        var transaction = new Transaction
+        {
+            Id = 1,
+            GrossAmount = 119.00m,
+            TaxAmount = 10.00m, // Incorrect - should be 19.00
+            TaxRate = 19.00m,
+            NetAmount = 109.00m,
+            IsTaxMismatchConfirmed = true, // User confirmed the mismatch
+            AccountId = 1,
+            Account = new Account { Id = 1, Name = "Test Account" }
+        };
+
+        // Act
+        var dto = transaction.TransactionDto();
+
+        // Assert
+        Assert.That(dto.IsTaxMismatch, Is.False, "Confirmed tax mismatch should not show as error");
+        Assert.That(dto.IsTaxMismatchConfirmed, Is.True, "Confirmation flag should be preserved");
+    }
 }
