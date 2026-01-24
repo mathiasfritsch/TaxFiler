@@ -3,7 +3,6 @@ import {MatFormField, MatLabel} from "@angular/material/form-field";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
-  MatDialog,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -23,7 +22,6 @@ import {map, startWith} from 'rxjs/operators';
 import { Account } from "../model/account";
 import { DocumentMatch } from "../model/document-match";
 import { Router } from "@angular/router";
-import { DocumentEditComponent } from "../document-edit/document-edit.component";
 
 @Component({
   selector: 'app-transaction-edit',
@@ -62,8 +60,7 @@ export class TransactionEditComponent implements OnInit{
     @Inject(MAT_DIALOG_DATA) public transaction: Transaction,
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router,
-    private dialog: MatDialog
+    private router: Router
   ) {
 
     var document = {
@@ -220,23 +217,14 @@ export class TransactionEditComponent implements OnInit{
     // Close the current dialog first
     this.dialogRef.close();
 
-    // Navigate to documents page with the yearMonth from the document's invoice date
+    // Navigate to documents page with the yearMonth and documentId
     const invoiceDate = new Date(this.connectedDocument.invoiceDate);
     const year = invoiceDate.getFullYear();
     const month = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
     const yearMonth = `${year}-${month}`;
 
-    // Navigate to documents page and open the document edit modal
-    this.router.navigate(['/documents', yearMonth]).then(() => {
-      // Use requestAnimationFrame to ensure the view is rendered before opening the modal
-      // This is more reliable than setTimeout and aligns with the browser's rendering cycle
-      requestAnimationFrame(() => {
-        this.dialog.open(DocumentEditComponent, {
-          width: '50vw',
-          maxWidth: '90vw',
-          data: this.connectedDocument,
-        });
-      });
-    });
+    // Navigate to documents page with documentId in the route
+    // The DocumentsComponent will handle opening the modal
+    this.router.navigate(['/documents', yearMonth, this.connectedDocument.id]);
   }
 }

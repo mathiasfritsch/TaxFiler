@@ -173,7 +173,26 @@ export class DocumentsComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.yearMonth = params.get('yearMonth');
+      const documentId = params.get('documentId');
       this.getDocuments();
+      
+      // If documentId is provided in the route, open the document modal
+      if (documentId) {
+        // Fetch the document and open the modal
+        this.http.get<any>(`/api/documents/getdocument/${documentId}`).subscribe({
+          next: response => {
+            // Handle FluentResults Result<DocumentDto> - check if response has value property
+            const document = response.value || response;
+            // Wait for the documents list to load before opening modal
+            setTimeout(() => {
+              this.openEditDialog(document);
+            }, 100);
+          },
+          error: error => {
+            console.error('Error fetching document for modal:', error);
+          }
+        });
+      }
     });
   }
 
