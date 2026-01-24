@@ -33,23 +33,38 @@
     </div>
     <div>
       <mat-label>Dokument</mat-label>
-      nur unconnected
-      <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
-      <mat-form-field>
-        <input type="text"
-          matInput formControlName="documentControl"
-          [matAutocomplete]="auto"
-          (focus)="onDocumentControlFocus()">
-          <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
-            @for (document of filteredDocuments | async; track document) {
-              <mat-option [value]="document">
-                <span>{{ document.name }}</span>|
-                <span>{{ document.total }}</span>|
-                <span>{{ document.invoiceDate }}</span>
-              </mat-option>
-            }
-          </mat-autocomplete>
+      @if (hasConnectedDocument && connectedDocument) {
+        <!-- Display connected document as non-editable with link -->
+        <div class="connected-document">
+          <button mat-button (click)="openDocumentModal()" type="button" class="document-link">
+            <div class="document-details">
+              <div><strong>{{ connectedDocument.name }}</strong></div>
+              <div>Invoice Number: {{ connectedDocument.invoiceNumber }}</div>
+              <div>Date: {{ connectedDocument.invoiceDate | date:'dd.MM.yyyy' }}</div>
+              <div>Amount: {{ connectedDocument.total | currency:'EUR':'symbol':'1.2-2' }}</div>
+            </div>
+          </button>
+        </div>
+      } @else {
+        <!-- Show autocomplete for best matches when no document connected -->
+        nur unconnected
+        <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
+        <mat-form-field>
+          <input type="text"
+            matInput formControlName="documentControl"
+            [matAutocomplete]="auto"
+            (focus)="onDocumentControlFocus()">
+            <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
+              @for (document of filteredDocuments | async; track document) {
+                <mat-option [value]="document">
+                  <span>{{ document.name }}</span>|
+                  <span>{{ document.total }}</span>|
+                  <span>{{ document.invoiceDate }}</span>
+                </mat-option>
+              }
+            </mat-autocomplete>
         </mat-form-field>
+      }
       </div>
       <div>
         <mat-label>Datum</mat-label>
