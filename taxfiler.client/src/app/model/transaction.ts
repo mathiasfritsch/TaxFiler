@@ -13,4 +13,5 @@
   accountId: number;
   accountName: string;
   isTaxMismatch: boolean;
+  isTaxMismatchConfirmed: boolean;
 }
