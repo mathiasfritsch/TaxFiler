@@ -36,6 +36,10 @@ public static class TransactionMapper
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant??false,
             DocumentId = transaction.DocumentId,
             Document = transaction.Document?.ToDto([]),
+            Documents = transaction.TransactionDocuments?
+                .Where(td => td.Document != null)
+                .Select(td => td.Document.ToDto([]))
+                .ToList() ?? new List<Model.Dto.DocumentDto>(),
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
             AccountName = transaction.Account.Name,

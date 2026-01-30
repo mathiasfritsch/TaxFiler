@@ -8,7 +8,7 @@ import {
   MatDialogRef,
   MatDialogTitle
 } from "@angular/material/dialog";
-import {MatButton} from "@angular/material/button";
+import {MatButton, MatIconButton} from "@angular/material/button";
 import {MatInput} from "@angular/material/input";
 import {Document} from "../model/document";
 import {MatCheckbox} from "@angular/material/checkbox";
@@ -29,6 +29,7 @@ import { Router } from "@angular/router";
     MatFormField,
     MatDialogActions,
     MatButton,
+    MatIconButton,
     MatDialogContent,
     MatDialogTitle,
     ReactiveFormsModule,
@@ -52,8 +53,8 @@ export class TransactionEditComponent implements OnInit{
   filteredDocuments: Observable<Document[]>;
   unconnectedOnly: boolean = true;
   accounts: Account[] = [];
-  connectedDocument: Document | null = null;
-  hasConnectedDocument: boolean = false;
+  connectedDocuments: Document[] = [];
+  hasConnectedDocuments: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<TransactionEditComponent>,
@@ -108,11 +109,13 @@ export class TransactionEditComponent implements OnInit{
   }
 
   onSaveClick(): void {
+    // Collect all document IDs from connected documents
+    const documentIds = this.connectedDocuments.map(d => d.id);
+
     const updatedTransaction = {
       ...this.transaction,
-      documentId: this.hasConnectedDocument 
-        ? this.transaction.documentId 
-        : this.transactionFormGroup.value.documentControl?.id,
+      documentIds: documentIds,
+      documentId: documentIds.length > 0 ? documentIds[0] : null, // Keep for backward compatibility
       transactionNote: this.transactionFormGroup.value.transactionNoteControl,
       netAmount: this.transactionFormGroup.value.netAmountControl,
       grossAmount: this.transactionFormGroup.value.grossAmountControl,
@@ -134,12 +137,16 @@ export class TransactionEditComponent implements OnInit{
     });
   }
   ngOnInit(): void {
-    // Check if transaction has a connected document
-    if (this.transaction.documentId) {
-      this.hasConnectedDocument = true;
+    // Check if transaction has connected documents
+    if (this.transaction.documents && this.transaction.documents.length > 0) {
+      this.hasConnectedDocuments = true;
+      this.connectedDocuments = this.transaction.documents;
+    } else if (this.transaction.documentId) {
+      // Backward compatibility: load single document if documentId is set
+      this.hasConnectedDocuments = true;
       this.getConnectedDocument();
     } else {
-      this.hasConnectedDocument = false;
+      this.hasConnectedDocuments = false;
       this.getDocuments(); // Load best matches
     }
     this.getAccounts();
@@ -198,19 +205,43 @@ export class TransactionEditComponent implements OnInit{
       next: response => {
         // Handle FluentResults Result<DocumentDto> - check if response has value property
         const document = response.value || response;
-        this.connectedDocument = document;
+        this.connectedDocuments = [document];
       },
       error: error => {
         console.error('Error fetching connected document:', error);
         // If we can't fetch the document, fall back to showing the autocomplete
-        this.hasConnectedDocument = false;
+        this.hasConnectedDocuments = false;
         this.getDocuments();
       }
     });
   }
 
-  openDocumentModal() {
-    if (!this.connectedDocument) {
+  addDocumentFromAutocomplete() {
+    const selectedDocument = this.transactionFormGroup.value.documentControl;
+    if (selectedDocument?.id) {
+      // Check if document is already in the list
+      if (!this.connectedDocuments.find(d => d.id === selectedDocument.id)) {
+        this.connectedDocuments.push(selectedDocument);
+        this.hasConnectedDocuments = true;
+      }
+      // Clear the autocomplete
+      this.transactionFormGroup.controls['documentControl'].setValue(null);
+    }
+  }
+
+  removeDocument(document: Document) {
+    const index = this.connectedDocuments.findIndex(d => d.id === document.id);
+    if (index > -1) {
+      this.connectedDocuments.splice(index, 1);
+    }
+    if (this.connectedDocuments.length === 0) {
+      this.hasConnectedDocuments = false;
+      this.getDocuments(); // Load available documents
+    }
+  }
+
+  openDocumentModal(document: Document) {
+    if (!document) {
       return;
     }
 
@@ -218,13 +249,13 @@ export class TransactionEditComponent implements OnInit{
     this.dialogRef.close();
 
     // Navigate to documents page with the yearMonth and documentId
-    const invoiceDate = new Date(this.connectedDocument.invoiceDate);
+    const invoiceDate = new Date(document.invoiceDate);
     const year = invoiceDate.getFullYear();
     const month = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
     const yearMonth = `${year}-${month}`;
 
     // Navigate to documents page with documentId in the route
     // The DocumentsComponent will handle opening the modal
-    this.router.navigate(['/documents', yearMonth, this.connectedDocument.id]);
+    this.router.navigate(['/documents', yearMonth, document.id]);
   }
 }

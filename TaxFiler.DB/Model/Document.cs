@@ -50,5 +50,8 @@ namespace TaxFiler.DB.Model
         public decimal? Skonto { get; set; }
         [MaxLength(200)] public string? VendorName { get; set; }
         public DateOnly? InvoiceDateFromFolder { get; set; }
+        
+        // Many-to-many relationship with Transactions
+        public ICollection<TransactionDocument> TransactionDocuments { get; set; } = new List<TransactionDocument>();
     }
 }

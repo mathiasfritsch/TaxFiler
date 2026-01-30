@@ -32,20 +32,35 @@
       </mat-form-field>
     </div>
     <div>
-      <mat-label>Dokument</mat-label>
-      @if (hasConnectedDocument && connectedDocument) {
-        <!-- Display connected document as non-editable with link -->
-             <div data-id="open-document-details" class="document-details" (click)="openDocumentModal()" >{{ connectedDocument.name }}</div>
-      } @else {
-        <!-- Show autocomplete for best matches when no document connected -->
-        nur unconnected
+      <mat-label>Dokumente</mat-label>
+      @if (hasConnectedDocuments && connectedDocuments.length > 0) {
+        <!-- Display connected documents as a list with remove buttons -->
+        <div class="connected-documents-list">
+          @for (doc of connectedDocuments; track doc.id) {
+            <div class="document-item">
+              <button type="button" class="document-name-button" (click)="openDocumentModal(doc)" 
+                      [attr.aria-label]="'Open document ' + doc.name">
+                {{ doc.name }}
+              </button>
+              <button mat-icon-button (click)="removeDocument(doc)" type="button"
+                      [attr.aria-label]="'Remove document ' + doc.name">
+                <span>✕</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+      <!-- Show autocomplete for adding documents -->
+      <div>
+        <span>nur unconnected</span>
         <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
         <mat-form-field>
           <input type="text"
             matInput formControlName="documentControl"
             [matAutocomplete]="auto"
-            (focus)="onDocumentControlFocus()">
-            <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
+            (focus)="onDocumentControlFocus()"
+            placeholder="Dokument hinzufügen">
+            <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName" (optionSelected)="addDocumentFromAutocomplete()">
               @for (document of filteredDocuments | async; track document) {
                 <mat-option [value]="document">
                   <span>{{ document.name }}</span>|
@@ -55,8 +70,8 @@
               }
             </mat-autocomplete>
         </mat-form-field>
-      }
       </div>
+    </div>
       <div>
         <mat-label>Datum</mat-label>
         <mat-form-field>

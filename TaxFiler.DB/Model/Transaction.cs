@@ -32,4 +32,7 @@ public class Transaction
     public int? DocumentId { get; set; }
     public Document? Document { get; set; }
     public string SenderReceiver { get; set; }
+    
+    // Many-to-many relationship with Documents
+    public ICollection<TransactionDocument> TransactionDocuments { get; set; } = new List<TransactionDocument>();
 }

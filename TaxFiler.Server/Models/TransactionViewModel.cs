@@ -17,6 +17,7 @@ public class TransactionViewModel
     public int? DocumentId { get; init; }
     public bool IsSalesTaxRelevant { get; init; }
     public string? DocumentName { get; init; }
+    public List<string> DocumentNames { get; init; } = new();
     public int AccountId { get; init; }
     public string AccountName { get; init; }
     public bool IsTaxMismatch { get; init; }

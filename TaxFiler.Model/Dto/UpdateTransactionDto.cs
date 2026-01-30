@@ -14,6 +14,7 @@ public class UpdateTransactionDto
     public bool IsOutgoing { get; set; }
     public bool IsIncomeTaxRelevant { get; set; }
     public int? DocumentId { get; set; }
+    public List<int> DocumentIds { get; set; } = new();
     public bool IsSalesTaxRelevant { get; set; }
     public string SenderReceiver { get; set; }
     public int? AccountId { get; set; }
