@@ -15,6 +15,7 @@ public class TransactionDto
     public bool IsIncomeTaxRelevant { get; set; }
     public int? DocumentId { get; set; }
     public DocumentDto? Document { get; set; }
+    public List<DocumentDto> Documents { get; set; } = new();
     public bool IsSalesTaxRelevant { get; set; }
     public string SenderReceiver { get; set; }
     public int AccountId { get; set; }

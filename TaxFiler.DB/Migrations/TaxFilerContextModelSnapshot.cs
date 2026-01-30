@@ -169,6 +169,29 @@ namespace TaxFiler.DB.Migrations
                     b.ToTable("Transactions");
                 });
 
+            modelBuilder.Entity("TaxFiler.DB.Model.TransactionDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TransactionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("TransactionId");
+
+                    b.ToTable("TransactionDocuments");
+                });
+
             modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
                 {
                     b.HasOne("TaxFiler.DB.Model.Account", "Account")
@@ -184,6 +207,35 @@ namespace TaxFiler.DB.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.TransactionDocument", b =>
+                {
+                    b.HasOne("TaxFiler.DB.Model.Document", "Document")
+                        .WithMany("TransactionDocuments")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxFiler.DB.Model.Transaction", "Transaction")
+                        .WithMany("TransactionDocuments")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Transaction");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.Document", b =>
+                {
+                    b.Navigation("TransactionDocuments");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
+                {
+                    b.Navigation("TransactionDocuments");
                 });
 #pragma warning restore 612, 618
         }

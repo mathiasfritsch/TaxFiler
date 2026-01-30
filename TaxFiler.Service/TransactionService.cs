@@ -134,6 +134,8 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             .Transactions
             .Include(t => t.Document)
             .Include(t => t.Account)
+            .Include(t => t.TransactionDocuments)
+                .ThenInclude(td => td.Document)
             .Where(t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month);
 
         if (accountId.HasValue)
@@ -147,15 +149,70 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 
     public async Task<modelDto.TransactionDto> GetTransactionAsync(int transactionId)
     {
-        var transaction = await taxFilerContext.Transactions.Include(a => a.Account).SingleAsync(t => t.Id == transactionId);
+        var transaction = await taxFilerContext.Transactions
+            .Include(a => a.Account)
+            .Include(t => t.TransactionDocuments)
+                .ThenInclude(td => td.Document)
+            .SingleAsync(t => t.Id == transactionId);
         return transaction.TransactionDto();
     }
 
     public async Task UpdateTransactionAsync(modelDto.UpdateTransactionDto updateTransactionDto)
     {
-        var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == updateTransactionDto.Id);
+        var transaction = await taxFilerContext.Transactions
+            .Include(t => t.TransactionDocuments)
+            .SingleAsync(t => t.Id == updateTransactionDto.Id);
 
-        if (transaction.DocumentId != updateTransactionDto.DocumentId && updateTransactionDto.DocumentId > 0)
+        // Handle multiple documents if provided
+        if (updateTransactionDto.DocumentIds != null && updateTransactionDto.DocumentIds.Any())
+        {
+            // Remove existing document associations
+            taxFilerContext.TransactionDocuments.RemoveRange(transaction.TransactionDocuments);
+            
+            // Fetch all documents for the transaction
+            var documents = await taxFilerContext.Documents
+                .Where(d => updateTransactionDto.DocumentIds.Contains(d.Id))
+                .ToListAsync();
+            
+            // Create new associations
+            foreach (var doc in documents)
+            {
+                transaction.TransactionDocuments.Add(new DB.Model.TransactionDocument
+                {
+                    TransactionId = transaction.Id,
+                    DocumentId = doc.Id
+                });
+            }
+            
+            // Calculate sum of document amounts
+            var totalSubTotal = documents.Sum(d => d.SubTotal ?? 0);
+            var totalTaxAmount = documents.Sum(d => d.TaxAmount ?? 0);
+            var totalSkonto = documents.Sum(d => d.Skonto ?? 0);
+            
+            // Use the tax rate from the first document (assuming all have the same rate)
+            var firstDocument = documents.FirstOrDefault();
+            if (firstDocument != null)
+            {
+                if (totalSkonto > 0)
+                {
+                    var netAmountSkonto = totalSubTotal * (100 - totalSkonto) / 100;
+                    updateTransactionDto.NetAmount = Math.Round(netAmountSkonto, 2);
+                    updateTransactionDto.TaxRate = firstDocument.TaxRate.GetValueOrDefault();
+                    updateTransactionDto.TaxAmount = updateTransactionDto.GrossAmount - updateTransactionDto.NetAmount;
+                }
+                else
+                {
+                    updateTransactionDto.NetAmount = totalSubTotal;
+                    updateTransactionDto.TaxAmount = totalTaxAmount;
+                    updateTransactionDto.TaxRate = firstDocument.TaxRate.GetValueOrDefault();
+                }
+            }
+            
+            // Clear the single DocumentId for backward compatibility
+            updateTransactionDto.DocumentId = null;
+        }
+        // Fall back to single document if no DocumentIds provided but DocumentId is set
+        else if (transaction.DocumentId != updateTransactionDto.DocumentId && updateTransactionDto.DocumentId > 0)
         {
             var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == updateTransactionDto.DocumentId);
 
