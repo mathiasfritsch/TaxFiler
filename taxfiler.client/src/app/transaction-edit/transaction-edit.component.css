@@ -43,3 +43,30 @@ mat-form-field {
   display: block;
   font-size: 14px;
 }
+
+.connected-documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.document-name {
+  flex: 1;
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.document-name:hover {
+  color: #1565c0;
+}
