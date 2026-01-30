@@ -24,6 +24,14 @@ namespace TaxFiler.DB
                 options.UseNpgsql(Configuration.GetConnectionString("TaxFilerNeonDB"));
             }
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Configure composite primary key for TransactionDocument junction table
+            modelBuilder.Entity<TransactionDocument>()
+                .HasKey(td => new { td.TransactionId, td.DocumentId });
+        }
+
         public DbSet<Document> Documents { get; set; }
         
         public DbSet<Transaction> Transactions { get; set; }

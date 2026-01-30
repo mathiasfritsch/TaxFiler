@@ -109,12 +109,8 @@ export class TransactionEditComponent implements OnInit{
   }
 
   onSaveClick(): void {
-    // Collect all document IDs (both existing connected and newly selected)
+    // Collect all document IDs from connected documents
     const documentIds = this.connectedDocuments.map(d => d.id);
-    const newDocument = this.transactionFormGroup.value.documentControl;
-    if (newDocument?.id && !documentIds.includes(newDocument.id)) {
-      documentIds.push(newDocument.id);
-    }
 
     const updatedTransaction = {
       ...this.transaction,

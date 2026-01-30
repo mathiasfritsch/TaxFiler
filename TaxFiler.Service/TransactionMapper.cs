@@ -37,6 +37,7 @@ public static class TransactionMapper
             DocumentId = transaction.DocumentId,
             Document = transaction.Document?.ToDto([]),
             Documents = transaction.TransactionDocuments?
+                .Where(td => td.Document != null)
                 .Select(td => td.Document.ToDto([]))
                 .ToList() ?? new List<Model.Dto.DocumentDto>(),
             SenderReceiver = transaction.SenderReceiver,

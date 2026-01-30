@@ -60,13 +60,21 @@ mat-form-field {
   border: 1px solid #ddd;
 }
 
-.document-name {
+.document-name-button {
   flex: 1;
+  text-align: left;
+  border: none;
+  background: none;
   color: #1976d2;
   text-decoration: underline;
   cursor: pointer;
+  padding: 4px;
+  font-size: inherit;
 }
 
-.document-name:hover {
+.document-name-button:hover,
+.document-name-button:focus {
   color: #1565c0;
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
 }

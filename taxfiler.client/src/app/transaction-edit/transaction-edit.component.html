@@ -38,8 +38,12 @@
         <div class="connected-documents-list">
           @for (doc of connectedDocuments; track doc.id) {
             <div class="document-item">
-              <span class="document-name" (click)="openDocumentModal(doc)">{{ doc.name }}</span>
-              <button mat-icon-button (click)="removeDocument(doc)" type="button">
+              <button type="button" class="document-name-button" (click)="openDocumentModal(doc)" 
+                      [attr.aria-label]="'Open document ' + doc.name">
+                {{ doc.name }}
+              </button>
+              <button mat-icon-button (click)="removeDocument(doc)" type="button"
+                      [attr.aria-label]="'Remove document ' + doc.name">
                 <span>✕</span>
               </button>
             </div>

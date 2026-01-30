@@ -12,7 +12,7 @@ using TaxFiler.DB;
 namespace TaxFiler.DB.Migrations
 {
     [DbContext(typeof(TaxFilerContext))]
-    [Migration("20260130184706_AddTransactionDocumentJunctionTable")]
+    [Migration("20260130185556_AddTransactionDocumentJunctionTable")]
     partial class AddTransactionDocumentJunctionTable
     {
         /// <inheritdoc />
@@ -174,23 +174,15 @@ namespace TaxFiler.DB.Migrations
 
             modelBuilder.Entity("TaxFiler.DB.Model.TransactionDocument", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("TransactionId")
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DocumentId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TransactionId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
+                    b.HasKey("TransactionId", "DocumentId");
 
                     b.HasIndex("DocumentId");
-
-                    b.HasIndex("TransactionId");
 
                     b.ToTable("TransactionDocuments");
                 });

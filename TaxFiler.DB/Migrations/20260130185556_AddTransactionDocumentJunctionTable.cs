@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,14 +14,12 @@ namespace TaxFiler.DB.Migrations
                 name: "TransactionDocuments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TransactionId = table.Column<int>(type: "integer", nullable: false),
                     DocumentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TransactionDocuments", x => x.Id);
+                    table.PrimaryKey("PK_TransactionDocuments", x => new { x.TransactionId, x.DocumentId });
                     table.ForeignKey(
                         name: "FK_TransactionDocuments_Documents_DocumentId",
                         column: x => x.DocumentId,
@@ -42,10 +39,13 @@ namespace TaxFiler.DB.Migrations
                 table: "TransactionDocuments",
                 column: "DocumentId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_TransactionDocuments_TransactionId",
-                table: "TransactionDocuments",
-                column: "TransactionId");
+            // Data migration: Copy existing transaction-document relationships
+            migrationBuilder.Sql(@"
+                INSERT INTO ""TransactionDocuments"" (""TransactionId"", ""DocumentId"")
+                SELECT ""Id"", ""DocumentId""
+                FROM ""Transactions""
+                WHERE ""DocumentId"" IS NOT NULL
+            ");
         }
 
         /// <inheritdoc />

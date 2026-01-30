@@ -8,9 +8,6 @@ namespace TaxFiler.DB.Model;
 /// </summary>
 public class TransactionDocument
 {
-    [Key]
-    public int Id { get; set; }
-    
     [ForeignKey(nameof(Transaction))]
     public int TransactionId { get; set; }
     public Transaction Transaction { get; set; }

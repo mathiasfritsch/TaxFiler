@@ -174,6 +174,12 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                 .Where(d => updateTransactionDto.DocumentIds.Contains(d.Id))
                 .ToListAsync();
             
+            // Validate that at least one document was found
+            if (!documents.Any())
+            {
+                throw new InvalidOperationException("No valid documents found for the provided document IDs");
+            }
+            
             // Create new associations
             foreach (var doc in documents)
             {
@@ -184,28 +190,35 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                 });
             }
             
-            // Calculate sum of document amounts
-            var totalSubTotal = documents.Sum(d => d.SubTotal ?? 0);
-            var totalTaxAmount = documents.Sum(d => d.TaxAmount ?? 0);
-            var totalSkonto = documents.Sum(d => d.Skonto ?? 0);
+            // Calculate totals from all documents
+            // For Skonto: calculate per document, then sum the net amounts
+            decimal totalNetAmount = 0;
+            decimal totalTaxAmount = 0;
             
-            // Use the tax rate from the first document (assuming all have the same rate)
-            var firstDocument = documents.FirstOrDefault();
-            if (firstDocument != null)
+            foreach (var doc in documents)
             {
-                if (totalSkonto > 0)
+                if (doc.Skonto is > 0)
                 {
-                    var netAmountSkonto = totalSubTotal * (100 - totalSkonto) / 100;
-                    updateTransactionDto.NetAmount = Math.Round(netAmountSkonto, 2);
-                    updateTransactionDto.TaxRate = firstDocument.TaxRate.GetValueOrDefault();
-                    updateTransactionDto.TaxAmount = updateTransactionDto.GrossAmount - updateTransactionDto.NetAmount;
+                    var netAmountSkonto = doc.SubTotal.GetValueOrDefault() *
+                        (100 - doc.Skonto.GetValueOrDefault()) / 100;
+                    totalNetAmount += netAmountSkonto;
                 }
                 else
                 {
-                    updateTransactionDto.NetAmount = totalSubTotal;
-                    updateTransactionDto.TaxAmount = totalTaxAmount;
-                    updateTransactionDto.TaxRate = firstDocument.TaxRate.GetValueOrDefault();
+                    totalNetAmount += doc.SubTotal.GetValueOrDefault();
                 }
+                totalTaxAmount += doc.TaxAmount.GetValueOrDefault();
+            }
+            
+            // Use the tax rate from the first document
+            // Note: This assumes all documents have the same tax rate
+            // Consider validating this or using weighted average in the future
+            var firstDocument = documents.FirstOrDefault();
+            if (firstDocument != null)
+            {
+                updateTransactionDto.NetAmount = Math.Round(totalNetAmount, 2);
+                updateTransactionDto.TaxAmount = totalTaxAmount;
+                updateTransactionDto.TaxRate = firstDocument.TaxRate.GetValueOrDefault();
             }
             
             // Clear the single DocumentId for backward compatibility
