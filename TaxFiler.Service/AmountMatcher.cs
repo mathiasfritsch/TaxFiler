@@ -302,12 +302,13 @@ public class AmountMatcher : IAmountMatcher
                 {
                     var discountedAmount = SkontoCalculator.CalculateDiscountedAmount(documentAmount.Value, document.Skonto);
                     
-                    // Validate Skonto calculation
-                    if (discountedAmount >= 0 && discountedAmount <= documentAmount.Value)
+                    // Validate Skonto calculation - ensure it's reasonable
+                    if (discountedAmount >= 0 && discountedAmount <= documentAmount.Value && document.Skonto <= 100.0m)
                     {
                         finalAmount = discountedAmount;
                         skontoApplied = true;
                     }
+                    // If Skonto is invalid (e.g., > 100%), don't apply it
                 }
                 catch (Exception)
                 {
@@ -359,11 +360,12 @@ public class AmountMatcher : IAmountMatcher
                 {
                     var discountedAmount = SkontoCalculator.CalculateDiscountedAmount(documentAmount.Value, document.Skonto);
                     
-                    // Validate Skonto calculation results
-                    if (discountedAmount >= 0 && discountedAmount <= documentAmount.Value)
+                    // Validate Skonto calculation results - ensure it's reasonable
+                    if (discountedAmount >= 0 && discountedAmount <= documentAmount.Value && document.Skonto <= 100.0m)
                     {
                         finalAmount = discountedAmount;
                     }
+                    // If Skonto is invalid (e.g., > 100%), don't apply it
                 }
                 catch (Exception)
                 {

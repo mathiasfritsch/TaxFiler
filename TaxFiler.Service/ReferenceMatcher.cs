@@ -164,15 +164,17 @@ public class ReferenceMatcher : IReferenceMatcher
         var voucherNumbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var note = transactionNote.Trim();
 
-        // Pattern 1: German invoice patterns (Rechnung, RG, RE, etc.)
-        var germanInvoicePatterns = new[]
+        // Strategy: Try patterns in order of specificity, stop when we find matches
+
+        // Pattern 1: Explicit German invoice patterns with keywords
+        var explicitPatterns = new[]
         {
-            @"(?:Rechnung|RG|RE|RN|INV|Invoice)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})",
+            @"(?:Rechnung|Invoice)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})",
             @"(?:Rechnungs?nr|Rechnungsnummer|Invoice\s*No|Inv\s*No)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})",
-            @"(?:Beleg|Voucher|Ref|Reference)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})"
+            @"(?:Beleg|Voucher)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})"
         };
 
-        foreach (var pattern in germanInvoicePatterns)
+        foreach (var pattern in explicitPatterns)
         {
             var matches = System.Text.RegularExpressions.Regex.Matches(note, pattern, 
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase);
@@ -185,39 +187,44 @@ public class ReferenceMatcher : IReferenceMatcher
             }
         }
 
-        // Pattern 2: Comma or semicolon separated references
-        var separatorPattern = @"\b([A-Z0-9\-\/\.]{3,})\s*[,;]\s*([A-Z0-9\-\/\.]{3,})(?:\s*[,;]\s*([A-Z0-9\-\/\.]{3,}))?";
+        // Pattern 2: Multiple references with connectors (und, and, &, +, sowie)
+        var connectorPattern = @"\b([A-Z0-9\-\/\.]{3,})\s*(?:und|and|&|\+|sowie)\s*([A-Z0-9\-\/\.]{3,})\b";
+        var connectorMatches = System.Text.RegularExpressions.Regex.Matches(note, connectorPattern, 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        foreach (System.Text.RegularExpressions.Match match in connectorMatches)
+        {
+            for (int i = 1; i < match.Groups.Count; i++)
+            {
+                if (match.Groups[i].Success && IsValidReference(match.Groups[i].Value))
+                {
+                    voucherNumbers.Add(match.Groups[i].Value.Trim());
+                }
+            }
+        }
+
+        // Pattern 3: Comma or semicolon separated references
+        var separatorPattern = @"\b([A-Z0-9\-\/\.]{3,})(?:\s*[,;]\s*([A-Z0-9\-\/\.]{3,}))+";
         var separatorMatches = System.Text.RegularExpressions.Regex.Matches(note, separatorPattern, 
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         
         foreach (System.Text.RegularExpressions.Match match in separatorMatches)
         {
-            for (int i = 1; i < match.Groups.Count; i++)
+            // Extract all voucher numbers from the matched text
+            var matchedText = match.Value;
+            var individualVouchers = System.Text.RegularExpressions.Regex.Matches(matchedText, @"\b([A-Z0-9\-\/\.]{3,})\b", 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            
+            foreach (System.Text.RegularExpressions.Match voucherMatch in individualVouchers)
             {
-                if (match.Groups[i].Success && IsValidReference(match.Groups[i].Value))
+                if (IsValidReference(voucherMatch.Groups[1].Value))
                 {
-                    voucherNumbers.Add(match.Groups[i].Value.Trim());
+                    voucherNumbers.Add(voucherMatch.Groups[1].Value.Trim());
                 }
             }
         }
 
-        // Pattern 3: Multiple references with "und" (and) or "&"
-        var andPattern = @"\b([A-Z0-9\-\/\.]{3,})\s*(?:und|and|&|\+)\s*([A-Z0-9\-\/\.]{3,})\b";
-        var andMatches = System.Text.RegularExpressions.Regex.Matches(note, andPattern, 
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        
-        foreach (System.Text.RegularExpressions.Match match in andMatches)
-        {
-            for (int i = 1; i < match.Groups.Count; i++)
-            {
-                if (match.Groups[i].Success && IsValidReference(match.Groups[i].Value))
-                {
-                    voucherNumbers.Add(match.Groups[i].Value.Trim());
-                }
-            }
-        }
-
-        // Pattern 4: Range patterns (e.g., "INV-001 bis INV-003", "2024-001 to 2024-005")
+        // Pattern 4: Range patterns (e.g., "INV-001 bis INV-003")
         var rangePattern = @"\b([A-Z0-9\-\/\.]{3,})\s*(?:bis|to|through)\s*([A-Z0-9\-\/\.]{3,})\b";
         var rangeMatches = System.Text.RegularExpressions.Regex.Matches(note, rangePattern, 
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
@@ -228,18 +235,29 @@ public class ReferenceMatcher : IReferenceMatcher
                 IsValidReference(match.Groups[1].Value) && 
                 IsValidReference(match.Groups[2].Value))
             {
-                // For ranges, extract the start and end references
                 voucherNumbers.Add(match.Groups[1].Value.Trim());
                 voucherNumbers.Add(match.Groups[2].Value.Trim());
             }
         }
 
-        // Pattern 5: Generic alphanumeric patterns (fallback)
-        // Only if no specific patterns were found
+        // Pattern 5: Standalone voucher-like patterns in context (before fallback)
+        var contextualPattern = @"(?:zusätzlich|additional|also|außerdem|further|moreover)\s+([A-Z0-9\-\/\.]{3,})\b";
+        var contextualMatches = System.Text.RegularExpressions.Regex.Matches(note, contextualPattern, 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        foreach (System.Text.RegularExpressions.Match match in contextualMatches)
+        {
+            if (match.Groups.Count > 1 && IsValidReference(match.Groups[1].Value))
+            {
+                voucherNumbers.Add(match.Groups[1].Value.Trim());
+            }
+        }
+
+        // Pattern 6: Standalone alphanumeric patterns (only if no explicit patterns found)
         if (!voucherNumbers.Any())
         {
-            var genericPattern = @"\b([A-Z]{2,}[0-9]{3,}|[0-9]{4,}[A-Z]{1,}|[A-Z0-9\-]{5,})\b";
-            var matches = System.Text.RegularExpressions.Regex.Matches(note, genericPattern, 
+            var standalonePattern = @"\b([A-Z]{2,}[0-9]{3,}|[0-9]{4,}[A-Z]{1,}|[A-Z0-9\-]{5,})\b";
+            var matches = System.Text.RegularExpressions.Regex.Matches(note, standalonePattern, 
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             
             foreach (System.Text.RegularExpressions.Match match in matches)
@@ -251,7 +269,6 @@ public class ReferenceMatcher : IReferenceMatcher
             }
         }
 
-        // Filter out duplicates and invalid references
         return voucherNumbers.Where(IsValidReference).Distinct(StringComparer.OrdinalIgnoreCase);
     }
 

@@ -25,14 +25,13 @@ public class MultipleDocumentAttachmentsIntegrationTests
     [SetUp]
     public void Setup()
     {
-        // Create in-memory database for testing
+        // Create in-memory database for testing with unique database name per test
+        var databaseName = Guid.NewGuid().ToString();
         var options = new DbContextOptionsBuilder<TaxFilerContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName: databaseName)
             .Options;
 
-        var configuration = Substitute.For<IConfiguration>();
-        _context = new TaxFilerContext(configuration);
-        _context.Database.EnsureCreated();
+        _context = new TestTaxFilerContext(options);
 
         // Create loggers
         _attachmentLogger = Substitute.For<ILogger<DocumentAttachmentService>>();
@@ -72,27 +71,44 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "Test Vendor",
             TransactionNote = "Payment for INV001, INV002",
             TransactionDateTime = DateTime.UtcNow,
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "Test Vendor"
         };
 
-        var document1 = new Document
+        var document1 = new Document(
+            "Invoice 001",
+            "INV001",
+            false,
+            19m,
+            14.25m,
+            75.00m,
+            60.75m,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
+            "INV001",
+            true,
+            0m,
+            "Test Vendor"
+        )
         {
-            Id = 1,
-            Name = "Invoice 001",
-            InvoiceNumber = "INV001",
-            Total = 75.00m,
-            InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
-            VendorName = "Test Vendor"
+            Id = 1
         };
 
-        var document2 = new Document
+        var document2 = new Document(
+            "Invoice 002",
+            "INV002",
+            false,
+            19m,
+            14.25m,
+            75.00m,
+            60.75m,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
+            "INV002",
+            true,
+            0m,
+            "Test Vendor"
+        )
         {
-            Id = 2,
-            Name = "Invoice 002", 
-            InvoiceNumber = "INV002",
-            Total = 75.00m,
-            InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
-            VendorName = "Test Vendor"
+            Id = 2
         };
 
         _context.Accounts.Add(account);
@@ -157,7 +173,8 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "ABC Company",
             TransactionNote = "Payment for invoices REF123, REF124, REF125",
             TransactionDateTime = DateTime.UtcNow,
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "ABC Company"
         };
 
         var documents = new[]
@@ -245,7 +262,8 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "Multi Vendor",
             TransactionNote = "Payment for A001, A002 and other expenses",
             TransactionDateTime = DateTime.UtcNow,
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "Multi Vendor"
         };
 
         var documents = new[]
@@ -333,7 +351,8 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "Test Vendor",
             TransactionNote = "Payment 1",
             TransactionDateTime = DateTime.UtcNow,
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "Test Vendor"
         };
 
         var transaction2 = new Transaction
@@ -344,17 +363,26 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "Test Vendor",
             TransactionNote = "Payment 2",
             TransactionDateTime = DateTime.UtcNow.AddDays(1),
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "Test Vendor"
         };
 
-        var document = new Document
+        var document = new Document(
+            "Shared Invoice",
+            "SHARED001",
+            false,
+            19m,
+            14.25m,
+            75.00m,
+            60.75m,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2)),
+            "SHARED001",
+            true,
+            0m,
+            "Test Vendor"
+        )
         {
-            Id = 1,
-            Name = "Shared Invoice",
-            InvoiceNumber = "SHARED001",
-            Total = 75.00m,
-            InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-2)),
-            VendorName = "Test Vendor"
+            Id = 1
         };
 
         _context.Accounts.Add(account);
@@ -418,7 +446,8 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "Big Vendor",
             TransactionNote = "Large payment",
             TransactionDateTime = DateTime.UtcNow,
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "Big Vendor"
         };
 
         _context.Accounts.Add(account);
@@ -501,7 +530,8 @@ public class MultipleDocumentAttachmentsIntegrationTests
             Counterparty = "Test Vendor",
             TransactionNote = "Test payment",
             TransactionDateTime = DateTime.UtcNow,
-            IsOutgoing = true
+            IsOutgoing = true,
+            SenderReceiver = "Test Vendor"
         };
 
         var documents = new[]
@@ -562,5 +592,37 @@ public class MultipleDocumentAttachmentsIntegrationTests
         // Test detaching non-existent attachment
         var nonExistentDetachResult = await _attachmentService.DetachDocumentAsync(1, 999);
         Assert.That(nonExistentDetachResult.IsFailed, Is.True, "Non-existent detachment should fail");
+    }
+
+    // Test helper class to allow constructor injection for testing
+    private class TestTaxFilerContext : TaxFilerContext
+    {
+        private readonly DbContextOptions<TaxFilerContext> _options;
+
+        public TestTaxFilerContext(DbContextOptions<TaxFilerContext> options) 
+            : base(CreateTestConfiguration())
+        {
+            _options = options;
+            Database.EnsureCreated();
+        }
+
+        private static IConfiguration CreateTestConfiguration()
+        {
+            return new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ConnectionStrings:TaxFilerNeonDB"] = "InMemory"
+                })
+                .Build();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            // Use the provided options instead of the base configuration
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString());
+            }
+        }
     }
 }

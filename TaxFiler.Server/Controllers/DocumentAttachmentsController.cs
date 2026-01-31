@@ -89,14 +89,11 @@ public class DocumentAttachmentsController(
         }
         
         // Include warnings in response if any
-        var response = new { Message = "Document successfully attached" };
-        if (result.Reasons.Any())
-        {
-            response = new { 
-                Message = "Document successfully attached", 
-                Warnings = result.Reasons.Select(r => r.Message).ToList() 
-            };
-        }
+        var warnings = result.Reasons.Select(r => r.Message).ToList();
+        var response = new { 
+            Message = "Document successfully attached", 
+            Warnings = warnings 
+        };
         
         return Ok(response);
     }

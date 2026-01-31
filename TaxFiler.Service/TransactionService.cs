@@ -184,54 +184,103 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                      && !unmatchedTransactionIds.Contains(t.Id))
             .OrderBy(t => t.TransactionDateTime)
             .ToListAsync(cancellationToken);
-        
-        // 2. Process each transaction using the new multiple document matching service
+
+        if (!unmatchedTransactions.Any())
+        {
+            return new modelDto.AutoAssignResult
+            {
+                TotalProcessed = 0,
+                AssignedCount = 0,
+                SkippedCount = 0,
+                Errors = new List<string>()
+            };
+        }
+
+        // 2. Get matches for all unmatched transactions using batch processing
+        var matchesByTransaction = await documentMatchingService
+            .BatchDocumentMatchesAsync(unmatchedTransactions, cancellationToken);
+
+        // 3. Process matches and create document attachments
         int assignedCount = 0;
         int skippedCount = 0;
         var errors = new List<string>();
-        
+        var transactionsToUpdate = new List<DB.Model.Transaction>();
+
         foreach (var transaction in unmatchedTransactions)
         {
             if (cancellationToken.IsCancellationRequested)
                 break;
-                
+
             try
             {
-                // Use the new AutoAssignMultipleDocumentsAsync method
-                var assignmentResult = await documentMatchingService
-                    .AutoAssignMultipleDocumentsAsync(transaction.Id, cancellationToken);
-                
-                if (assignmentResult.IsSuccess && assignmentResult.Value.DocumentsAttached > 0)
-                {
-                    assignedCount++;
-                    
-                    // Log successful assignment
-                    if (assignmentResult.Value.HasWarnings)
-                    {
-                        errors.AddRange(assignmentResult.Value.Warnings.Select(w => 
-                            $"Transaction {transaction.Id}: {w}"));
-                    }
-                }
-                else
+                // Check if we have matches for this transaction
+                if (!matchesByTransaction.TryGetValue(transaction.Id, out var matches) || !matches.Any())
                 {
                     skippedCount++;
-                    
-                    // Log why assignment failed
-                    if (assignmentResult.IsFailed)
-                    {
-                        errors.Add($"Transaction {transaction.Id}: {string.Join(", ", assignmentResult.Errors.Select(e => e.Message))}");
-                    }
+                    continue;
                 }
+
+                // Get the best match (highest score)
+                var bestMatch = matches.OrderByDescending(m => m.MatchScore).First();
+
+                // Only assign if the match score is above threshold (0.5)
+                if (bestMatch.MatchScore < 0.5)
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                // Create document attachment
+                var attachment = new DB.Model.DocumentAttachment
+                {
+                    TransactionId = transaction.Id,
+                    DocumentId = bestMatch.Document.Id,
+                    AttachedAt = DateTime.UtcNow,
+                    IsAutomatic = true,
+                    AttachedBy = "AutoAssign"
+                };
+
+                taxFilerContext.DocumentAttachments.Add(attachment);
+
+                // Copy tax data from document to transaction if available
+                if (bestMatch.Document.SubTotal.HasValue)
+                {
+                    // Handle Skonto calculation if present
+                    if (bestMatch.Document.Skonto.HasValue && bestMatch.Document.Skonto > 0)
+                    {
+                        // Calculate net amount with Skonto discount
+                        var skontoMultiplier = (100 - bestMatch.Document.Skonto.Value) / 100;
+                        transaction.NetAmount = bestMatch.Document.SubTotal.Value * skontoMultiplier;
+                        
+                        // Calculate tax amount from gross - net
+                        transaction.TaxAmount = transaction.GrossAmount - transaction.NetAmount;
+                    }
+                    else
+                    {
+                        // No Skonto - copy values directly
+                        transaction.NetAmount = bestMatch.Document.SubTotal;
+                        transaction.TaxAmount = bestMatch.Document.TaxAmount;
+                    }
+                    
+                    transaction.TaxRate = bestMatch.Document.TaxRate;
+                    transactionsToUpdate.Add(transaction);
+                }
+
+                assignedCount++;
             }
             catch (Exception ex)
             {
                 errors.Add($"Transaction {transaction.Id}: {ex.Message}");
                 skippedCount++;
-                // Continue processing remaining transactions
             }
         }
-        
-        // 3. Return summary
+
+        // 4. Save all changes
+        if (assignedCount > 0)
+        {
+            await taxFilerContext.SaveChangesAsync(cancellationToken);
+        }
+
         return new modelDto.AutoAssignResult
         {
             TotalProcessed = unmatchedTransactions.Count,

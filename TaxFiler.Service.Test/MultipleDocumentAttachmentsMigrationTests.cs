@@ -54,19 +54,8 @@ public class MultipleDocumentAttachmentsMigrationTests
         context.DocumentAttachments.Add(attachment);
         await context.SaveChangesAsync();
 
-        // Act - Simulate the migration logic
-        // In a real migration, this would be done by the SQL script
-        var documentAttachment = new DocumentAttachment
-        {
-            TransactionId = transaction.Id,
-            DocumentId = document.Id,
-            AttachedAt = DateTime.UtcNow,
-            AttachedBy = null,
-            IsAutomatic = true
-        };
-        
-        context.DocumentAttachments.Add(documentAttachment);
-        await context.SaveChangesAsync();
+        // Act - The migration has already been simulated above
+        // No need to add another attachment
 
         // Assert
         var attachments = await context.DocumentAttachments
