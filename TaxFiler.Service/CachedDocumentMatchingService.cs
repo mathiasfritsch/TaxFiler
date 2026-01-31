@@ -12,7 +12,7 @@ namespace TaxFiler.Service;
 /// </summary>
 public class CachedDocumentMatchingService : IDocumentMatchingService
 {
-    private readonly IDocumentMatchingService _innerService;
+    private readonly DocumentMatchingService _innerService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<CachedDocumentMatchingService> _logger;
     
@@ -27,7 +27,7 @@ public class CachedDocumentMatchingService : IDocumentMatchingService
     private const string BatchMatchesCacheKeyPrefix = "batch_matches_";
 
     public CachedDocumentMatchingService(
-        IDocumentMatchingService innerService,
+        DocumentMatchingService innerService,
         IMemoryCache cache,
         ILogger<CachedDocumentMatchingService> logger)
     {

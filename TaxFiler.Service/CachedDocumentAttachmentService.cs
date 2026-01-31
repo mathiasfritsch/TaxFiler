@@ -12,11 +12,11 @@ namespace TaxFiler.Service;
 /// </summary>
 public class CachedDocumentAttachmentService : IDocumentAttachmentService
 {
-    private readonly IDocumentAttachmentService _innerService;
+    private readonly DocumentAttachmentService _innerService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<CachedDocumentAttachmentService> _logger;
     
-    // Cache configuration
+    // Cache configuration+++++++++++++++++++++++++++++++++++++++++++++++
     private static readonly TimeSpan DefaultCacheExpiry = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan SummaryCacheExpiry = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan AttachmentListCacheExpiry = TimeSpan.FromMinutes(10);
@@ -28,7 +28,7 @@ public class CachedDocumentAttachmentService : IDocumentAttachmentService
     private const string PaginatedAttachmentsCacheKeyPrefix = "paginated_attachments_";
 
     public CachedDocumentAttachmentService(
-        IDocumentAttachmentService innerService,
+        DocumentAttachmentService innerService,
         IMemoryCache cache,
         ILogger<CachedDocumentAttachmentService> logger)
     {
