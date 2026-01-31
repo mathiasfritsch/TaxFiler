@@ -179,41 +179,73 @@ public class MultipleDocumentAttachmentsIntegrationTests
 
         var documents = new[]
         {
-            new Document
+            new Document(
+                "Invoice REF123",
+                "REF123",
+                false,
+                19m,
+                19m,
+                100.00m,
+                81m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7)),
+                "REF123",
+                true,
+                0m,
+                "ABC Company"
+            )
             {
-                Id = 1,
-                Name = "Invoice REF123",
-                InvoiceNumber = "REF123",
-                Total = 100.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7)),
-                VendorName = "ABC Company"
+                Id = 1
             },
-            new Document
+            new Document(
+                "Invoice REF124",
+                "REF124",
+                false,
+                19m,
+                14.25m,
+                75.25m,
+                61m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
+                "REF124",
+                true,
+                0m,
+                "ABC Company"
+            )
             {
-                Id = 2,
-                Name = "Invoice REF124",
-                InvoiceNumber = "REF124", 
-                Total = 75.25m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
-                VendorName = "ABC Company"
+                Id = 2
             },
-            new Document
+            new Document(
+                "Invoice REF125",
+                "REF125",
+                false,
+                19m,
+                9.5m,
+                50.25m,
+                40.75m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
+                "REF125",
+                true,
+                0m,
+                "ABC Company"
+            )
             {
-                Id = 3,
-                Name = "Invoice REF125",
-                InvoiceNumber = "REF125",
-                Total = 50.25m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
-                VendorName = "ABC Company"
+                Id = 3
             },
-            new Document
+            new Document(
+                "Unrelated Invoice",
+                "OTHER001",
+                false,
+                19m,
+                38m,
+                200.00m,
+                162m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-10)),
+                "OTHER001",
+                true,
+                0m,
+                "Other Company"
+            )
             {
-                Id = 4,
-                Name = "Unrelated Invoice",
-                InvoiceNumber = "OTHER001",
-                Total = 200.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-10)),
-                VendorName = "Other Company"
+                Id = 4
             }
         };
 
@@ -269,42 +301,74 @@ public class MultipleDocumentAttachmentsIntegrationTests
         var documents = new[]
         {
             // Perfect reference match combination
-            new Document
+            new Document(
+                "Invoice A001",
+                "A001",
+                false,
+                19m,
+                28.5m,
+                150.00m,
+                121.5m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
+                "A001",
+                true,
+                0m,
+                "Multi Vendor"
+            )
             {
-                Id = 1,
-                Name = "Invoice A001",
-                InvoiceNumber = "A001",
-                Total = 150.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
-                VendorName = "Multi Vendor"
+                Id = 1
             },
-            new Document
+            new Document(
+                "Invoice A002",
+                "A002",
+                false,
+                19m,
+                28.5m,
+                150.00m,
+                121.5m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
+                "A002",
+                true,
+                0m,
+                "Multi Vendor"
+            )
             {
-                Id = 2,
-                Name = "Invoice A002",
-                InvoiceNumber = "A002",
-                Total = 150.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
-                VendorName = "Multi Vendor"
+                Id = 2
             },
             // Amount-based match combination
-            new Document
+            new Document(
+                "Invoice B001",
+                "B001",
+                false,
+                19m,
+                19m,
+                100.00m,
+                81m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7)),
+                "B001",
+                true,
+                0m,
+                "Multi Vendor"
+            )
             {
-                Id = 3,
-                Name = "Invoice B001",
-                InvoiceNumber = "B001",
-                Total = 100.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7)),
-                VendorName = "Multi Vendor"
+                Id = 3
             },
-            new Document
+            new Document(
+                "Invoice B002",
+                "B002",
+                false,
+                19m,
+                38m,
+                200.00m,
+                162m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-6)),
+                "B002",
+                true,
+                0m,
+                "Multi Vendor"
+            )
             {
-                Id = 4,
-                Name = "Invoice B002",
-                InvoiceNumber = "B002",
-                Total = 200.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-6)),
-                VendorName = "Multi Vendor"
+                Id = 4
             }
         };
 
@@ -408,14 +472,22 @@ public class MultipleDocumentAttachmentsIntegrationTests
         // Note: Warnings are included in the result but don't make it fail
 
         // 4. Test amount overage warning (Business Rule 5.2)
-        var largeDocument = new Document
+        var largeDocument = new Document(
+            "Large Invoice",
+            "LARGE001",
+            false,
+            19m,
+            38m,
+            200.00m, // Much larger than transaction amount
+            162m,
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
+            "LARGE001",
+            true,
+            0m,
+            "Test Vendor"
+        )
         {
-            Id = 2,
-            Name = "Large Invoice",
-            InvoiceNumber = "LARGE001",
-            Total = 200.00m, // Much larger than transaction amount
-            InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
-            VendorName = "Test Vendor"
+            Id = 2
         };
 
         _context.Documents.Add(largeDocument);
@@ -457,14 +529,22 @@ public class MultipleDocumentAttachmentsIntegrationTests
         var documents = new List<Document>();
         for (int i = 1; i <= 25; i++)
         {
-            var document = new Document
+            var document = new Document(
+                $"Invoice {i:D3}",
+                $"INV{i:D3}",
+                false,
+                19m,
+                7.6m,
+                40.00m,
+                32.4m,
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-i)),
+                $"INV{i:D3}",
+                true,
+                0m,
+                "Big Vendor"
+            )
             {
-                Id = i,
-                Name = $"Invoice {i:D3}",
-                InvoiceNumber = $"INV{i:D3}",
-                Total = 40.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-i)),
-                VendorName = "Big Vendor"
+                Id = i
             };
             documents.Add(document);
         }
@@ -536,24 +616,34 @@ public class MultipleDocumentAttachmentsIntegrationTests
 
         var documents = new[]
         {
-            new Document
-            {
-                Id = 1,
-                Name = "Invoice 1",
-                InvoiceNumber = "INV001",
-                Total = 100.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
-                VendorName = "Test Vendor"
-            },
-            new Document
-            {
-                Id = 2,
-                Name = "Invoice 2",
-                InvoiceNumber = "INV002",
-                Total = 100.00m,
-                InvoiceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
-                VendorName = "Test Vendor"
-            }
+            new Document(
+                name: "Invoice 1",
+                externalRef: "EXT001",
+                orphaned: false,
+                taxRate: null,
+                taxAmount: null,
+                total: 100.00m,
+                subTotal: null,
+                invoiceDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-5)),
+                invoiceNumber: "INV001",
+                parsed: true,
+                skonto: null,
+                vendorName: "Test Vendor"
+            ) { Id = 1 },
+            new Document(
+                name: "Invoice 2",
+                externalRef: "EXT002",
+                orphaned: false,
+                taxRate: null,
+                taxAmount: null,
+                total: 100.00m,
+                subTotal: null,
+                invoiceDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3)),
+                invoiceNumber: "INV002",
+                parsed: true,
+                skonto: null,
+                vendorName: "Test Vendor"
+            ) { Id = 2 }
         };
 
         _context.Accounts.Add(account);

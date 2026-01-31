@@ -223,7 +223,7 @@ public class DocumentAttachmentService : IDocumentAttachmentService
             {
                 foreach (var warning in warnings)
                 {
-                    result.WithReason(Result.Fail(warning).Reasons.First());
+                    result.WithSuccess(warning);
                 }
             }
 
