@@ -18,6 +18,34 @@ public class TransactionServiceAutoAssignIntegrationTests
     private TransactionService _service;
     private MatchingConfiguration _config;
 
+    /// <summary>
+    /// Helper method to check if a transaction has a document attachment
+    /// </summary>
+    private async Task<bool> HasDocumentAttachment(int transactionId)
+    {
+        return await _context.DocumentAttachments
+            .AnyAsync(da => da.TransactionId == transactionId);
+    }
+
+    /// <summary>
+    /// Helper method to get the first attached document ID for a transaction
+    /// </summary>
+    private async Task<int?> GetFirstAttachedDocumentId(int transactionId)
+    {
+        var attachment = await _context.DocumentAttachments
+            .FirstOrDefaultAsync(da => da.TransactionId == transactionId);
+        return attachment?.DocumentId;
+    }
+
+    /// <summary>
+    /// Helper method to check if a transaction is attached to a specific document
+    /// </summary>
+    private async Task<bool> IsAttachedToDocument(int transactionId, int documentId)
+    {
+        return await _context.DocumentAttachments
+            .AnyAsync(da => da.TransactionId == transactionId && da.DocumentId == documentId);
+    }
+
     [SetUp]
     public void Setup()
     {
@@ -33,6 +61,11 @@ public class TransactionServiceAutoAssignIntegrationTests
         var vendorMatcher = new VendorMatcher();
         var referenceMatcher = new ReferenceMatcher();
         
+        // Create attachment service and logger
+        var attachmentLogger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<DocumentAttachmentService>();
+        var attachmentService = new DocumentAttachmentService(_context, attachmentLogger);
+        var logger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<DocumentMatchingService>();
+        
         // Create real matching service
         _matchingService = new DocumentMatchingService(
             _context,
@@ -40,7 +73,9 @@ public class TransactionServiceAutoAssignIntegrationTests
             amountMatcher,
             dateMatcher,
             vendorMatcher,
-            referenceMatcher);
+            referenceMatcher,
+            attachmentService,
+            logger);
         
         // Create service with real dependencies
         _service = new TransactionService(_context, _matchingService);
@@ -91,8 +126,7 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionReference = "RE-2024-001234",
                 TransactionNote = "Grocery shopping",
                 SenderReceiver = "REWE",
-                Account = account,
-                DocumentId = null // Unmatched
+                Account = account
             },
             // Unmatched transaction 2 - should match Müller document
             new Transaction
@@ -104,8 +138,7 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionReference = "MUE-456789",
                 TransactionNote = "Drugstore purchase",
                 SenderReceiver = "MÜLLER",
-                Account = account,
-                DocumentId = null // Unmatched
+                Account = account
             },
             // Already matched transaction - should be skipped
             new Transaction
@@ -117,12 +150,23 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionReference = "OFF-2024-999",
                 TransactionNote = "Office supplies",
                 SenderReceiver = "BÜRO & MEHR",
-                Account = account,
-                DocumentId = documents[2].Id // Already matched
+                Account = account
             }
         };
         
         await _context.Transactions.AddRangeAsync(transactions);
+        await _context.SaveChangesAsync();
+        
+        // Add pre-existing attachment for transaction 3 (already matched)
+        var existingAttachment = new DocumentAttachment
+        {
+            TransactionId = 3,
+            DocumentId = documents[2].Id,
+            AttachedAt = DateTime.UtcNow,
+            IsAutomatic = false,
+            AttachedBy = "TestSetup"
+        };
+        await _context.DocumentAttachments.AddAsync(existingAttachment);
         await _context.SaveChangesAsync();
         
         // Act
@@ -139,11 +183,11 @@ public class TransactionServiceAutoAssignIntegrationTests
         var transaction2 = await _context.Transactions.FindAsync(2);
         var transaction3 = await _context.Transactions.FindAsync(3);
         
-        Assert.That(transaction1!.DocumentId, Is.EqualTo(documents[0].Id), 
+        Assert.That(await IsAttachedToDocument(1, documents[0].Id), Is.True, 
             "Transaction 1 should be assigned to REWE document");
-        Assert.That(transaction2!.DocumentId, Is.EqualTo(documents[1].Id), 
+        Assert.That(await IsAttachedToDocument(2, documents[1].Id), Is.True, 
             "Transaction 2 should be assigned to Müller document");
-        Assert.That(transaction3!.DocumentId, Is.EqualTo(documents[2].Id), 
+        Assert.That(await IsAttachedToDocument(3, documents[2].Id), Is.True, 
             "Transaction 3 should remain assigned to Office document");
     }
 

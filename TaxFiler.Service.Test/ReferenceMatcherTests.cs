@@ -251,4 +251,223 @@ public class ReferenceMatcherTests
 
         Assert.That(score, Is.GreaterThan(0.3)); // Should handle German invoice formats with some similarity
     }
+
+    #region Multiple Voucher Number Tests
+
+    [Test]
+    public void ExtractVoucherNumbers_SingleVoucher_ReturnsOne()
+    {
+        var voucherNumbers = _matcher.ExtractVoucherNumbers("Rechnung INV-2024-001").ToList();
+
+        Assert.That(voucherNumbers, Has.Count.EqualTo(1));
+        Assert.That(voucherNumbers[0], Is.EqualTo("INV-2024-001"));
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_MultipleVouchersCommaSeparated_ReturnsAll()
+    {
+        var voucherNumbers = _matcher.ExtractVoucherNumbers("INV-2024-001, INV-2024-002").ToList();
+
+        Assert.That(voucherNumbers, Has.Count.EqualTo(2));
+        Assert.That(voucherNumbers, Contains.Item("INV-2024-001"));
+        Assert.That(voucherNumbers, Contains.Item("INV-2024-002"));
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_MultipleVouchersSemicolonSeparated_ReturnsAll()
+    {
+        var voucherNumbers = _matcher.ExtractVoucherNumbers("RG-001; RG-002; RG-003").ToList();
+
+        Assert.That(voucherNumbers, Has.Count.EqualTo(3));
+        Assert.That(voucherNumbers, Contains.Item("RG-001"));
+        Assert.That(voucherNumbers, Contains.Item("RG-002"));
+        Assert.That(voucherNumbers, Contains.Item("RG-003"));
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_GermanInvoicePatterns_ReturnsCorrectly()
+    {
+        var testCases = new[]
+        {
+            ("Rechnung: 2024-001", "2024-001"),
+            ("RG-Nr. 12345", "12345"),
+            ("Rechnungsnummer: INV-2024-001", "INV-2024-001"),
+            ("Invoice No: ABC123", "ABC123"),
+            ("Beleg: REF-456", "REF-456")
+        };
+
+        foreach (var (input, expected) in testCases)
+        {
+            var voucherNumbers = _matcher.ExtractVoucherNumbers(input).ToList();
+            Assert.That(voucherNumbers, Has.Count.EqualTo(1), $"Failed for input: {input}");
+            Assert.That(voucherNumbers[0], Is.EqualTo(expected), $"Failed for input: {input}");
+        }
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_WithAndConnector_ReturnsAll()
+    {
+        var testCases = new[]
+        {
+            "INV-001 und INV-002",
+            "RG-123 and RG-456",
+            "REF-001 & REF-002",
+            "2024-001 + 2024-002",
+            "INV-001 sowie INV-002"
+        };
+
+        foreach (var input in testCases)
+        {
+            var voucherNumbers = _matcher.ExtractVoucherNumbers(input).ToList();
+            Assert.That(voucherNumbers, Has.Count.EqualTo(2), $"Failed for input: {input}");
+        }
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_RangePattern_ReturnsEndpoints()
+    {
+        var voucherNumbers = _matcher.ExtractVoucherNumbers("INV-001 bis INV-005").ToList();
+
+        Assert.That(voucherNumbers, Has.Count.EqualTo(2));
+        Assert.That(voucherNumbers, Contains.Item("INV-001"));
+        Assert.That(voucherNumbers, Contains.Item("INV-005"));
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_EmptyOrNull_ReturnsEmpty()
+    {
+        Assert.That(_matcher.ExtractVoucherNumbers(null), Is.Empty);
+        Assert.That(_matcher.ExtractVoucherNumbers(""), Is.Empty);
+        Assert.That(_matcher.ExtractVoucherNumbers("   "), Is.Empty);
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_NoValidReferences_ReturnsEmpty()
+    {
+        var voucherNumbers = _matcher.ExtractVoucherNumbers("Payment received").ToList();
+        Assert.That(voucherNumbers, Is.Empty);
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_FiltersDuplicates_ReturnsUnique()
+    {
+        var voucherNumbers = _matcher.ExtractVoucherNumbers("INV-001, inv-001, INV-001").ToList();
+
+        Assert.That(voucherNumbers, Has.Count.EqualTo(1));
+        Assert.That(voucherNumbers[0], Is.EqualTo("INV-001"));
+    }
+
+    [Test]
+    public void ExtractVoucherNumbers_ComplexGermanText_ExtractsCorrectly()
+    {
+        var note = "Zahlung für Rechnung RG-2024-001 sowie Beleg REF-456 und zusätzlich INV-789";
+        var voucherNumbers = _matcher.ExtractVoucherNumbers(note).ToList();
+
+        Assert.That(voucherNumbers, Has.Count.EqualTo(3));
+        Assert.That(voucherNumbers, Contains.Item("RG-2024-001"));
+        Assert.That(voucherNumbers, Contains.Item("REF-456"));
+        Assert.That(voucherNumbers, Contains.Item("INV-789"));
+    }
+
+    [Test]
+    public void CalculateReferenceScore_MultipleDocuments_SingleDocument_SameAsIndividual()
+    {
+        var transaction = new Transaction { TransactionNote = "INV-2024-001" };
+        var document = new Document { InvoiceNumber = "INV-2024-001" };
+        var documents = new[] { document };
+
+        var individualScore = _matcher.CalculateReferenceScore(transaction, document);
+        var multipleScore = _matcher.CalculateReferenceScore(transaction, documents);
+
+        Assert.That(multipleScore, Is.EqualTo(individualScore));
+    }
+
+    [Test]
+    public void CalculateReferenceScore_MultipleDocuments_ReturnsHighestScore()
+    {
+        var transaction = new Transaction { TransactionNote = "INV-2024-001" };
+        var documents = new[]
+        {
+            new Document { InvoiceNumber = "INV-2024-999" }, // Low match
+            new Document { InvoiceNumber = "INV-2024-001" }, // Exact match
+            new Document { InvoiceNumber = "REF-456" }       // No match
+        };
+
+        var score = _matcher.CalculateReferenceScore(transaction, documents);
+
+        Assert.That(score, Is.EqualTo(1.0)); // Should return the exact match score
+    }
+
+    [Test]
+    public void CalculateReferenceScore_MultipleVouchersMultipleDocuments_AppliesBonus()
+    {
+        var transaction = new Transaction { TransactionNote = "INV-001, INV-002, INV-003" };
+        var documents = new[]
+        {
+            new Document { InvoiceNumber = "INV-001" },
+            new Document { InvoiceNumber = "INV-002" },
+            new Document { InvoiceNumber = "INV-003" }
+        };
+
+        var score = _matcher.CalculateReferenceScore(transaction, documents);
+
+        // Should get bonus for matching multiple vouchers
+        Assert.That(score, Is.GreaterThan(1.0).Or.EqualTo(1.0)); // Capped at 1.0
+    }
+
+    [Test]
+    public void CalculateReferenceScore_PartialMultipleMatch_AppliesPartialBonus()
+    {
+        var transaction = new Transaction { TransactionNote = "INV-001, INV-002, INV-003" };
+        var documents = new[]
+        {
+            new Document { InvoiceNumber = "INV-001" },
+            new Document { InvoiceNumber = "INV-002" },
+            new Document { InvoiceNumber = "DIFFERENT-REF" }
+        };
+
+        var score = _matcher.CalculateReferenceScore(transaction, documents);
+
+        // Should get partial bonus for matching 2 out of 3 vouchers
+        Assert.That(score, Is.GreaterThan(0.8)); // Base exact match score plus bonus
+    }
+
+    [Test]
+    public void CalculateReferenceScore_NoVouchersInNote_FallsBackToMaxScore()
+    {
+        var transaction = new Transaction { TransactionNote = "General payment" };
+        var documents = new[]
+        {
+            new Document { InvoiceNumber = "INV-001" },
+            new Document { InvoiceNumber = "INV-002" }
+        };
+
+        var score = _matcher.CalculateReferenceScore(transaction, documents);
+
+        // Should fall back to maximum individual score
+        Assert.That(score, Is.GreaterThanOrEqualTo(0.0));
+    }
+
+    [Test]
+    public void CalculateReferenceScore_EmptyDocumentList_ReturnsZero()
+    {
+        var transaction = new Transaction { TransactionNote = "INV-001" };
+        var documents = new Document[0];
+
+        var score = _matcher.CalculateReferenceScore(transaction, documents);
+
+        Assert.That(score, Is.EqualTo(0.0));
+    }
+
+    [Test]
+    public void CalculateReferenceScore_NullDocumentList_ReturnsZero()
+    {
+        var transaction = new Transaction { TransactionNote = "INV-001" };
+
+        var score = _matcher.CalculateReferenceScore(transaction, (IEnumerable<Document>)null);
+
+        Assert.That(score, Is.EqualTo(0.0));
+    }
+
+    #endregion
 }

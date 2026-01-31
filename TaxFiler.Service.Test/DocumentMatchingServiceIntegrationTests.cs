@@ -55,6 +55,11 @@ public class DocumentMatchingServiceIntegrationTests
         var vendorMatcher = new VendorMatcher();
         var referenceMatcher = new ReferenceMatcher();
 
+        // Create attachment service and logger
+        var attachmentLogger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<DocumentAttachmentService>();
+        var attachmentService = new DocumentAttachmentService(_context, attachmentLogger);
+        var logger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<DocumentMatchingService>();
+
         // Create service with all dependencies
         _service = new DocumentMatchingService(
             _context,
@@ -62,7 +67,9 @@ public class DocumentMatchingServiceIntegrationTests
             amountMatcher,
             dateMatcher,
             vendorMatcher,
-            referenceMatcher);
+            referenceMatcher,
+            attachmentService,
+            logger);
     }
 
     [TearDown]

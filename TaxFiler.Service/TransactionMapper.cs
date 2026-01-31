@@ -34,8 +34,10 @@ public static class TransactionMapper
             IsSalesTaxRelevant = transaction.IsSalesTaxRelevant??false,
             IsOutgoing = transaction.IsOutgoing,
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant??false,
-            DocumentId = transaction.DocumentId,
-            Document = transaction.Document?.ToDto([]),
+            AttachedDocuments = transaction.DocumentAttachments?.Select(da => da.Document.ToDto([])) ?? Enumerable.Empty<DocumentDto>(),
+            AttachedDocumentCount = transaction.DocumentAttachments?.Count ?? 0,
+            TotalAttachedAmount = transaction.DocumentAttachments?.Where(da => da.Document.Total.HasValue).Sum(da => da.Document.Total!.Value) ?? 0,
+            HasAttachmentAmountMismatch = CalculateAttachmentAmountMismatch(transaction),
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
             AccountName = transaction.Account.Name,
@@ -72,6 +74,28 @@ public static class TransactionMapper
         return difference > tolerance;
     }
 
+    /// <summary>
+    /// Calculates whether there's a mismatch between the transaction amount and total attached document amounts.
+    /// </summary>
+    private static bool CalculateAttachmentAmountMismatch(Transaction transaction)
+    {
+        if (transaction.DocumentAttachments == null || !transaction.DocumentAttachments.Any())
+            return false;
+
+        var totalAttachedAmount = transaction.DocumentAttachments
+            .Where(da => da.Document.Total.HasValue)
+            .Sum(da => da.Document.Total!.Value);
+
+        if (totalAttachedAmount == 0)
+            return false;
+
+        var transactionAmount = Math.Abs(transaction.GrossAmount);
+        var difference = Math.Abs(totalAttachedAmount - transactionAmount);
+        var tolerance = 0.01m; // 1 cent tolerance
+
+        return difference > tolerance;
+    }
+
     public static void UpdateTransaction( Transaction transaction, UpdateTransactionDto transactionDto)
     {
         transaction.IsIncomeTaxRelevant = transactionDto.IsIncomeTaxRelevant;
@@ -84,8 +108,8 @@ public static class TransactionMapper
         transaction.TransactionNote = transactionDto.TransactionNote;
         transaction.TransactionReference = transactionDto.TransactionReference;
         transaction.Counterparty = transactionDto.Counterparty;
-        transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
         transaction.SenderReceiver = transactionDto.SenderReceiver;
         transaction.AccountId = transactionDto.AccountId ?? transaction.AccountId;
+        // Note: Document attachments are now managed through DocumentAttachmentService
     }
 }

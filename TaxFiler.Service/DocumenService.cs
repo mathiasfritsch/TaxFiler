@@ -16,11 +16,10 @@ public class DocumenService(TaxFilerContext context):IDocumentService
 
     async Task<IEnumerable<DocumentDto>> IDocumentService.GetDocumentsAsync(DateOnly? yearMonth = null)
     {
-        var documentsWithTransactions = context.Transactions
-            .Where(t => t.DocumentId != null)
-            .Select( t => t.DocumentId)
+        var documentsWithTransactions = await context.DocumentAttachments
+            .Select(da => (int?)da.DocumentId)
             .Distinct()
-            .ToArray();
+            .ToArrayAsync();
         
         var query = context.Documents.AsQueryable();
         
@@ -90,12 +89,12 @@ public class DocumenService(TaxFilerContext context):IDocumentService
             return Result.Fail($"DocumentId {id} not found");
         }
 
-        var transactionsWithDocument = context.Transactions.Where(t => t.DocumentId == id);
-
-        foreach (var transaction in transactionsWithDocument)
-        {
-            transaction.Document = null;
-        }
+        // Remove all document attachments for this document
+        var attachments = await context.DocumentAttachments
+            .Where(da => da.DocumentId == id)
+            .ToListAsync();
+        
+        context.DocumentAttachments.RemoveRange(attachments);
         
         context.Remove(document);
         await context.SaveChangesAsync();

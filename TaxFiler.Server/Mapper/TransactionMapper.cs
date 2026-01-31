@@ -21,12 +21,16 @@ public static class TransactionMapper
             IsSalesTaxRelevant = transaction.IsSalesTaxRelevant,
             IsOutgoing = transaction.IsOutgoing,
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
-            DocumentId = transaction.DocumentId,
-            DocumentName = transaction.Document?.Name,
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
             AccountName = transaction.AccountName,
-            IsTaxMismatch = transaction.IsTaxMismatch
+            IsTaxMismatch = transaction.IsTaxMismatch,
+            
+            // Multiple document attachment support
+            AttachedDocuments = transaction.AttachedDocuments,
+            AttachedDocumentCount = transaction.AttachedDocumentCount,
+            TotalAttachedAmount = transaction.TotalAttachedAmount,
+            HasAttachmentAmountMismatch = transaction.HasAttachmentAmountMismatch
         };
     }
 }

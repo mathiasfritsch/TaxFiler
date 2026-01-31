@@ -50,5 +50,11 @@ namespace TaxFiler.DB.Model
         public decimal? Skonto { get; set; }
         [MaxLength(200)] public string? VendorName { get; set; }
         public DateOnly? InvoiceDateFromFolder { get; set; }
+        
+        /// <summary>
+        /// Collection of document attachments for this document.
+        /// Supports this document being attached to multiple transactions.
+        /// </summary>
+        public ICollection<DocumentAttachment> DocumentAttachments { get; set; } = new List<DocumentAttachment>();
     }
 }

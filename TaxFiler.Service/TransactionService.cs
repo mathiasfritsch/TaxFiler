@@ -39,7 +39,9 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             DateTime.DaysInMonth(yearMonth.Year, yearMonth.Month), 0, 0, 0, DateTimeKind.Utc);
 
         var transactions = await taxFilerContext
-            .Transactions.Include(t => t.Document)
+            .Transactions
+            .Include(t => t.DocumentAttachments)
+                .ThenInclude(da => da.Document)
             .Where(t => t.TransactionDateTime >= startOfMonth && t.TransactionDateTime <= endOfMonth
                                                               && (t.IsSalesTaxRelevant == true ||
                                                                   t.IsIncomeTaxRelevant == true))
@@ -60,8 +62,8 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                 IsIncomeTaxRelevant = t.IsIncomeTaxRelevant ?? false,
                 IsSalesTaxRelevant = t.IsSalesTaxRelevant ?? false,
                 DocumentName = t.IsOutgoing
-                    ? $"Rechnungseingang/{t.Document?.Name}"
-                    : $"Rechnungsausgang/{t.Document?.Name}",
+                    ? $"Rechnungseingang/{GetDocumentNamesForTransaction(t)}"
+                    : $"Rechnungsausgang/{GetDocumentNamesForTransaction(t)}",
                 SenderReceiver = t.SenderReceiver
             }
         ).ToList();
@@ -132,7 +134,8 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
     {
         var query = taxFilerContext
             .Transactions
-            .Include(t => t.Document)
+            .Include(t => t.DocumentAttachments)
+                .ThenInclude(da => da.Document)
             .Include(t => t.Account)
             .Where(t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month);
 
@@ -155,27 +158,9 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
     {
         var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == updateTransactionDto.Id);
 
-        if (transaction.DocumentId != updateTransactionDto.DocumentId && updateTransactionDto.DocumentId > 0)
-        {
-            var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == updateTransactionDto.DocumentId);
-
-            if (document.Skonto is > 0)
-            {
-                var netAmountSkonto = document.SubTotal.GetValueOrDefault() *
-                    (100 - document.Skonto.GetValueOrDefault()) / 100;
-
-                updateTransactionDto.NetAmount = Math.Round(netAmountSkonto, 2);
-                updateTransactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
-                updateTransactionDto.TaxAmount = updateTransactionDto.GrossAmount - updateTransactionDto.NetAmount;
-            }
-            else
-            {
-                updateTransactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
-                updateTransactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
-                updateTransactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
-            }
-        }
-
+        // Note: Document attachments are now managed through DocumentAttachmentService
+        // Tax data copying from documents should be handled when documents are attached
+        
         TransactionMapper.UpdateTransaction(transaction, updateTransactionDto);
         await taxFilerContext.SaveChangesAsync();
     }
@@ -188,19 +173,19 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 
     public async Task<modelDto.AutoAssignResult> AutoAssignDocumentsAsync(DateOnly yearMonth, CancellationToken cancellationToken = default)
     {
-        // 1. Query unmatched transactions for the month
+        // 1. Query unmatched transactions for the month (transactions without any document attachments)
+        var unmatchedTransactionIds = await taxFilerContext.DocumentAttachments
+            .Select(da => da.TransactionId)
+            .ToListAsync(cancellationToken);
+            
         var unmatchedTransactions = await taxFilerContext.Transactions
             .Where(t => t.TransactionDateTime.Year == yearMonth.Year 
                      && t.TransactionDateTime.Month == yearMonth.Month
-                     && t.DocumentId == null)
+                     && !unmatchedTransactionIds.Contains(t.Id))
             .OrderBy(t => t.TransactionDateTime)
             .ToListAsync(cancellationToken);
         
-        // 2. Use batch matching to get candidates for all transactions
-        var matchesByTransaction = await documentMatchingService
-            .BatchDocumentMatchesAsync(unmatchedTransactions, cancellationToken);
-        
-        // 3. Process each transaction and assign best match if score >= 0.5
+        // 2. Process each transaction using the new multiple document matching service
         int assignedCount = 0;
         int skippedCount = 0;
         var errors = new List<string>();
@@ -212,43 +197,30 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                 
             try
             {
-                if (matchesByTransaction.TryGetValue(transaction.Id, out var matches))
+                // Use the new AutoAssignMultipleDocumentsAsync method
+                var assignmentResult = await documentMatchingService
+                    .AutoAssignMultipleDocumentsAsync(transaction.Id, cancellationToken);
+                
+                if (assignmentResult.IsSuccess && assignmentResult.Value.DocumentsAttached > 0)
                 {
-                    var bestMatch = matches.FirstOrDefault();
+                    assignedCount++;
                     
-                    if (bestMatch != null && bestMatch.MatchScore >= 0.5)
+                    // Log successful assignment
+                    if (assignmentResult.Value.HasWarnings)
                     {
-                        var document = bestMatch.Document;
-                        transaction.DocumentId = document.Id;
-                        
-                        // Copy tax data from document to transaction (same logic as UpdateTransactionAsync)
-                        var skontoValue = document.Skonto.GetValueOrDefault();
-                        if (skontoValue > 0)
-                        {
-                            var netAmountSkonto = document.SubTotal.GetValueOrDefault() *
-                                (100 - skontoValue) / 100m;
-                            
-                            transaction.NetAmount = Math.Round(netAmountSkonto, 2);
-                            transaction.TaxRate = document.TaxRate.GetValueOrDefault();
-                            transaction.TaxAmount = transaction.GrossAmount - transaction.NetAmount;
-                        }
-                        else
-                        {
-                            transaction.NetAmount = document.SubTotal.GetValueOrDefault();
-                            transaction.TaxAmount = document.TaxAmount.GetValueOrDefault();
-                            transaction.TaxRate = document.TaxRate.GetValueOrDefault();
-                        }
-                        
-                        assignedCount++;
-                    }
-                    else
-                    {
-                        skippedCount++;
+                        errors.AddRange(assignmentResult.Value.Warnings.Select(w => 
+                            $"Transaction {transaction.Id}: {w}"));
                     }
                 }
                 else
                 {
                     skippedCount++;
+                    
+                    // Log why assignment failed
+                    if (assignmentResult.IsFailed)
+                    {
+                        errors.Add($"Transaction {transaction.Id}: {string.Join(", ", assignmentResult.Errors.Select(e => e.Message))}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -259,13 +231,7 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             }
         }
         
-        // 4. Save all changes in a single transaction
-        if (assignedCount > 0)
-        {
-            await taxFilerContext.SaveChangesAsync(cancellationToken);
-        }
-        
-        // 5. Return summary
+        // 3. Return summary
         return new modelDto.AutoAssignResult
         {
             TotalProcessed = unmatchedTransactions.Count,
@@ -273,5 +239,21 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             SkippedCount = skippedCount,
             Errors = errors
         };
+    }
+
+    /// <summary>
+    /// Gets a comma-separated list of document names for a transaction.
+    /// </summary>
+    private static string GetDocumentNamesForTransaction(DB.Model.Transaction transaction)
+    {
+        if (transaction.DocumentAttachments == null || !transaction.DocumentAttachments.Any())
+            return "No Documents";
+
+        var documentNames = transaction.DocumentAttachments
+            .Select(da => da.Document?.Name ?? "Unknown")
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
+        return documentNames.Any() ? string.Join(", ", documentNames) : "No Documents";
     }
 }

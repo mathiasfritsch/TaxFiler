@@ -20,6 +20,10 @@ public class Program
         builder.Configuration.AddUserSecrets<Program>();
         builder.Services.AddControllersWithViews()
             .AddMicrosoftIdentityUI();
+        
+        // Add memory caching for performance optimization
+        builder.Services.AddMemoryCache();
+        
         builder.Services.AddDbContext<TaxFilerContext>();
         builder.Services.AddScoped<ISyncService, SyncService>();
         builder.Services.AddScoped<IParseService, ParseService>();
@@ -29,12 +33,17 @@ public class Program
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<ILlamaIndexService, LlamaIndexService>();
         
-        // Document Matching Services
-        builder.Services.AddScoped<IDocumentMatchingService, DocumentMatchingService>();
+        // Document Matching Services with caching
+        builder.Services.AddScoped<DocumentMatchingService>(); // Register the concrete implementation
+        builder.Services.AddScoped<IDocumentMatchingService, CachedDocumentMatchingService>(); // Register the cached decorator
         builder.Services.AddScoped<IAmountMatcher, AmountMatcher>();
         builder.Services.AddScoped<IDateMatcher, DateMatcher>();
         builder.Services.AddScoped<IVendorMatcher, VendorMatcher>();
         builder.Services.AddScoped<IReferenceMatcher, ReferenceMatcher>();
+        
+        // Document Attachment Service with caching
+        builder.Services.AddScoped<DocumentAttachmentService>(); // Register the concrete implementation
+        builder.Services.AddScoped<IDocumentAttachmentService, CachedDocumentAttachmentService>(); // Register the cached decorator
         
         // Document Matching Configuration
         builder.Services.AddSingleton<MatchingConfiguration>(provider =>

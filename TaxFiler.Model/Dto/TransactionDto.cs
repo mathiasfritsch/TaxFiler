@@ -13,8 +13,28 @@ public class TransactionDto
     public decimal TaxRate { get; set; }
     public bool IsOutgoing { get; set; }
     public bool IsIncomeTaxRelevant { get; set; }
-    public int? DocumentId { get; set; }
-    public DocumentDto? Document { get; set; }
+    
+    // Multiple document attachment support
+    /// <summary>
+    /// Collection of all documents attached to this transaction
+    /// </summary>
+    public IEnumerable<DocumentDto> AttachedDocuments { get; set; } = new List<DocumentDto>();
+    
+    /// <summary>
+    /// Total number of documents attached to this transaction
+    /// </summary>
+    public int AttachedDocumentCount { get; set; }
+    
+    /// <summary>
+    /// Sum of all attached document amounts
+    /// </summary>
+    public decimal TotalAttachedAmount { get; set; }
+    
+    /// <summary>
+    /// Indicates whether there's a mismatch between transaction amount and total attached document amounts
+    /// </summary>
+    public bool HasAttachmentAmountMismatch { get; set; }
+    
     public bool IsSalesTaxRelevant { get; set; }
     public string SenderReceiver { get; set; }
     public int AccountId { get; set; }

@@ -43,6 +43,12 @@ public class MatchingConfiguration
     public double BonusMultiplier { get; set; } = 1.1;
     
     /// <summary>
+    /// Minimum score required for automatic document assignment (default: 0.7).
+    /// Higher threshold ensures only high-confidence matches are automatically assigned.
+    /// </summary>
+    public double AutoAssignmentThreshold { get; set; } = 0.7;
+    
+    /// <summary>
     /// Configuration for amount matching behavior.
     /// </summary>
     public AmountMatchingConfig AmountConfig { get; set; } = new();
@@ -85,6 +91,8 @@ public class MatchingConfiguration
             errors.Add("MinimumMatchScore must be between 0.0 and 1.0");
         if (BonusThreshold < 0.0 || BonusThreshold > 1.0)
             errors.Add("BonusThreshold must be between 0.0 and 1.0");
+        if (AutoAssignmentThreshold < 0.0 || AutoAssignmentThreshold > 1.0)
+            errors.Add("AutoAssignmentThreshold must be between 0.0 and 1.0");
             
         // Validate bonus multiplier is positive and reasonable
         if (BonusMultiplier <= 0)

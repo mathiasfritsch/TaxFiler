@@ -28,8 +28,11 @@ public class Transaction
     public int? TaxMonth { get; set; } = 0;
     public int? TaxYear { get; set; } = 0;
     
-    [ForeignKey(nameof(Document))]
-    public int? DocumentId { get; set; }
-    public Document? Document { get; set; }
     public string SenderReceiver { get; set; }
+    
+    /// <summary>
+    /// Collection of document attachments for this transaction.
+    /// Supports multiple documents being attached to a single transaction.
+    /// </summary>
+    public ICollection<DocumentAttachment> DocumentAttachments { get; set; } = new List<DocumentAttachment>();
 }

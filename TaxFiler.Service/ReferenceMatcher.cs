@@ -14,6 +14,21 @@ public interface IReferenceMatcher
     /// <param name="document">Document to match against</param>
     /// <returns>Score between 0.0 and 1.0 indicating reference similarity</returns>
     double CalculateReferenceScore(Transaction transaction, Document document);
+
+    /// <summary>
+    /// Calculates the reference similarity score between a transaction and multiple documents.
+    /// </summary>
+    /// <param name="transaction">Transaction to match</param>
+    /// <param name="documents">Documents to match against</param>
+    /// <returns>Score between 0.0 and 1.0 indicating reference similarity for multiple documents</returns>
+    double CalculateReferenceScore(Transaction transaction, IEnumerable<Document> documents);
+
+    /// <summary>
+    /// Extracts voucher numbers from a transaction note.
+    /// </summary>
+    /// <param name="transactionNote">Transaction note to parse</param>
+    /// <returns>Collection of extracted voucher numbers</returns>
+    IEnumerable<string> ExtractVoucherNumbers(string transactionNote);
 }
 
 /// <summary>
@@ -69,6 +84,175 @@ public class ReferenceMatcher : IReferenceMatcher
             return Math.Min(patternScore, 0.4); // Cap at 0.4 for pattern matches
 
         return 0.0; // No match
+    }
+
+    /// <summary>
+    /// Calculates the reference similarity score between a transaction and multiple documents.
+    /// Uses the highest individual score among all documents, with bonus for multiple matches.
+    /// </summary>
+    /// <param name="transaction">Transaction containing TransactionNote field</param>
+    /// <param name="documents">Documents to match against</param>
+    /// <returns>Score between 0.0 and 1.0, where higher scores indicate better matches</returns>
+    public double CalculateReferenceScore(Transaction transaction, IEnumerable<Document> documents)
+    {
+        if (documents == null || !documents.Any())
+            return 0.0;
+
+        var documentList = documents.ToList();
+        if (documentList.Count == 1)
+            return CalculateReferenceScore(transaction, documentList.First());
+
+        // Extract voucher numbers from transaction note
+        var voucherNumbers = ExtractVoucherNumbers(transaction.TransactionNote).ToList();
+        if (!voucherNumbers.Any())
+        {
+            // Fall back to single document scoring if no voucher numbers found
+            return documentList.Max(doc => CalculateReferenceScore(transaction, doc));
+        }
+
+        // Calculate scores for each document
+        var documentScores = new List<double>();
+        var matchedVouchers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var document in documentList)
+        {
+            var score = CalculateReferenceScore(transaction, document);
+            documentScores.Add(score);
+
+            // Check if this document matches any voucher number
+            if (!string.IsNullOrWhiteSpace(document.InvoiceNumber))
+            {
+                var normalizedInvoice = NormalizeReference(document.InvoiceNumber);
+                foreach (var voucher in voucherNumbers)
+                {
+                    var normalizedVoucher = NormalizeReference(voucher);
+                    if (string.Equals(normalizedInvoice, normalizedVoucher, StringComparison.OrdinalIgnoreCase) ||
+                        StringSimilarity.ContainsIgnoreCase(normalizedInvoice, normalizedVoucher) ||
+                        StringSimilarity.ContainsIgnoreCase(normalizedVoucher, normalizedInvoice))
+                    {
+                        matchedVouchers.Add(voucher);
+                    }
+                }
+            }
+        }
+
+        // Base score is the maximum individual score
+        var baseScore = documentScores.Max();
+
+        // Apply bonus for multiple voucher matches
+        if (matchedVouchers.Count > 1)
+        {
+            var matchRatio = (double)matchedVouchers.Count / voucherNumbers.Count;
+            var bonus = Math.Min(matchRatio * 0.2, 0.3); // Up to 30% bonus for multiple matches
+            baseScore = Math.Min(baseScore + bonus, 1.0);
+        }
+
+        return baseScore;
+    }
+
+    /// <summary>
+    /// Extracts voucher numbers from a transaction note.
+    /// Supports common German voucher number patterns and multiple references in a single note.
+    /// </summary>
+    /// <param name="transactionNote">Transaction note to parse</param>
+    /// <returns>Collection of extracted voucher numbers</returns>
+    public IEnumerable<string> ExtractVoucherNumbers(string transactionNote)
+    {
+        if (string.IsNullOrWhiteSpace(transactionNote))
+            return Enumerable.Empty<string>();
+
+        var voucherNumbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var note = transactionNote.Trim();
+
+        // Pattern 1: German invoice patterns (Rechnung, RG, RE, etc.)
+        var germanInvoicePatterns = new[]
+        {
+            @"(?:Rechnung|RG|RE|RN|INV|Invoice)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})",
+            @"(?:Rechnungs?nr|Rechnungsnummer|Invoice\s*No|Inv\s*No)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})",
+            @"(?:Beleg|Voucher|Ref|Reference)\s*[:\-\.]?\s*([A-Z0-9\-\/\.]{3,})"
+        };
+
+        foreach (var pattern in germanInvoicePatterns)
+        {
+            var matches = System.Text.RegularExpressions.Regex.Matches(note, pattern, 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                if (match.Groups.Count > 1 && IsValidReference(match.Groups[1].Value))
+                {
+                    voucherNumbers.Add(match.Groups[1].Value.Trim());
+                }
+            }
+        }
+
+        // Pattern 2: Comma or semicolon separated references
+        var separatorPattern = @"\b([A-Z0-9\-\/\.]{3,})\s*[,;]\s*([A-Z0-9\-\/\.]{3,})(?:\s*[,;]\s*([A-Z0-9\-\/\.]{3,}))?";
+        var separatorMatches = System.Text.RegularExpressions.Regex.Matches(note, separatorPattern, 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        foreach (System.Text.RegularExpressions.Match match in separatorMatches)
+        {
+            for (int i = 1; i < match.Groups.Count; i++)
+            {
+                if (match.Groups[i].Success && IsValidReference(match.Groups[i].Value))
+                {
+                    voucherNumbers.Add(match.Groups[i].Value.Trim());
+                }
+            }
+        }
+
+        // Pattern 3: Multiple references with "und" (and) or "&"
+        var andPattern = @"\b([A-Z0-9\-\/\.]{3,})\s*(?:und|and|&|\+)\s*([A-Z0-9\-\/\.]{3,})\b";
+        var andMatches = System.Text.RegularExpressions.Regex.Matches(note, andPattern, 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        foreach (System.Text.RegularExpressions.Match match in andMatches)
+        {
+            for (int i = 1; i < match.Groups.Count; i++)
+            {
+                if (match.Groups[i].Success && IsValidReference(match.Groups[i].Value))
+                {
+                    voucherNumbers.Add(match.Groups[i].Value.Trim());
+                }
+            }
+        }
+
+        // Pattern 4: Range patterns (e.g., "INV-001 bis INV-003", "2024-001 to 2024-005")
+        var rangePattern = @"\b([A-Z0-9\-\/\.]{3,})\s*(?:bis|to|through)\s*([A-Z0-9\-\/\.]{3,})\b";
+        var rangeMatches = System.Text.RegularExpressions.Regex.Matches(note, rangePattern, 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        foreach (System.Text.RegularExpressions.Match match in rangeMatches)
+        {
+            if (match.Groups.Count > 2 && 
+                IsValidReference(match.Groups[1].Value) && 
+                IsValidReference(match.Groups[2].Value))
+            {
+                // For ranges, extract the start and end references
+                voucherNumbers.Add(match.Groups[1].Value.Trim());
+                voucherNumbers.Add(match.Groups[2].Value.Trim());
+            }
+        }
+
+        // Pattern 5: Generic alphanumeric patterns (fallback)
+        // Only if no specific patterns were found
+        if (!voucherNumbers.Any())
+        {
+            var genericPattern = @"\b([A-Z]{2,}[0-9]{3,}|[0-9]{4,}[A-Z]{1,}|[A-Z0-9\-]{5,})\b";
+            var matches = System.Text.RegularExpressions.Regex.Matches(note, genericPattern, 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                if (IsValidReference(match.Value))
+                {
+                    voucherNumbers.Add(match.Value.Trim());
+                }
+            }
+        }
+
+        // Filter out duplicates and invalid references
+        return voucherNumbers.Where(IsValidReference).Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -281,21 +465,43 @@ public class ReferenceMatcher : IReferenceMatcher
         if (string.IsNullOrWhiteSpace(reference))
             return false;
 
-        var normalized = NormalizeReference(reference);
+        var trimmed = reference.Trim();
         
         // Must have minimum length
-        if (normalized.Length < 3)
+        if (trimmed.Length < 3)
             return false;
 
         // Must contain at least one alphanumeric character
-        if (!normalized.Any(char.IsLetterOrDigit))
+        if (!trimmed.Any(char.IsLetterOrDigit))
             return false;
 
-        // Exclude common generic references (check both original and normalized)
+        // Must contain at least one digit (voucher numbers typically have numbers)
+        if (!trimmed.Any(char.IsDigit))
+            return false;
+
+        // Exclude common generic references
         var genericRefs = new[] { "N/A", "NA", "NONE", "NULL", "UNKNOWN", "TBD", "PENDING" };
-        if (genericRefs.Contains(reference.Trim().ToUpperInvariant()) || genericRefs.Contains(normalized))
+        if (genericRefs.Contains(trimmed.ToUpperInvariant()))
             return false;
 
-        return true;
+        // Exclude fragments that are just parts of words
+        if (trimmed.All(char.IsLetter) && trimmed.Length < 5)
+            return false;
+
+        // Exclude fragments that don't look like voucher numbers
+        // Valid voucher numbers should have a mix of letters and numbers or be structured
+        var hasLetters = trimmed.Any(char.IsLetter);
+        var hasDigits = trimmed.Any(char.IsDigit);
+        var hasStructure = trimmed.Contains('-') || trimmed.Contains('/') || trimmed.Contains('.');
+
+        // Accept if it has both letters and digits, or if it has structure
+        if ((hasLetters && hasDigits) || hasStructure)
+            return true;
+
+        // Accept if it's a long numeric sequence (like order numbers)
+        if (!hasLetters && hasDigits && trimmed.Length >= 4)
+            return true;
+
+        return false;
     }
 }
