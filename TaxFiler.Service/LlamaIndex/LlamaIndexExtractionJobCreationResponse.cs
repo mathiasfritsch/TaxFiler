@@ -2,5 +2,5 @@ namespace TaxFiler.Service.LlamaIndex;
 
 public class LlamaIndexExtractionJobCreationResponse
 {
-    public string id { get; set; }
+    public required string id { get; set; }
 }

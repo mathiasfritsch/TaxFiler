@@ -18,6 +18,6 @@ public class TransactionViewModel
     public bool IsSalesTaxRelevant { get; init; }
     public string? DocumentName { get; init; }
     public int AccountId { get; init; }
-    public string AccountName { get; init; }
+    public required string AccountName { get; init; }
     public bool IsTaxMismatch { get; init; }
 }
