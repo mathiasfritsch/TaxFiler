@@ -48,7 +48,7 @@ public static class DocumentMapper
         document.TaxAmount = documentDto.TaxAmount;
         document.Total = documentDto.Total;
         document.SubTotal = documentDto.SubTotal;
-        //document.InvoiceDate = documentDto.InvoiceDate;
+        document.InvoiceDate = documentDto.InvoiceDate;
         document.InvoiceNumber = documentDto.InvoiceNumber;
         document.Parsed = documentDto.Parsed;
         document.Skonto = documentDto.Skonto;
