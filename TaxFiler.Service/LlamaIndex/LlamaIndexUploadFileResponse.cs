@@ -1,12 +1,10 @@
 namespace TaxFiler.Service.LlamaIndex;
 
+/// <summary>
+/// Response from LlamaParse upload endpoint
+/// The API returns only the job ID and initial status
+/// </summary>
 public class LlamaIndexUploadFileResponse
 {
-    public required string id { get; set; }
-    public required string name { get; set; }
-    public required string type { get; set; }
-    public required string status { get; set; }
-    public required string created_at { get; set; }
-    public required string updated_at { get; set; }
-    // Add other fields as needed based on the API response
+    public required string Id { get; init; }
 }
