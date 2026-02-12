@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
-import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
+import { ColDef, CellValueChangedEvent, CellClickedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { combineLatest, Observable, firstValueFrom } from 'rxjs';
 import { CommonModule, AsyncPipe } from '@angular/common';
@@ -100,7 +100,7 @@ export class TransactionsComponent  implements  OnInit{
         }
         return null;
       },
-      onCellClicked: (params: CellValueChangedEvent) => {
+      onCellClicked: (params: CellClickedEvent) => {
         if (params.value === true) {
           // Confirm the tax mismatch - send only the updated transaction
           const updatedTransaction = {
