@@ -20,4 +20,5 @@ public class TransactionDto
     public int AccountId { get; init; }
     public required string AccountName { get; init; }
     public bool IsTaxMismatch { get; init; }
+    public bool IsTaxMismatchConfirmed { get; init; }
 }

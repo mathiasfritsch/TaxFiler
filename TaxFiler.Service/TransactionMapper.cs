@@ -52,15 +52,22 @@ public static class TransactionMapper
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
             AccountName = transaction.Account.Name,
-            IsTaxMismatch = CalculateTaxMismatch(transaction)
+            IsTaxMismatch = CalculateTaxMismatch(transaction),
+            IsTaxMismatchConfirmed = transaction.IsTaxMismatchConfirmed
         };
     
     /// <summary>
     /// Calculates whether the tax amount matches the expected value based on the tax rate and gross amount.
-    /// Returns true if there's a mismatch (i.e., the tax calculation is incorrect).
+    /// Returns true if there's a mismatch (i.e., the tax calculation is incorrect) AND it hasn't been confirmed.
     /// </summary>
     private static bool CalculateTaxMismatch(Transaction transaction)
     {
+        // If the mismatch has been confirmed by the user, don't show it as an error
+        if (transaction.IsTaxMismatchConfirmed)
+        {
+            return false;
+        }
+        
         // Skip validation if any required values are missing or zero
         if (!transaction.TaxAmount.HasValue || transaction.TaxAmount.Value == 0 ||
             !transaction.TaxRate.HasValue || transaction.TaxRate.Value == 0 ||
@@ -100,5 +107,6 @@ public static class TransactionMapper
         transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
         transaction.SenderReceiver = Truncate(transactionDto.SenderReceiver);
         transaction.AccountId = transactionDto.AccountId ?? transaction.AccountId;
+        transaction.IsTaxMismatchConfirmed = transactionDto.IsTaxMismatchConfirmed;
     }
 }
