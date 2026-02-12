@@ -158,24 +158,4 @@ public class AmountMatcher : IAmountMatcher
         // No valid amount found
         return null;
     }
-
-    /// <summary>
-    /// Gets alternative amount considering Skonto discount for additional matching attempts.
-    /// This method is now deprecated as Skonto logic is integrated into CalculateAmountScore.
-    /// Kept for backward compatibility.
-    /// </summary>
-    /// <param name="document">Document to get alternative amount from</param>
-    /// <returns>Amount with Skonto discount applied, or null if not applicable</returns>
-    [Obsolete("Skonto logic is now integrated into CalculateAmountScore. This method is kept for backward compatibility.")]
-    public static decimal? GetSkontoAdjustedAmount(Document document)
-    {
-        var baseAmount = GetBestDocumentAmount(document);
-        
-        if (baseAmount.HasValue && SkontoCalculator.HasValidSkonto(document.Skonto))
-        {
-            return SkontoCalculator.CalculateDiscountedAmount(baseAmount.Value, document.Skonto);
-        }
-
-        return null;
-    }
 }

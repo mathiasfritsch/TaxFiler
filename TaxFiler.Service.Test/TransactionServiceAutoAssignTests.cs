@@ -4,6 +4,7 @@ using NUnit.Framework;
 using NSubstitute;
 using TaxFiler.DB;
 using TaxFiler.DB.Model;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace TaxFiler.Service.Test;
 

@@ -5,14 +5,27 @@ namespace TaxFiler.Service;
 
 public static class TransactionMapper
 {
+    private const int MaxStringLength = 200;
+    
+    /// <summary>
+    /// Truncates a string to the specified maximum length.
+    /// </summary>
+    private static string Truncate(string? value, int maxLength = MaxStringLength)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+        
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+    }
+    
     public static Transaction ToTransaction(this TaxFiler.Model.Csv.TransactionDto transaction) =>
         new()
         {
             AccountId = 1,
             GrossAmount = transaction.Amount,
-            SenderReceiver = transaction.SenderReceiver,
-            Counterparty = transaction.CounterPartyIBAN,
-            TransactionNote = transaction.Comment,
+            SenderReceiver = Truncate(transaction.SenderReceiver),
+            Counterparty = Truncate(transaction.CounterPartyIBAN),
+            TransactionNote = Truncate(transaction.Comment),
             TransactionDateTime = DateTime.SpecifyKind(transaction.BookingDate, DateTimeKind.Utc),
             IsOutgoing = transaction.Amount < 0,
             IsIncomeTaxRelevant = false,
@@ -88,11 +101,11 @@ public static class TransactionMapper
         transaction.TaxAmount = transactionDto.TaxAmount;
         transaction.TaxRate = transactionDto.TaxRate;
         transaction.TransactionDateTime = transactionDto.TransactionDateTime;
-        transaction.TransactionNote = transactionDto.TransactionNote;
-        transaction.TransactionReference = transactionDto.TransactionReference;
-        transaction.Counterparty = transactionDto.Counterparty;
+        transaction.TransactionNote = Truncate(transactionDto.TransactionNote);
+        transaction.TransactionReference = Truncate(transactionDto.TransactionReference);
+        transaction.Counterparty = Truncate(transactionDto.Counterparty);
         transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
-        transaction.SenderReceiver = transactionDto.SenderReceiver;
+        transaction.SenderReceiver = Truncate(transactionDto.SenderReceiver);
         transaction.AccountId = transactionDto.AccountId ?? transaction.AccountId;
         transaction.IsTaxMismatchConfirmed = transactionDto.IsTaxMismatchConfirmed;
     }

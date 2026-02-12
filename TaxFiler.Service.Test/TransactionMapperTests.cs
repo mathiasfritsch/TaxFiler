@@ -208,4 +208,51 @@ public class TransactionMapperTests
         Assert.That(dto.IsTaxMismatch, Is.False, "Confirmed tax mismatch should not show as error");
         Assert.That(dto.IsTaxMismatchConfirmed, Is.True, "Confirmation flag should be preserved");
     }
+    
+    [Test]
+    public void ToTransaction_WithLongStrings_TruncatesTo200Characters()
+    {
+        // Arrange: Create a CSV transaction with strings longer than 200 characters
+        var longString = new string('X', 250); // 250 characters
+        var csvTransaction = new TaxFiler.Model.Csv.TransactionDto
+        {
+            BookingDate = new DateTime(2026, 1, 15),
+            SenderReceiver = longString,
+            CounterPartyBIC = "TESTBIC123",
+            CounterPartyIBAN = longString,
+            Comment = longString,
+            Amount = 100.50m
+        };
+
+        // Act
+        var transaction = csvTransaction.ToTransaction();
+
+        // Assert
+        Assert.That(transaction.SenderReceiver.Length, Is.EqualTo(200), "SenderReceiver should be truncated to 200 characters");
+        Assert.That(transaction.Counterparty.Length, Is.EqualTo(200), "Counterparty should be truncated to 200 characters");
+        Assert.That(transaction.TransactionNote.Length, Is.EqualTo(200), "TransactionNote should be truncated to 200 characters");
+    }
+    
+    [Test]
+    public void ToTransaction_WithNullStrings_ReturnsEmptyStrings()
+    {
+        // Arrange: Create a CSV transaction with null strings
+        var csvTransaction = new TaxFiler.Model.Csv.TransactionDto
+        {
+            BookingDate = new DateTime(2026, 1, 15),
+            SenderReceiver = null!,
+            CounterPartyBIC = "TESTBIC123",
+            CounterPartyIBAN = null!,
+            Comment = null!,
+            Amount = 100.50m
+        };
+
+        // Act
+        var transaction = csvTransaction.ToTransaction();
+
+        // Assert
+        Assert.That(transaction.SenderReceiver, Is.EqualTo(string.Empty), "SenderReceiver should be empty string");
+        Assert.That(transaction.Counterparty, Is.EqualTo(string.Empty), "Counterparty should be empty string");
+        Assert.That(transaction.TransactionNote, Is.EqualTo(string.Empty), "TransactionNote should be empty string");
+    }
 }

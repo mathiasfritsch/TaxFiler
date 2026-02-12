@@ -33,28 +33,34 @@
     </div>
     <div>
       <mat-label>Dokument</mat-label>
-      nur unconnected
-      <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
-      <mat-form-field>
-        <input type="text"
-          matInput formControlName="documentControl"
-          [matAutocomplete]="auto"
-          (focus)="onDocumentControlFocus()">
-          <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
-            @for (document of filteredDocuments | async; track document) {
-              <mat-option [value]="document">
-                <span>{{ document.name }}</span>|
-                <span>{{ document.total }}</span>|
-                <span>{{ document.invoiceDate }}</span>
-              </mat-option>
-            }
-          </mat-autocomplete>
+      @if (hasConnectedDocument && connectedDocument) {
+        <!-- Display connected document as non-editable with link -->
+             <div data-id="open-document-details" class="document-details" (click)="openDocumentModal()" >{{ connectedDocument.name }}</div>
+      } @else {
+        <!-- Show autocomplete for best matches when no document connected -->
+        nur unconnected
+        <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
+        <mat-form-field>
+          <input type="text"
+            matInput formControlName="documentControl"
+            [matAutocomplete]="auto"
+            (focus)="onDocumentControlFocus()">
+            <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
+              @for (document of filteredDocuments | async; track document) {
+                <mat-option [value]="document">
+                  <span>{{ document.name }}</span>|
+                  <span>{{ document.total }}</span>|
+                  <span>{{ document.invoiceDate }}</span>
+                </mat-option>
+              }
+            </mat-autocomplete>
         </mat-form-field>
+      }
       </div>
       <div>
         <mat-label>Datum</mat-label>
         <mat-form-field>
-          <input id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
+          <input  id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
         </mat-form-field>
       </div>
       <div>

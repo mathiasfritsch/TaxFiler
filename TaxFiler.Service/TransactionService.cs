@@ -20,16 +20,18 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
         using var csv = new CsvReader(reader, config);
         var transactions = csv.GetRecords<TransactionDto>();
 
-        return transactions.Select(t => new TransactionDto
-            {
-                BookingDate = DateTime.SpecifyKind(t.BookingDate, DateTimeKind.Utc),
-                SenderReceiver = t.SenderReceiver,
-                CounterPartyBIC = t.CounterPartyBIC,
-                CounterPartyIBAN = t.CounterPartyIBAN,
-                Comment = t.Comment,
-                Amount = t.Amount / 100
-            }
-        ).ToArray();
+        var retVaue = transactions.Select(t => new TransactionDto
+                                  {
+                                      BookingDate = DateTime.SpecifyKind(t.BookingDate, DateTimeKind.Utc),
+                                      SenderReceiver = t.SenderReceiver,
+                                      CounterPartyBIC = t.CounterPartyBIC,
+                                      CounterPartyIBAN = t.CounterPartyIBAN,
+                                      Comment = t.Comment,
+                                      Amount = t.Amount / 100
+                                  }
+                              ).ToArray();
+
+        return retVaue;
     }
 
     public async Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonth)
