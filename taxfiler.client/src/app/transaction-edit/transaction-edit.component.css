@@ -33,6 +33,14 @@ mat-form-field {
   color: #1976d2;
   text-decoration: underline;
   cursor: pointer;
+  flex: 1;
+}
+
+.connected-document-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 8px;
 }
 
 .document-details:hover {

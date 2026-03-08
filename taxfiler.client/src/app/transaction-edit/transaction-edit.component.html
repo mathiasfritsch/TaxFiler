@@ -34,8 +34,13 @@
     <div>
       <mat-label>Dokument</mat-label>
       @if (hasConnectedDocument && connectedDocument) {
-        <!-- Display connected document as non-editable with link -->
-             <div data-id="open-document-details" class="document-details" (click)="openDocumentModal()" >{{ connectedDocument.name }}</div>
+        <!-- Display connected document as non-editable with link and remove button -->
+        <div class="connected-document-row">
+          <div data-id="open-document-details" class="document-details" (click)="openDocumentModal()" >{{ connectedDocument.name }}</div>
+          <button mat-icon-button color="warn" data-id="remove-document-button" (click)="removeDocument()" matTooltip="Remove document assignment" type="button">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       } @else {
         <!-- Show autocomplete for best matches when no document connected -->
         nur unconnected
