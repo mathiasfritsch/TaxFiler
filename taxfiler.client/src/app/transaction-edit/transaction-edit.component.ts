@@ -8,7 +8,9 @@ import {
   MatDialogRef,
   MatDialogTitle
 } from "@angular/material/dialog";
-import {MatButton} from "@angular/material/button";
+import {MatButton, MatIconButton} from "@angular/material/button";
+import {MatTooltip} from "@angular/material/tooltip";
+import {MatIcon} from "@angular/material/icon";
 import {MatInput} from "@angular/material/input";
 import {Document} from "../model/document";
 import {MatCheckbox} from "@angular/material/checkbox";
@@ -29,6 +31,9 @@ import { Router } from "@angular/router";
     MatFormField,
     MatDialogActions,
     MatButton,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
     MatDialogContent,
     MatDialogTitle,
     ReactiveFormsModule,
@@ -226,5 +231,12 @@ export class TransactionEditComponent implements OnInit{
     // Navigate to documents page with documentId in the route
     // The DocumentsComponent will handle opening the modal
     this.router.navigate(['/documents', yearMonth, this.connectedDocument.id]);
+  }
+
+  removeDocument() {
+    this.hasConnectedDocument = false;
+    this.connectedDocument = null;
+    this.transactionFormGroup.controls['documentControl'].setValue(null);
+    this.getDocuments();
   }
 }
