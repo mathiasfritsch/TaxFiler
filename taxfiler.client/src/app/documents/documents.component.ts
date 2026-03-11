@@ -219,9 +219,11 @@ export class DocumentsComponent implements OnInit {
     this.http.post<any>(`/api/documents/parse/${document.id}`, {}).subscribe({
       next: () => {
         button.enabled = true;
+        this.getDocuments();
       },
       error: () => {
         button.enabled = true;
+        this.getDocuments();
         alert('There was an error parsing the document');
       },
     });
