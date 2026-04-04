@@ -70,14 +70,16 @@ export class DocumentEditComponent implements OnInit{
   onSaveClick(): void {
     if (this.documentFormGroup.valid) {
 
+      const emptyToNull = (value: string | number | null | undefined) => value === '' ? null : value;
+
       const updateDocument: Document = {
         id: this.document.id,
         name: this.documentFormGroup.value.nameControl,
-        total: this.documentFormGroup.value.totalControl,
-        subTotal: this.documentFormGroup.value.subTotalControl,
-        taxAmount: this.documentFormGroup.value.taxAmountControl,
-        taxRate: this.documentFormGroup.value.taxRateControl,
-        skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
+        total: emptyToNull(this.documentFormGroup.value.totalControl),
+        subTotal: emptyToNull(this.documentFormGroup.value.subTotalControl),
+        taxAmount: emptyToNull(this.documentFormGroup.value.taxAmountControl),
+        taxRate: emptyToNull(this.documentFormGroup.value.taxRateControl),
+        skonto: emptyToNull(this.documentFormGroup.value.skontoControl),
         invoiceDate: this.documentFormGroup.value.invoiceDateControl,
         invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,
         parsed: this.documentFormGroup.value.parsedControl,
