@@ -70,7 +70,12 @@ export class DocumentEditComponent implements OnInit{
   onSaveClick(): void {
     if (this.documentFormGroup.valid) {
 
-      const emptyToNull = (value: string | number | null | undefined) => value === '' ? null : value;
+      const emptyToNull = (value: string | number | null | undefined): number | null => {
+        if (value === '' || value === null || value === undefined) {
+          return null;
+        }
+        return typeof value === 'string' ? parseFloat(value) : value;
+      };
 
       const updateDocument: Document = {
         id: this.document.id,
