@@ -137,6 +137,11 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'main' }}
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -148,6 +153,26 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F79B82B2BDD44966A925BB5E9CD27472 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A8D7393D741A4993BBF6CD69147AEB6D }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_CF2560DA9B0A456CA0FE382A922E60B0 }}
+
+      - name: Validate Bicep templates
+        run: |
+          az bicep lint infrastructure/main.bicep
+          echo "Bicep template validation successful"
+
+      - name: Deploy Infrastructure with Bicep
+        id: bicep-deploy
+        run: |
+          az deployment group create \
+            --resource-group TaxFiler \
+            --template-file infrastructure/main.bicep \
+            --parameters infrastructure/parameters/prod.bicepparam \
+            --parameters entraClientId='${{ secrets.ENTRA_CLIENT_ID }}' \
+            --parameters entraClientSecret='${{ secrets.ENTRA_CLIENT_SECRET }}' \
+            --parameters webAppName='TaxFiler' \
+            --parameters webAppDomain='taxfiler.azurewebsites.net' \
+            --name taxfiler-infra-prod-$(date +%s)
+          
+          echo "Infrastructure deployment completed successfully"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
