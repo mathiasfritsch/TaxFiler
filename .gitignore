@@ -371,3 +371,27 @@ identifier.sqlite
 taxfiler.client/obj
 TaxFiler.DB/bin*
 taxfiler.client/obj*
+
+# Infrastructure as Code
+# Bicep build artifacts
+*.bicep.json
+
+# Deployment parameter files with secrets
+# (never commit actual secrets!)
+infrastructure/parameters/*.local.bicepparam
+infrastructure/parameters/*.secrets.bicepparam
+deploy-params.txt
+
+# Azure CLI cache
+.azure/
+
+# Local environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# Terraform state (if using Terraform in the future)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
