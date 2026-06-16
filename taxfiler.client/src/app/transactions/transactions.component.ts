@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
 import { ColDef, CellValueChangedEvent, CellClickedEvent } from 'ag-grid-community';
@@ -29,6 +29,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AgGridAngular,
     MatDialogTitle,
