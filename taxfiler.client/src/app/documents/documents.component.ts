@@ -5,7 +5,7 @@ import {AllCommunityModule, ModuleRegistry} from 'ag-grid-community';
 import {AG_GRID_LOCALE_DE} from '@ag-grid-community/locale';
 import { CommonModule } from '@angular/common';
 import {AgGridAngular} from 'ag-grid-angular';
-import {Component, OnInit, LOCALE_ID, Inject} from '@angular/core';
+import {Component, OnInit, LOCALE_ID, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog, MatDialogTitle} from '@angular/material/dialog';
 import {FormBuilder} from '@angular/forms';
 import {ButtonCellRendererComponent} from '../button-cell-renderer/button-cell-renderer.component';
@@ -35,6 +35,7 @@ function formatPrice(value: any): string {
     CommonModule,
     NavigationComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class DocumentsComponent implements OnInit {

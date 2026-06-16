@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -14,6 +14,7 @@ import { AutoAssignResult } from '../model/auto-assign-result';
   templateUrl: './auto-assign-result-dialog.component.html',
   styleUrls: ['./auto-assign-result-dialog.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogTitle,
     MatDialogContent,

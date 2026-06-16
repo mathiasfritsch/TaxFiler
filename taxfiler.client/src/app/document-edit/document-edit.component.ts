@@ -1,4 +1,4 @@
-﻿import {Component, Inject, OnInit} from "@angular/core";
+﻿import {Component, Inject, OnInit, ChangeDetectionStrategy} from "@angular/core";
 import {MatFormField, MatLabel} from "@angular/material/form-field";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
@@ -27,6 +27,7 @@ function formatPrice(value: any):string{
   templateUrl: './document-edit.component.html',
   styleUrls: ['./document-edit.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormField,
     MatDialogActions,

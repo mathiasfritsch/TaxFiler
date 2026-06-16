@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -26,6 +26,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
     NavigationComponent
   ],
   templateUrl: './accounts.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./accounts.component.css']
 })
 export class AccountsComponent implements OnInit {

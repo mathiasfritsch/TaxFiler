@@ -1,4 +1,4 @@
-﻿import { Component,Input } from '@angular/core';
+﻿import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import {MatButton} from "@angular/material/button";
   imports: [
     MatButton
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <button mat-button (click)="onClick($event)"  [disabled]="!enabled" [attr.data-id]="dataId || null" >{{ buttonText }}</button>`
 })

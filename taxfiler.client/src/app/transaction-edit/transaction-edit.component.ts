@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from "@angular/core";
+import {Component, Inject, OnInit, ChangeDetectionStrategy} from "@angular/core";
 import {MatFormField, MatLabel} from "@angular/material/form-field";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
@@ -49,6 +49,7 @@ import { Router } from "@angular/router";
 ],
   templateUrl: './transaction-edit.component.html',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './transaction-edit.component.css'
 })
 export class TransactionEditComponent implements OnInit{
