@@ -562,7 +562,7 @@ public class TransactionServiceAutoAssignIntegrationTests
     /// Validates: Requirements 5.1 - Should handle cancellation gracefully
     /// </summary>
     [Test]
-    public void AutoAssignDocumentsAsync_WithCancellation_ThrowsOperationCanceledException()
+    public async Task AutoAssignDocumentsAsync_WithCancellation_ThrowsOperationCanceledException()
     {
         // Arrange
         var yearMonth = new DateOnly(2024, 3, 1);
@@ -593,7 +593,7 @@ public class TransactionServiceAutoAssignIntegrationTests
         cts.Cancel();
         
         // Act & Assert
-        Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
         {
             await _service.AutoAssignDocumentsAsync(yearMonth, cts.Token);
         }, "Should throw OperationCanceledException when cancellation is requested");

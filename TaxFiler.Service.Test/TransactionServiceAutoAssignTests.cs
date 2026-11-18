@@ -339,7 +339,7 @@ public class TransactionServiceAutoAssignTests
         
         // Act & Assert
         // The cancellation will be detected during the database query
-        Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
         {
             await _service.AutoAssignDocumentsAsync(yearMonth, cts.Token);
         });
