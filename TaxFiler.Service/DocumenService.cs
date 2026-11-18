@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
 using TaxFiler.DB.Model;
@@ -10,19 +10,21 @@ public class DocumenService(TaxFilerContext context):IDocumentService
 {
     public async Task DeleteAllDocumentsAsync()
     {
+        context.TransactionDocuments.RemoveRange(context.TransactionDocuments);
         context.Documents.RemoveRange(context.Documents);
         await context.SaveChangesAsync();
     }
 
     async Task<IEnumerable<DocumentDto>> IDocumentService.GetDocumentsAsync(DateOnly? yearMonth = null)
     {
-        var documentsWithTransactions = context.Transactions
-            .Where(t => t.DocumentId != null)
-            .Select( t => t.DocumentId)
+        var documentsWithTransactions = context.TransactionDocuments
+            .Select(td => td.DocumentId)
             .Distinct()
             .ToArray();
         
-        var query = context.Documents.AsQueryable();
+        var query = context.Documents
+            .Include(d => d.TransactionDocuments)
+            .AsQueryable();
         
         if (yearMonth.HasValue)
         {
@@ -39,12 +41,20 @@ public class DocumenService(TaxFilerContext context):IDocumentService
 
     public async Task<Result<DocumentDto>> GetDocumentAsync(int id)
     {
-        var document = await context.Documents.FindAsync(id);
+        var document = await context.Documents
+            .Include(d => d.TransactionDocuments)
+            .FirstOrDefaultAsync(d => d.Id == id);
         if(document == null)
         {
             return Result.Fail($"DocumentId {id} not found");
         }
-        return Result.Ok(document.ToDto([]));
+
+        var documentsWithTransactions = context.TransactionDocuments
+            .Select(td => td.DocumentId)
+            .Distinct()
+            .ToArray();
+
+        return Result.Ok(document.ToDto(documentsWithTransactions));
     }
     
     public async Task<Result<DocumentDto>> AddDocumentAsync(AddDocumentDto documentDto)
@@ -63,7 +73,7 @@ public class DocumenService(TaxFilerContext context):IDocumentService
         await context.Documents.AddAsync(document);
         await context.SaveChangesAsync();
         
-        return Result.Ok(document.ToDto([]));
+        return Result.Ok(document.ToDto());
     }
     
     public async Task<Result> UpdateDocumentAsync(int id, UpdateDocumentDto documentDto)
@@ -90,12 +100,12 @@ public class DocumenService(TaxFilerContext context):IDocumentService
             return Result.Fail($"DocumentId {id} not found");
         }
 
-        var transactionsWithDocument = context.Transactions.Where(t => t.DocumentId == id);
-
-        foreach (var transaction in transactionsWithDocument)
-        {
-            transaction.Document = null;
-        }
+        // Remove the many-to-many links first (the FK cascade also handles this
+        // at the database level; this keeps in-memory providers consistent too).
+        var links = await context.TransactionDocuments
+            .Where(td => td.DocumentId == id)
+            .ToListAsync();
+        context.TransactionDocuments.RemoveRange(links);
         
         context.Remove(document);
         await context.SaveChangesAsync();

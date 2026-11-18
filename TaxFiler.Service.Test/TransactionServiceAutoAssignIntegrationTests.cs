@@ -92,7 +92,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Grocery shopping",
                 SenderReceiver = "REWE",
                 Account = account,
-                DocumentId = null // Unmatched
             },
             // Unmatched transaction 2 - should match Müller document
             new Transaction
@@ -105,7 +104,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Drugstore purchase",
                 SenderReceiver = "MÜLLER",
                 Account = account,
-                DocumentId = null // Unmatched
             },
             // Already matched transaction - should be skipped
             new Transaction
@@ -118,12 +116,12 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Office supplies",
                 SenderReceiver = "BÜRO & MEHR",
                 Account = account,
-                DocumentId = documents[2].Id // Already matched
             }
         };
         
         await _context.Transactions.AddRangeAsync(transactions);
         await _context.SaveChangesAsync();
+        await LinkDocumentAsync(3, documents[2].Id);
         
         // Act
         var result = await _service.AutoAssignDocumentsAsync(yearMonth);
@@ -135,15 +133,12 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify documents are assigned correctly
-        var transaction1 = await _context.Transactions.FindAsync(1);
-        var transaction2 = await _context.Transactions.FindAsync(2);
-        var transaction3 = await _context.Transactions.FindAsync(3);
         
-        Assert.That(transaction1!.DocumentId, Is.EqualTo(documents[0].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.EqualTo(documents[0].Id), 
             "Transaction 1 should be assigned to REWE document");
-        Assert.That(transaction2!.DocumentId, Is.EqualTo(documents[1].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(2), Is.EqualTo(documents[1].Id), 
             "Transaction 2 should be assigned to Müller document");
-        Assert.That(transaction3!.DocumentId, Is.EqualTo(documents[2].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(3), Is.EqualTo(documents[2].Id), 
             "Transaction 3 should remain assigned to Office document");
     }
 
@@ -174,7 +169,6 @@ public class TransactionServiceAutoAssignIntegrationTests
             TransactionNote = "Grocery shopping",
             SenderReceiver = "REWE",
             Account = account,
-            DocumentId = null
         };
         
         await _context.Documents.AddAsync(document);
@@ -191,8 +185,7 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify transaction remains unassigned
-        var updatedTransaction = await _context.Transactions.FindAsync(1);
-        Assert.That(updatedTransaction!.DocumentId, Is.Null, "Transaction should remain unassigned");
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.Null, "Transaction should remain unassigned");
     }
 
     /// <summary>
@@ -220,7 +213,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Grocery shopping",
                 SenderReceiver = "REWE",
                 Account = account,
-                DocumentId = null
             },
             new Transaction
             {
@@ -232,7 +224,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Drugstore",
                 SenderReceiver = "MÜLLER",
                 Account = account,
-                DocumentId = null
             }
         };
         
@@ -249,10 +240,8 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify transactions remain unassigned
-        var transaction1 = await _context.Transactions.FindAsync(1);
-        var transaction2 = await _context.Transactions.FindAsync(2);
-        Assert.That(transaction1!.DocumentId, Is.Null, "Transaction 1 should remain unassigned");
-        Assert.That(transaction2!.DocumentId, Is.Null, "Transaction 2 should remain unassigned");
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.Null, "Transaction 1 should remain unassigned");
+        Assert.That(await GetPrimaryDocumentIdAsync(2), Is.Null, "Transaction 2 should remain unassigned");
     }
 
     /// <summary>
@@ -291,7 +280,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Payment with 2% discount",
                 SenderReceiver = "Vendor A",
                 Account = account,
-                DocumentId = null
             },
             new Transaction
             {
@@ -303,7 +291,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Payment with 3% discount",
                 SenderReceiver = "Vendor B",
                 Account = account,
-                DocumentId = null
             }
         };
         
@@ -321,12 +308,10 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify correct Skonto documents are assigned
-        var transaction1 = await _context.Transactions.FindAsync(1);
-        var transaction2 = await _context.Transactions.FindAsync(2);
         
-        Assert.That(transaction1!.DocumentId, Is.EqualTo(documents[0].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.EqualTo(documents[0].Id), 
             "Transaction 1 should be assigned to 2% Skonto document");
-        Assert.That(transaction2!.DocumentId, Is.EqualTo(documents[1].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(2), Is.EqualTo(documents[1].Id), 
             "Transaction 2 should be assigned to 3% Skonto document");
     }
 
@@ -367,7 +352,6 @@ public class TransactionServiceAutoAssignIntegrationTests
             TransactionNote = "Grocery shopping",
             SenderReceiver = "REWE",
             Account = account,
-            DocumentId = null
         };
         
         await _context.Documents.AddRangeAsync(documents);
@@ -384,8 +368,7 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify the best match (perfect match) is assigned
-        var updatedTransaction = await _context.Transactions.FindAsync(1);
-        Assert.That(updatedTransaction!.DocumentId, Is.EqualTo(documents[0].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.EqualTo(documents[0].Id), 
             "Should assign the perfect match document");
     }
 
@@ -426,7 +409,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Zahlung mit Skonto 2%",
                 SenderReceiver = "BÜRO & MEHR",
                 Account = account,
-                DocumentId = null
             },
             // Transaction with 3% Skonto applied
             new Transaction
@@ -439,7 +421,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "IT-Ausstattung mit Skonto",
                 SenderReceiver = "TECHNOMAX",
                 Account = account,
-                DocumentId = null
             },
             // Transaction without Skonto
             new Transaction
@@ -452,7 +433,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Beratungsleistung",
                 SenderReceiver = "CONSULTING PRO",
                 Account = account,
-                DocumentId = null
             }
         };
         
@@ -470,15 +450,12 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify correct assignments
-        var transaction1 = await _context.Transactions.FindAsync(1);
-        var transaction2 = await _context.Transactions.FindAsync(2);
-        var transaction3 = await _context.Transactions.FindAsync(3);
         
-        Assert.That(transaction1!.DocumentId, Is.EqualTo(documents[0].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.EqualTo(documents[0].Id), 
             "Transaction 1 should be assigned to Büromaterial document");
-        Assert.That(transaction2!.DocumentId, Is.EqualTo(documents[1].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(2), Is.EqualTo(documents[1].Id), 
             "Transaction 2 should be assigned to IT Equipment document");
-        Assert.That(transaction3!.DocumentId, Is.EqualTo(documents[2].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(3), Is.EqualTo(documents[2].Id), 
             "Transaction 3 should be assigned to Beratungsleistung document");
     }
 
@@ -527,7 +504,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = $"Transaction {i}",
                 SenderReceiver = $"Vendor {i}",
                 Account = account,
-                DocumentId = null
             });
         }
         
@@ -551,8 +527,7 @@ public class TransactionServiceAutoAssignIntegrationTests
         // Verify all transactions are assigned
         for (int i = 1; i <= 20; i++)
         {
-            var transaction = await _context.Transactions.FindAsync(i);
-            Assert.That(transaction!.DocumentId, Is.Not.Null, 
+            Assert.That(await GetPrimaryDocumentIdAsync(i), Is.Not.Null, 
                 $"Transaction {i} should be assigned");
         }
     }
@@ -583,7 +558,6 @@ public class TransactionServiceAutoAssignIntegrationTests
             TransactionNote = "Test transaction",
             SenderReceiver = "Test Vendor",
             Account = account,
-            DocumentId = null
         };
         _context.Transactions.Add(transaction);
         _context.SaveChanges();
@@ -637,7 +611,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Good match",
                 SenderReceiver = "Vendor A",
                 Account = account,
-                DocumentId = null
             },
             // Transaction 2: No match - should be skipped
             new Transaction
@@ -650,7 +623,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "No match",
                 SenderReceiver = "Unknown",
                 Account = account,
-                DocumentId = null
             },
             // Transaction 3: Good match - should be assigned
             new Transaction
@@ -663,7 +635,6 @@ public class TransactionServiceAutoAssignIntegrationTests
                 TransactionNote = "Another good match",
                 SenderReceiver = "Vendor B",
                 Account = account,
-                DocumentId = null
             }
         };
         
@@ -680,15 +651,32 @@ public class TransactionServiceAutoAssignIntegrationTests
         Assert.That(result.Errors, Is.Empty, "Should have no errors");
         
         // Verify assignments
-        var transaction1 = await _context.Transactions.FindAsync(1);
-        var transaction2 = await _context.Transactions.FindAsync(2);
-        var transaction3 = await _context.Transactions.FindAsync(3);
         
-        Assert.That(transaction1!.DocumentId, Is.EqualTo(documents[0].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(1), Is.EqualTo(documents[0].Id), 
             "Transaction 1 should be assigned");
-        Assert.That(transaction2!.DocumentId, Is.Null, 
+        Assert.That(await GetPrimaryDocumentIdAsync(2), Is.Null, 
             "Transaction 2 should remain unassigned (no match)");
-        Assert.That(transaction3!.DocumentId, Is.EqualTo(documents[1].Id), 
+        Assert.That(await GetPrimaryDocumentIdAsync(3), Is.EqualTo(documents[1].Id), 
             "Transaction 3 should be assigned");
+    }
+
+    private async Task<int?> GetPrimaryDocumentIdAsync(int transactionId)
+    {
+        var link = await _context.TransactionDocuments
+            .OrderBy(td => td.Sequence)
+            .FirstOrDefaultAsync(td => td.TransactionId == transactionId);
+        return link?.DocumentId;
+    }
+
+    private async Task LinkDocumentAsync(int transactionId, int documentId)
+    {
+        await _context.TransactionDocuments.AddAsync(new TransactionDocument
+        {
+            TransactionId = transactionId,
+            DocumentId = documentId,
+            Sequence = 1,
+            AssignedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
     }
 }

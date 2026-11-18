@@ -82,6 +82,13 @@ export class DocumentsComponent implements OnInit {
     {field: 'parsed', headerName: 'Parsed', filter: true},
     {field: 'unconnected', headerName: 'Unconnected', filter: true},
     {
+      field: 'transactionIds',
+      headerName: 'Transaktionen',
+      valueFormatter: (params: any) =>
+        Array.isArray(params.value) ? params.value.join(', ') : '',
+      cellStyle: {textAlign: 'left'},
+    },
+    {
       headerName: 'Edit',
       cellRenderer: ButtonCellRendererComponent,
       cellRendererParams: {

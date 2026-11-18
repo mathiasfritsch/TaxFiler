@@ -15,15 +15,20 @@ import {MatInput} from "@angular/material/input";
 import {Document} from "../model/document";
 import {MatCheckbox} from "@angular/material/checkbox";
 import {HttpClient} from "@angular/common/http";
-import {Transaction} from "../model/transaction";
+import {Transaction, TransactionDocumentLink} from "../model/transaction";
 import {MatOption, MatSelect} from "@angular/material/select";
 import { AsyncPipe, CommonModule } from "@angular/common";
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { Observable } from "rxjs";
 import {map, startWith} from 'rxjs/operators';
 import { Account } from "../model/account";
-import { DocumentMatch } from "../model/document-match";
 import { Router } from "@angular/router";
+
+interface LinkedDocument {
+  documentId: number;
+  name: string;
+  sequence: number;
+}
 
 @Component({
   selector: 'app-transaction-edit',
@@ -54,12 +59,11 @@ import { Router } from "@angular/router";
 })
 export class TransactionEditComponent implements OnInit{
   transactionFormGroup: FormGroup;
-  documents: Document[] = [];
+  documentSearchControl = new FormControl<string | Document>('');
+  availableDocuments: Document[] = [];
   filteredDocuments: Observable<Document[]>;
-  unconnectedOnly: boolean = true;
   accounts: Account[] = [];
-  connectedDocument: Document | null = null;
-  hasConnectedDocument: boolean = false;
+  linkedDocuments: LinkedDocument[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<TransactionEditComponent>,
@@ -68,47 +72,46 @@ export class TransactionEditComponent implements OnInit{
     private http: HttpClient,
     private router: Router
   ) {
-
-    var document = {
-      id: transaction.documentId,
-      name: transaction.documentName
-    };
-
     this.transactionFormGroup = this.fb.group({
       transactionNoteControl: new FormControl(transaction.transactionNote),
       netAmountControl: new FormControl(transaction.netAmount),
       grossAmountControl: new FormControl(transaction.grossAmount),
       senderReceiverControl: new FormControl(transaction.senderReceiver),
-      documentControl: new FormControl(document),
       taxAmountControl: new FormControl(transaction.taxAmount),
       transactionDateTimeControl: new FormControl(transaction.transactionDateTime),
       isSalesTaxRelevantControl: new FormControl(transaction.isSalesTaxRelevant),
       isIncomeTaxRelevantControl: new FormControl(transaction.isIncomeTaxRelevant),
       accountControl: new FormControl(transaction.accountId)
     });
-    this.filteredDocuments = this.transactionFormGroup.controls['documentControl'].valueChanges.pipe(
+
+    this.filteredDocuments = this.documentSearchControl.valueChanges.pipe(
       startWith(''),
       map(value => this._filterDocuments(value))
     );
   }
+
   onCancelClick(): void {
     this.dialogRef.close();
   }
+
   private _filterDocuments(value: string | Document | null): Document[] {
-    // If value is empty, null, or an object (Document), show all documents
+    // Filter out documents already linked to this transaction.
+    const linkedIds = new Set(this.linkedDocuments.map(d => d.documentId));
+    const candidates = this.availableDocuments.filter(d => !linkedIds.has(d.id));
+
     if (!value || typeof value !== 'string') {
-      return this.documents;
+      return candidates;
     }
 
     const filterValue = value.toLowerCase();
     const filterValueNumber = parseFloat(value);
-    const filterValueDate:Date = new Date(value);
+    const filterValueDate = new Date(value);
 
-    return this.documents.filter(document =>
+    return candidates.filter(document =>
       (
         document.name.toLowerCase().includes(filterValue) ||
-        document.total == filterValueNumber ||
-        document.invoiceDate == filterValueDate
+        document.total === filterValueNumber ||
+        document.invoiceDate === filterValueDate
       )
     );
   }
@@ -116,9 +119,6 @@ export class TransactionEditComponent implements OnInit{
   onSaveClick(): void {
     const updatedTransaction = {
       ...this.transaction,
-      documentId: this.hasConnectedDocument 
-        ? this.transaction.documentId 
-        : this.transactionFormGroup.value.documentControl?.id,
       transactionNote: this.transactionFormGroup.value.transactionNoteControl,
       netAmount: this.transactionFormGroup.value.netAmountControl,
       grossAmount: this.transactionFormGroup.value.grossAmountControl,
@@ -139,15 +139,10 @@ export class TransactionEditComponent implements OnInit{
       }
     });
   }
+
   ngOnInit(): void {
-    // Check if transaction has a connected document
-    if (this.transaction.documentId) {
-      this.hasConnectedDocument = true;
-      this.getConnectedDocument();
-    } else {
-      this.hasConnectedDocument = false;
-      this.getDocuments(); // Load best matches
-    }
+    this.getLinkedDocuments();
+    this.getAvailableDocuments();
     this.getAccounts();
   }
 
@@ -155,22 +150,30 @@ export class TransactionEditComponent implements OnInit{
     return document && document.name ? document.name : '';
   }
 
-  getDocuments() {
-    if (!this.transaction || !this.transaction.id) {
-      console.error('Transaction ID is required to fetch document matches');
-      return;
-    }
-
-    this.http.get<DocumentMatch[]>(`/api/documentmatching/matches/${this.transaction.id}?unconnectedOnly=${this.unconnectedOnly}`).subscribe(
-      {
-        next: documentMatches => {
-          this.documents = documentMatches.map(match => match.document);
-        },
-        error: error => {
-          console.error('There was an error!', error);
-        }
+  getAvailableDocuments() {
+    this.http.get<Document[]>(`/api/documents/getdocuments`).subscribe({
+      next: documents => {
+        this.availableDocuments = documents;
+      },
+      error: error => {
+        console.error('There was an error fetching documents!', error);
       }
-    );
+    });
+  }
+
+  getLinkedDocuments() {
+    this.http.get<TransactionDocumentLink[]>(`/api/transactions/${this.transaction.id}/documents`).subscribe({
+      next: links => {
+        this.linkedDocuments = links.map(link => ({
+          documentId: link.documentId,
+          name: link.document?.name ?? `Document ${link.documentId}`,
+          sequence: link.sequence
+        }));
+      },
+      error: error => {
+        console.error('There was an error fetching linked documents!', error);
+      }
+    });
   }
 
   getAccounts() {
@@ -184,60 +187,30 @@ export class TransactionEditComponent implements OnInit{
     });
   }
 
-  changeUnconnectedOnly() {
-    this.unconnectedOnly = !this.unconnectedOnly;
-    this.getDocuments(); // Reload documents with new filter
-  }
-
-  onDocumentControlFocus() {
-    // Trigger the observable to emit current value and show all documents
-    const currentValue = this.transactionFormGroup.controls['documentControl'].value;
-    this.transactionFormGroup.controls['documentControl'].setValue(currentValue);
-  }
-
-  getConnectedDocument() {
-    if (!this.transaction.documentId) {
+  onDocumentSelected(document: Document) {
+    if (!document || !document.id) {
       return;
     }
 
-    this.http.get<any>(`/api/documents/getdocument/${this.transaction.documentId}`).subscribe({
-      next: response => {
-        // Handle FluentResults Result<DocumentDto> - check if response has value property
-        const document = response.value || response;
-        this.connectedDocument = document;
+    this.http.post(`/api/transactions/${this.transaction.id}/documents`, { documentId: document.id }).subscribe({
+      next: () => {
+        this.documentSearchControl.setValue('');
+        this.getLinkedDocuments();
       },
       error: error => {
-        console.error('Error fetching connected document:', error);
-        // If we can't fetch the document, fall back to showing the autocomplete
-        this.hasConnectedDocument = false;
-        this.getDocuments();
+        console.error('There was an error linking the document!', error);
       }
     });
   }
 
-  openDocumentModal() {
-    if (!this.connectedDocument) {
-      return;
-    }
-
-    // Close the current dialog first
-    this.dialogRef.close();
-
-    // Navigate to documents page with the yearMonth and documentId
-    const invoiceDate = new Date(this.connectedDocument.invoiceDate);
-    const year = invoiceDate.getFullYear();
-    const month = (invoiceDate.getMonth() + 1).toString().padStart(2, '0');
-    const yearMonth = `${year}-${month}`;
-
-    // Navigate to documents page with documentId in the route
-    // The DocumentsComponent will handle opening the modal
-    this.router.navigate(['/documents', yearMonth, this.connectedDocument.id]);
-  }
-
-  removeDocument() {
-    this.hasConnectedDocument = false;
-    this.connectedDocument = null;
-    this.transactionFormGroup.controls['documentControl'].setValue(null);
-    this.getDocuments();
+  removeDocument(documentId: number) {
+    this.http.delete(`/api/transactions/${this.transaction.id}/documents/${documentId}`).subscribe({
+      next: () => {
+        this.getLinkedDocuments();
+      },
+      error: error => {
+        console.error('There was an error removing the document!', error);
+      }
+    });
   }
 }

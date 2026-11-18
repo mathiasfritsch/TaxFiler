@@ -13,7 +13,6 @@ public class UpdateTransactionDto
     public decimal TaxRate { get; set; }
     public bool IsOutgoing { get; set; }
     public bool IsIncomeTaxRelevant { get; set; }
-    public int? DocumentId { get; set; }
     public bool IsSalesTaxRelevant { get; set; }
     public required string SenderReceiver { get; set; }
     public int? AccountId { get; set; }

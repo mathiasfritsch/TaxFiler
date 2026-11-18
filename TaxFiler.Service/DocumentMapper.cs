@@ -5,7 +5,7 @@ namespace TaxFiler.Service;
 
 public static class DocumentMapper
 {
-    public static DocumentDto ToDto(this Document document, int?[] documentsWithTransactions) =>
+    public static DocumentDto ToDto(this Document document, IEnumerable<int>? documentsWithTransactions = null) =>
         new()
         {
             Id = document.Id,
@@ -22,7 +22,11 @@ public static class DocumentMapper
             Skonto = document.Skonto,
             VendorName = document.VendorName,
             InvoiceDateFromFolder = document.InvoiceDateFromFolder,
-            Unconnected = !documentsWithTransactions.Contains(document.Id)
+            Unconnected = documentsWithTransactions != null && !documentsWithTransactions.Contains(document.Id),
+            TransactionIds = document.TransactionDocuments?
+                .Select(td => td.TransactionId)
+                .OrderBy(id => id)
+                .ToList() ?? new List<int>()
         };
 
     public static Document ToDocument(this AddDocumentDto addDocumentDto)

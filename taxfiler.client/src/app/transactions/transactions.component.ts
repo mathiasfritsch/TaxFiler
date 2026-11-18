@@ -73,8 +73,13 @@ export class TransactionsComponent  implements  OnInit{
       headerName: 'Konto',
     },
     {
-      field: 'documentName',
+      field: 'documentNames',
       headerName: 'Dokument',
+      valueFormatter: (params: any) =>
+        Array.isArray(params.value) ? params.value.join(', ') : (params.value ?? ''),
+      cellStyle: {
+        textAlign: 'left',
+      },
     },
     {
       field: 'taxAmount',

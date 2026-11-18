@@ -32,28 +32,52 @@ public static class TransactionMapper
             IsSalesTaxRelevant = false
         };
     
-    public static TransactionDto TransactionDto(this Transaction transaction) =>
-        new()
+    public static TransactionDto TransactionDto(this Transaction transaction)
+    {
+        var documents = transaction.TransactionDocuments?
+            .OrderBy(td => td.Sequence)
+            .Select(td => td.ToDto())
+            .ToList() ?? new List<TransactionDocumentDto>();
+
+        var primaryDocument = documents.FirstOrDefault()?.Document;
+
+        return new TransactionDto
         {
             Id = transaction.Id,
-            NetAmount = transaction.NetAmount??0,
+            NetAmount = transaction.NetAmount ?? 0,
             GrossAmount = transaction.GrossAmount,
-            TaxAmount = transaction.TaxAmount??0,
-            TaxRate = transaction.TaxRate??0,
+            TaxAmount = transaction.TaxAmount ?? 0,
+            TaxRate = transaction.TaxRate ?? 0,
             Counterparty = transaction.Counterparty,
             TransactionNote = transaction.TransactionNote,
             TransactionReference = transaction.TransactionReference,
             TransactionDateTime = transaction.TransactionDateTime,
-            IsSalesTaxRelevant = transaction.IsSalesTaxRelevant??false,
+            IsSalesTaxRelevant = transaction.IsSalesTaxRelevant ?? false,
             IsOutgoing = transaction.IsOutgoing,
-            IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant??false,
-            DocumentId = transaction.DocumentId,
-            Document = transaction.Document?.ToDto([]),
+            IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant ?? false,
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
             AccountName = transaction.Account.Name,
             IsTaxMismatch = CalculateTaxMismatch(transaction),
-            IsTaxMismatchConfirmed = transaction.IsTaxMismatchConfirmed
+            IsTaxMismatchConfirmed = transaction.IsTaxMismatchConfirmed,
+            Documents = documents,
+            DocumentIds = documents.Select(d => d.DocumentId).ToList(),
+            DocumentId = documents.FirstOrDefault()?.DocumentId,
+            Document = primaryDocument
+        };
+    }
+
+    public static TransactionDocumentDto ToDto(this TransactionDocument link) =>
+        new()
+        {
+            Id = link.Id,
+            TransactionId = link.TransactionId,
+            DocumentId = link.DocumentId,
+            Document = link.Document?.ToDto(),
+            Sequence = link.Sequence,
+            AssignedAt = link.AssignedAt,
+            AssignedBy = link.AssignedBy,
+            Notes = link.Notes
         };
     
     /// <summary>
@@ -104,7 +128,6 @@ public static class TransactionMapper
         transaction.TransactionNote = Truncate(transactionDto.TransactionNote);
         transaction.TransactionReference = Truncate(transactionDto.TransactionReference);
         transaction.Counterparty = Truncate(transactionDto.Counterparty);
-        transaction.DocumentId = transactionDto.DocumentId > 0 ? transactionDto.DocumentId : null;
         transaction.SenderReceiver = Truncate(transactionDto.SenderReceiver);
         transaction.AccountId = transactionDto.AccountId ?? transaction.AccountId;
         transaction.IsTaxMismatchConfirmed = transactionDto.IsTaxMismatchConfirmed;

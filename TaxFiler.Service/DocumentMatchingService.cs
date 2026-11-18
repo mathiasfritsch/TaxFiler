@@ -64,15 +64,15 @@ public class DocumentMatchingService : IDocumentMatchingService
         
         if (unconnectedOnly)
         {
-            query = query.Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id));
+            query = query.Where(d => !_context.TransactionDocuments.Any(td => td.DocumentId == d.Id));
         }
         
         var documents = await query.ToListAsync(cancellationToken);
 
         // Get list of document IDs that have transactions for calculating Unconnected field
-        var documentsWithTransactions = await _context.Transactions
-            .Where(t => t.DocumentId != null)
-            .Select(t => t.DocumentId)
+        var documentsWithTransactions = await _context.TransactionDocuments
+            .Select(td => td.DocumentId)
+            .Distinct()
             .ToArrayAsync(cancellationToken);
 
         // Calculate matches for all documents
@@ -126,13 +126,13 @@ public class DocumentMatchingService : IDocumentMatchingService
         // Get all documents once for efficiency (only unmatched documents)
         var documents = await _context.Documents
             .AsNoTracking()
-            .Where(d => !_context.Transactions.Any(t => t.DocumentId == d.Id))
+            .Where(d => !_context.TransactionDocuments.Any(td => td.DocumentId == d.Id))
             .ToListAsync(cancellationToken);
 
         // Get list of document IDs that have transactions for calculating Unconnected field
-        var documentsWithTransactions = await _context.Transactions
-            .Where(t => t.DocumentId != null)
-            .Select(t => t.DocumentId)
+        var documentsWithTransactions = await _context.TransactionDocuments
+            .Select(td => td.DocumentId)
+            .Distinct()
             .ToArrayAsync(cancellationToken);
 
         // Process each transaction
@@ -166,7 +166,7 @@ public class DocumentMatchingService : IDocumentMatchingService
     /// <param name="document">Document to match against</param>
     /// <param name="documentsWithTransactions">Array of document IDs that have transactions</param>
     /// <returns>DocumentMatch with calculated scores</returns>
-    private DocumentMatch CalculateDocumentMatch(Transaction transaction, Document document, int?[] documentsWithTransactions)
+    private DocumentMatch CalculateDocumentMatch(Transaction transaction, Document document, int[] documentsWithTransactions)
     {
         // Calculate individual criterion scores
         var amountScore = _amountMatcher.CalculateAmountScore(transaction, document, _config.AmountConfig);
