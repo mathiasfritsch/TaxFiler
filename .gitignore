@@ -367,3 +367,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 identifier.sqlite
+
+taxfiler.client/obj
+TaxFiler.DB/bin*
+taxfiler.client/obj*

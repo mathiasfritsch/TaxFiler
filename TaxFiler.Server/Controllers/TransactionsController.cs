@@ -91,4 +91,67 @@ public class TransactionsController(ITransactionService transactionService) : Co
                 $"An error occurred during auto-assignment: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Lists the sequence-ordered documents linked to a transaction.
+    /// </summary>
+    [HttpGet("{transactionId:int}/documents")]
+    [ProducesResponseType(typeof(IEnumerable<TransactionDocumentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<TransactionDocumentDto>>> GetDocuments(
+        int transactionId,
+        CancellationToken cancellationToken = default)
+    {
+        var documents = await transactionService.GetTransactionDocumentsAsync(transactionId, cancellationToken);
+        return Ok(documents);
+    }
+
+    /// <summary>
+    /// Links a document to a transaction (many-to-many). A document may be linked
+    /// to several transactions and vice versa.
+    /// </summary>
+    [HttpPost("{transactionId:int}/documents")]
+    [ProducesResponseType(typeof(TransactionDocumentDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<TransactionDocumentDto>> AddDocument(
+        int transactionId,
+        [FromBody] AddDocumentToTransactionDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await transactionService.AddDocumentToTransactionAsync(transactionId, dto, cancellationToken);
+
+        if (result.IsFailed)
+        {
+            var message = string.Join("; ", result.Errors.Select(e => e.Message));
+            var isNotFound = message.Contains("not found", StringComparison.OrdinalIgnoreCase);
+            return isNotFound
+                ? NotFound(message)
+                : Conflict(message);
+        }
+
+        return CreatedAtAction(nameof(GetDocuments), new { transactionId }, result.Value);
+    }
+
+    /// <summary>
+    /// Removes a document link from a transaction. The document and transaction
+    /// records themselves are left intact.
+    /// </summary>
+    [HttpDelete("{transactionId:int}/documents/{documentId:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RemoveDocument(
+        int transactionId,
+        int documentId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await transactionService.RemoveDocumentFromTransactionAsync(transactionId, documentId, cancellationToken);
+
+        if (result.IsFailed)
+        {
+            return NotFound(string.Join("; ", result.Errors.Select(e => e.Message)));
+        }
+
+        return NoContent();
+    }
 }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TaxFiler.DB.Model
 {
@@ -50,5 +50,13 @@ namespace TaxFiler.DB.Model
         public decimal? Skonto { get; set; }
         [MaxLength(200)] public string? VendorName { get; set; }
         public DateOnly? InvoiceDateFromFolder { get; set; }
+
+        /// <summary>
+        /// Transactions associated with this document. This is a many-to-many
+        /// relationship: a document may support several transactions and a
+        /// transaction may be supported by several documents.
+        /// </summary>
+        public ICollection<TransactionDocument> TransactionDocuments { get; set; } =
+            new List<TransactionDocument>();
     }
 }

@@ -1,4 +1,4 @@
-<h1 id="tableLabel" mat-dialog-title >Transaktionen   {{ yearMonth }}</h1>
+<h1 id="tableLabel" mat-dialog-title data-id="transactions-title">Transaktionen   {{ yearMonth }}</h1>
 <app-navigation
   [yearMonth]="yearMonth"
   (monthChanged)="switchMonth($event)"
@@ -31,6 +31,7 @@
   <button
     mat-raised-button
     color="primary"
+    data-id="auto-assign-button"
     (click)="autoAssignDocuments()"
     [matTooltip]="getAutoAssignTooltip()">
     Auto-Assign Documents
@@ -39,6 +40,7 @@
 
 
 <ag-grid-angular
+  data-id="transactions-grid"
   class="ag-theme-quartz"
   style="height: 600px;"
   [rowData]="transactions$ | async"

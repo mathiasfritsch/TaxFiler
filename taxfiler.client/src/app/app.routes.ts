@@ -27,6 +27,10 @@ export const routes: Routes = [
     component: DocumentsComponent
   },
   {
+    path: 'documents/:yearMonth/:documentId',
+    component: DocumentsComponent
+  },
+  {
     path: 'accounts',
     redirectTo: `accounts/${getStartOfMonth()}`,
     pathMatch: 'full'

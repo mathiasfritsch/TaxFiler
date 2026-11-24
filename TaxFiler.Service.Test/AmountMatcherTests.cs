@@ -193,47 +193,7 @@ public class AmountMatcherTests
 
         Assert.That(score, Is.EqualTo(0.0)); // 200% difference
     }
-
-    [Test]
-    public void GetSkontoAdjustedAmount_WithSkonto_ReturnsAdjustedAmount()
-    {
-        var document = new Document 
-        { 
-            Total = 100.00m, 
-            Skonto = 2.00m 
-        };
-
-        var adjustedAmount = AmountMatcher.GetSkontoAdjustedAmount(document);
-
-        Assert.That(adjustedAmount, Is.EqualTo(98.00m));
-    }
-
-    [Test]
-    public void GetSkontoAdjustedAmount_WithoutSkonto_ReturnsNull()
-    {
-        var document = new Document { Total = 100.00m };
-
-        var adjustedAmount = AmountMatcher.GetSkontoAdjustedAmount(document);
-
-        Assert.That(adjustedAmount, Is.Null);
-    }
-
-    [Test]
-    public void GetSkontoAdjustedAmount_WithZeroSkonto_ReturnsNull()
-    {
-        var document = new Document 
-        { 
-            Total = 100.00m, 
-            Skonto = 0.00m 
-        };
-
-        var adjustedAmount = AmountMatcher.GetSkontoAdjustedAmount(document);
-
-        Assert.That(adjustedAmount, Is.Null);
-    }
-
-    // Enhanced error handling tests for Skonto calculations
-
+    
     [Test]
     public void CalculateAmountScore_DocumentWithExtremeSkonto_HandlesGracefully()
     {

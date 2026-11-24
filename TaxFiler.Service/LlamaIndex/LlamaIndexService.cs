@@ -21,7 +21,7 @@ public class LlamaIndexService : ILlamaIndexService
         // 1. Upload file
         var uploadResponse = await UploadFileAsync(bytes,fileName);
         // 2. Create job
-        var job = await CreateJobAsync(uploadResponse.id);
+        var job = await CreateJobAsync(uploadResponse.Id);
         // 3. Poll job until completion or failure, and get result if successful
         LlamaIndexJobResultResponse? result = await PollExtractionJobAsync(job.id);
         return result;
@@ -33,7 +33,7 @@ public class LlamaIndexService : ILlamaIndexService
         var filePart = new StreamPart(fileStream, fileName, "application/pdf");
         
         var uploadResponse = await _llamaApiClient.UploadFileAsync(filePart);
-        if (uploadResponse == null || string.IsNullOrEmpty(uploadResponse.id))
+        if (uploadResponse == null || string.IsNullOrEmpty(uploadResponse.Id))
             throw new Exception("File ID not returned from LlamaIndex");
         return uploadResponse;
     }

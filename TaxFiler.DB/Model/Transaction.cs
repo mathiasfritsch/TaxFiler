@@ -27,9 +27,15 @@ public class Transaction
     public bool? IsSalesTaxRelevant { get; set; }
     public int? TaxMonth { get; set; } = 0;
     public int? TaxYear { get; set; } = 0;
-    
-    [ForeignKey(nameof(Document))]
-    public int? DocumentId { get; set; }
-    public Document? Document { get; set; }
+    public bool IsTaxMismatchConfirmed { get; set; } = false;
+
     public string SenderReceiver { get; set; }
+
+    /// <summary>
+    /// Documents associated with this transaction. This is a many-to-many
+    /// relationship: a transaction may be supported by several documents and a
+    /// document may support several transactions.
+    /// </summary>
+    public ICollection<TransactionDocument> TransactionDocuments { get; set; } =
+        new List<TransactionDocument>();
 }

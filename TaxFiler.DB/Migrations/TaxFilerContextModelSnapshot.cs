@@ -17,7 +17,7 @@ namespace TaxFiler.DB.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.1")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -113,9 +113,6 @@ namespace TaxFiler.DB.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("integer");
-
                     b.Property<decimal>("GrossAmount")
                         .HasColumnType("numeric");
 
@@ -126,6 +123,9 @@ namespace TaxFiler.DB.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool?>("IsSalesTaxRelevant")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsTaxMismatchConfirmed")
                         .HasColumnType("boolean");
 
                     b.Property<decimal?>("NetAmount")
@@ -164,9 +164,45 @@ namespace TaxFiler.DB.Migrations
 
                     b.HasIndex("AccountId");
 
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.TransactionDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AssignedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TransactionId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
                     b.HasIndex("DocumentId");
 
-                    b.ToTable("Transactions");
+                    b.HasIndex("TransactionId", "Sequence")
+                        .IsUnique();
+
+                    b.ToTable("TransactionDocuments");
                 });
 
             modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
@@ -177,13 +213,36 @@ namespace TaxFiler.DB.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TaxFiler.DB.Model.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId");
-
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.TransactionDocument", b =>
+                {
+                    b.HasOne("TaxFiler.DB.Model.Document", "Document")
+                        .WithMany("TransactionDocuments")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaxFiler.DB.Model.Transaction", "Transaction")
+                        .WithMany("TransactionDocuments")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Document");
+
+                    b.Navigation("Transaction");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.Document", b =>
+                {
+                    b.Navigation("TransactionDocuments");
+                });
+
+            modelBuilder.Entity("TaxFiler.DB.Model.Transaction", b =>
+                {
+                    b.Navigation("TransactionDocuments");
                 });
 #pragma warning restore 612, 618
         }

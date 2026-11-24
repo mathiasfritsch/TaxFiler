@@ -15,7 +15,6 @@ public class DocumentsController(
     IDocumentService documentService,
     IParseService parseService,
     ISyncService syncService,
-    ILlamaApiClient llamaApiClient,
     IGoogleDriveService googleDriveService) : ControllerBase
 {
     [HttpGet("DownloadDocument/{documentId}")]

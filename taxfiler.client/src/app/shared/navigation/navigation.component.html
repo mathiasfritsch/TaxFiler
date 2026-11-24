@@ -2,26 +2,29 @@
   <!-- Documents Link -->
   <a
     [routerLink]="['/documents', yearMonth]"
-    mat-button>
+    mat-button
+    data-id="nav-documents">
     Dokumente
   </a>
 
   <!-- Transactions Link -->
   <a
     [routerLink]="['/transactions', yearMonth]"
-    mat-button>
+    mat-button
+    data-id="nav-transactions">
     Transaktionen
   </a>
 
   <!-- Accounts Link -->
   <a
     [routerLink]="['/accounts']"
-    mat-button>
+    mat-button
+    data-id="nav-accounts">
     Konten
   </a>
 
   <!-- Sync Button -->
-  <button (click)="onSyncClick()" mat-button>
+  <button (click)="onSyncClick()" mat-button data-id="nav-sync-button">
     Sync from Google Drive
   </button>
   <!-- Upload Button -->
@@ -30,12 +33,12 @@
       (change)="onFileSelected($event)"
       style="display: none;"
       #fileInput>
-      <button (click)="fileInput.click()" mat-button>
+      <button (click)="fileInput.click()" mat-button data-id="nav-upload-button">
         Upload
       </button>
     </ng-container>
     <!-- Download Report Button -->
-    <button (click)="onDownloadReportClick()" mat-button>
+    <button (click)="onDownloadReportClick()" mat-button data-id="nav-download-report-button">
       Download Report
     </button>
   </div>
@@ -43,10 +46,10 @@
   <!-- Month Navigation in separate row -->
   @if (showMonthNavigation) {
     <div class="month-navigation-container">
-      <button (click)="onMonthChange(-1)" mat-button>
+      <button (click)="onMonthChange(-1)" mat-button data-id="nav-previous-month">
         << Vorheriger Monat
       </button>
-      <button (click)="onMonthChange(1)" mat-button>
+      <button (click)="onMonthChange(1)" mat-button data-id="nav-next-month">
         Nächster Monat >>
       </button>
     </div>

@@ -374,7 +374,7 @@ public class MatchingConfiguration
 
 ## Additional Documentation
 
-- **CLAUDE.md**: Development notes and Copilot context
+- **AGENTS.md**: Development notes and agent context
 - **API Documentation**: Swagger UI at `/swagger`
 - **Database Migrations**: `TaxFiler.DB/Migrations/`
 

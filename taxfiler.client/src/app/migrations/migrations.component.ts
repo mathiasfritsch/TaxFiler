@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { MatButton } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { MatDialogTitle } from '@angular/material/dialog';
     MatDialogTitle
 ],
   templateUrl: './migrations.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './migrations.component.css'
 })
 export class MigrationsComponent {

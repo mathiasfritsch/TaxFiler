@@ -1,4 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UserSecretsId>ea864c6a-a1ee-44f1-b2c6-2ed423e06ca1</UserSecretsId>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="FluentResults" />

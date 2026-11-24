@@ -16,6 +16,7 @@
         <PackageReference Include="Microsoft.Identity.Web.UI" />
         <PackageReference Include="Refit" />
         <PackageReference Include="Refit.HttpClientFactory" />
+        <PackageReference Include="Refit.HttpClientFactory.Reflection" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>

@@ -1,4 +1,4 @@
-﻿namespace TaxFiler.Model.Dto;
+namespace TaxFiler.Model.Dto;
 
 public class DocumentDto
 {
@@ -17,5 +17,10 @@ public class DocumentDto
     public bool Unconnected { get; set; }
     public string? VendorName { get; set; }
     public DateOnly? InvoiceDateFromFolder { get; set; }
-    
+
+    /// <summary>
+    /// IDs of the transactions this document is linked to. Empty when the document
+    /// navigation is not loaded.
+    /// </summary>
+    public IReadOnlyList<int> TransactionIds { get; init; } = new List<int>();
 }

@@ -1,4 +1,4 @@
-﻿import {Component, Inject, OnInit} from "@angular/core";
+﻿import {Component, Inject, OnInit, ChangeDetectionStrategy} from "@angular/core";
 import {MatFormField, MatLabel} from "@angular/material/form-field";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
@@ -27,6 +27,7 @@ function formatPrice(value: any):string{
   templateUrl: './document-edit.component.html',
   styleUrls: ['./document-edit.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormField,
     MatDialogActions,
@@ -70,14 +71,21 @@ export class DocumentEditComponent implements OnInit{
   onSaveClick(): void {
     if (this.documentFormGroup.valid) {
 
+      const emptyToNull = (value: string | number | null | undefined): number | null => {
+        if (value === '' || value === null || value === undefined) {
+          return null;
+        }
+        return typeof value === 'string' ? parseFloat(value) : value;
+      };
+
       const updateDocument: Document = {
         id: this.document.id,
         name: this.documentFormGroup.value.nameControl,
-        total: this.documentFormGroup.value.totalControl,
-        subTotal: this.documentFormGroup.value.subTotalControl,
-        taxAmount: this.documentFormGroup.value.taxAmountControl,
-        taxRate: this.documentFormGroup.value.taxRateControl,
-        skonto: this.documentFormGroup.value.skontoControl==''?null:this.documentFormGroup.value.skontoControl,
+        total: emptyToNull(this.documentFormGroup.value.totalControl),
+        subTotal: emptyToNull(this.documentFormGroup.value.subTotalControl),
+        taxAmount: emptyToNull(this.documentFormGroup.value.taxAmountControl),
+        taxRate: emptyToNull(this.documentFormGroup.value.taxRateControl),
+        skonto: emptyToNull(this.documentFormGroup.value.skontoControl),
         invoiceDate: this.documentFormGroup.value.invoiceDateControl,
         invoiceNumber: this.documentFormGroup.value.invoiceNumberControl,
         parsed: this.documentFormGroup.value.parsedControl,

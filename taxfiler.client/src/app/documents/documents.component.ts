@@ -5,7 +5,7 @@ import {AllCommunityModule, ModuleRegistry} from 'ag-grid-community';
 import {AG_GRID_LOCALE_DE} from '@ag-grid-community/locale';
 import { CommonModule } from '@angular/common';
 import {AgGridAngular} from 'ag-grid-angular';
-import {Component, OnInit, LOCALE_ID, Inject} from '@angular/core';
+import {Component, OnInit, LOCALE_ID, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog, MatDialogTitle} from '@angular/material/dialog';
 import {FormBuilder} from '@angular/forms';
 import {ButtonCellRendererComponent} from '../button-cell-renderer/button-cell-renderer.component';
@@ -35,6 +35,7 @@ function formatPrice(value: any): string {
     CommonModule,
     NavigationComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class DocumentsComponent implements OnInit {
@@ -80,6 +81,13 @@ export class DocumentsComponent implements OnInit {
     },
     {field: 'parsed', headerName: 'Parsed', filter: true},
     {field: 'unconnected', headerName: 'Unconnected', filter: true},
+    {
+      field: 'transactionIds',
+      headerName: 'Transaktionen',
+      valueFormatter: (params: any) =>
+        Array.isArray(params.value) ? params.value.join(', ') : '',
+      cellStyle: {textAlign: 'left'},
+    },
     {
       headerName: 'Edit',
       cellRenderer: ButtonCellRendererComponent,
@@ -163,7 +171,6 @@ export class DocumentsComponent implements OnInit {
 
   constructor(
     private dialog: MatDialog,
-    private fb: FormBuilder,
     private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router,
@@ -174,7 +181,33 @@ export class DocumentsComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.yearMonth = params.get('yearMonth');
+      const documentId = params.get('documentId');
       this.getDocuments();
+      
+      // If documentId is provided in the route, open the document modal
+      if (documentId) {
+        // Fetch the document and open the modal after documents list loads
+        this.http.get<any>(`/api/documents/getdocument/${documentId}`).subscribe({
+          next: response => {
+            // Handle FluentResults Result<DocumentDto> - check if response has value property
+            const document = response.value || response;
+            // Wait for documents observable to be set before opening modal
+            if (this.documents$) {
+              this.documents$.subscribe(() => {
+                this.openEditDialog(document);
+              });
+            } else {
+              // Fallback if documents$ is not yet set
+              setTimeout(() => {
+                this.openEditDialog(document);
+              }, 100);
+            }
+          },
+          error: error => {
+            console.error('Error fetching document for modal:', error);
+          }
+        });
+      }
     });
   }
 
@@ -192,11 +225,13 @@ export class DocumentsComponent implements OnInit {
   ) {
     button.enabled = false;
     this.http.post<any>(`/api/documents/parse/${document.id}`, {}).subscribe({
-      next: (documents) => {
+      next: () => {
         button.enabled = true;
+        this.getDocuments();
       },
-      error: (error) => {
+      error: () => {
         button.enabled = true;
+        this.getDocuments();
         alert('There was an error parsing the document');
       },
     });
@@ -204,7 +239,7 @@ export class DocumentsComponent implements OnInit {
 
   synchronize() {
     this.http.post(`/api/documents/syncfiles/${this.yearMonth}`, {}).subscribe({
-      next: (documents) => {
+      next: () => {
         this.getDocuments();
       },
       error: (error) => {
@@ -218,7 +253,7 @@ export class DocumentsComponent implements OnInit {
     this.http
       .delete<any>(`/api/documents/deleteDocument/${document.id}`, {})
       .subscribe({
-        next: (documents) => {
+        next: () => {
           button.enabled = true;
         },
         error: (error) => {

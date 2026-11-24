@@ -21,11 +21,18 @@ public static class TransactionMapper
             IsSalesTaxRelevant = transaction.IsSalesTaxRelevant,
             IsOutgoing = transaction.IsOutgoing,
             IsIncomeTaxRelevant = transaction.IsIncomeTaxRelevant,
-            DocumentId = transaction.DocumentId,
-            DocumentName = transaction.Document?.Name,
             SenderReceiver = transaction.SenderReceiver,
             AccountId = transaction.AccountId,
-            AccountName = transaction.AccountName
+            AccountName = transaction.AccountName,
+            IsTaxMismatch = transaction.IsTaxMismatch,
+            DocumentIds = transaction.DocumentIds,
+            DocumentNames = transaction.Documents
+                .Select(d => d.Document?.Name)
+                .Where(name => name != null)
+                .Cast<string>()
+                .ToList(),
+            DocumentId = transaction.DocumentId,
+            DocumentName = transaction.Document?.Name
         };
     }
 }

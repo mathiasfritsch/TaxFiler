@@ -32,16 +32,28 @@
       </mat-form-field>
     </div>
     <div>
-      <mat-label>Dokument</mat-label>
-      nur unconnected
-      <mat-checkbox id="unconnectedOnly"  checked="unconnectedOnly" (change)="changeUnconnectedOnly()"   ></mat-checkbox>
+      <mat-label>Dokumente</mat-label>
+      <div class="linked-documents">
+        @for (doc of linkedDocuments; track doc.documentId) {
+          <div class="connected-document-row">
+            <div class="document-details">{{ doc.name }}</div>
+            <button mat-icon-button color="warn" type="button"
+                    data-id="remove-document-button"
+                    (click)="removeDocument(doc.documentId)"
+                    matTooltip="Remove document assignment">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
       <mat-form-field>
         <input type="text"
-          matInput formControlName="documentControl"
-          [matAutocomplete]="auto"
-          (focus)="onDocumentControlFocus()">
-          <mat-autocomplete #auto="matAutocomplete"  [displayWith]="displayWithDocumentName">
-            @for (document of filteredDocuments | async; track document) {
+          matInput [formControl]="documentSearchControl"
+          [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete"
+            [displayWith]="displayWithDocumentName"
+            (optionSelected)="onDocumentSelected($event.option.value)">
+            @for (document of filteredDocuments | async; track document.id) {
               <mat-option [value]="document">
                 <span>{{ document.name }}</span>|
                 <span>{{ document.total }}</span>|
@@ -49,12 +61,12 @@
               </mat-option>
             }
           </mat-autocomplete>
-        </mat-form-field>
-      </div>
+      </mat-form-field>
+    </div>
       <div>
         <mat-label>Datum</mat-label>
         <mat-form-field>
-          <input id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
+          <input  id="transactionDateTime" type="text" formControlName="transactionDateTimeControl" matInput >
         </mat-form-field>
       </div>
       <div>

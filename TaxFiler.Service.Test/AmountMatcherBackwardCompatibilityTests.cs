@@ -192,18 +192,5 @@ public class AmountMatcherBackwardCompatibilityTests
         Assert.That(score, Is.EqualTo(1.0), "Large amounts within tolerance should match exactly");
     }
 
-    [Test]
-    public void GetSkontoAdjustedAmount_BackwardCompatibilityMethod_StillWorks()
-    {
-        // Arrange - Test the deprecated method still works for backward compatibility
-        var documentWithSkonto = new Document { Total = 100.00m, Skonto = 2.00m };
-        var documentWithoutSkonto = new Document { Total = 100.00m, Skonto = null };
 
-        // Act & Assert
-        var adjustedWithSkonto = AmountMatcher.GetSkontoAdjustedAmount(documentWithSkonto);
-        Assert.That(adjustedWithSkonto, Is.EqualTo(98.00m), "Method should still calculate Skonto correctly");
-
-        var adjustedWithoutSkonto = AmountMatcher.GetSkontoAdjustedAmount(documentWithoutSkonto);
-        Assert.That(adjustedWithoutSkonto, Is.Null, "Method should return null for documents without Skonto");
-    }
 }

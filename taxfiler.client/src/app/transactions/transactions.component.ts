@@ -1,9 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {ActivatedRoute, Router} from '@angular/router';
-import { ColDef, CellValueChangedEvent } from 'ag-grid-community';
+import { ColDef, CellValueChangedEvent, CellClickedEvent } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, firstValueFrom } from 'rxjs';
 import { CommonModule, AsyncPipe } from '@angular/common';
 
 import {AgGridAngular} from "ag-grid-angular";
@@ -29,6 +29,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AgGridAngular,
     MatDialogTitle,
@@ -72,12 +73,63 @@ export class TransactionsComponent  implements  OnInit{
       headerName: 'Konto',
     },
     {
-      field: 'documentName',
+      field: 'documentNames',
       headerName: 'Dokument',
+      valueFormatter: (params: any) =>
+        Array.isArray(params.value) ? params.value.join(', ') : (params.value ?? ''),
+      cellStyle: {
+        textAlign: 'left',
+      },
     },
     {
       field: 'taxAmount',
       headerName: 'Steuer',
+    },
+    {
+      field: 'isTaxMismatch',
+      headerName: 'Steuerfehler',
+      cellRenderer: (params: any) => {
+        if (params.value === true) {
+          return '⚠️';
+        }
+        return '';
+      },
+      cellStyle: (params: any) => {
+        if (params.value === true) {
+          return {
+            backgroundColor: '#ffebee',
+            color: '#c62828',
+            textAlign: 'center',
+            fontSize: '20px',
+            cursor: 'pointer'
+          };
+        }
+        return null;
+      },
+      onCellClicked: (params: CellClickedEvent) => {
+        if (params.value === true) {
+          // Confirm the tax mismatch - send only the updated transaction
+          const updatedTransaction = {
+            ...params.data,
+            isTaxMismatchConfirmed: true
+          };
+          // Update the transaction on the server
+          this.http.post('/api/transactions/updateTransaction', updatedTransaction)
+            .subscribe({
+              next: () => {
+                console.log('Tax mismatch confirmed successfully');
+                // Refresh the grid to show updated data
+                this.getTransactions(this.yearMonth);
+              },
+              error: error => {
+                console.error('Error confirming tax mismatch:', error);
+                // Refresh the grid to revert changes on error
+                this.getTransactions(this.yearMonth);
+              }
+            });
+        }
+      },
+      maxWidth: 120
     },
     {
       field: 'transactionDateTime',
@@ -101,7 +153,8 @@ export class TransactionsComponent  implements  OnInit{
       cellRendererParams: {
         onClickCallback: (data: any) => this.openEditDialog(data),
         buttonText: 'Edit',
-        enabled:true
+        enabled:true,
+        dataId: 'button-edit'
       },
       editable: false,
       colId: 'params',
@@ -113,7 +166,8 @@ export class TransactionsComponent  implements  OnInit{
       cellRendererParams: {
         onClickCallback: (data: any, button:any) => this.deleteTransaction(data, button),
         buttonText: 'Delete',
-        enabled:true
+        enabled:true,
+        dataId: 'button-delete'
       },
       editable: false,
       colId: 'params',
@@ -210,10 +264,6 @@ export class TransactionsComponent  implements  OnInit{
         {
           next: () => {
             button.enabled = true;
-          },
-          error: error => {
-            button.enabled = true;
-            alert("error deleting transaction");
           }
         }
       );
@@ -256,7 +306,7 @@ export class TransactionsComponent  implements  OnInit{
     try {
       const url = `/api/transactions/auto-assign?yearMonth=${this.yearMonth}`;
 
-      const result = await this.http.post<AutoAssignResult>(url, {}).toPromise();
+      const result = await firstValueFrom(this.http.post<AutoAssignResult>(url, {}));
 
       // Open the Material Dialog to show results
       if (result) {
@@ -276,21 +326,11 @@ export class TransactionsComponent  implements  OnInit{
     }
   }
 
-  get hasUnmatchedTransactions(): Observable<boolean> {
-    if (!this.transactions$) {
-      return new Observable(observer => observer.next(false));
-    }
-    return this.transactions$.pipe(
-      map(txns => txns.some(t => !t.documentId))
-    );
-  }
-
-
   getAutoAssignTooltip(): string {
     if (this.isAutoAssigning) {
       return 'Auto-assignment in progress...';
     }
-    // Note: This is a synchronous method but hasUnmatchedTransactions is async
+    // Note: This is a synchronous method, but hasUnmatchedTransactions is async
     // For the tooltip, we'll provide a generic message
     return 'Automatically assign documents to unmatched transactions';
   }

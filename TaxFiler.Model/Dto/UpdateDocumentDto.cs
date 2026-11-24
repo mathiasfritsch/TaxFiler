@@ -12,4 +12,5 @@ public class UpdateDocumentDto
     public bool Parsed { get; set; }
     public decimal? Skonto { get; set; }
     public string? VendorName { get; set; }
+    public DateOnly? InvoiceDate { get; set; }
 }

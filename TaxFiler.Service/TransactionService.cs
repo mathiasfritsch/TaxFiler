@@ -1,9 +1,10 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using CsvHelper;
-using CsvHelper.Configuration;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
+using TaxFiler.DB.Model;
 using TaxFiler.Model.Csv;
 using modelDto = TaxFiler.Model.Dto;
 
@@ -13,23 +14,25 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 {
     public IEnumerable<TransactionDto> ParseTransactions(TextReader reader)
     {
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        var options = new CsvReaderOptions
         {
-            Delimiter = ";"
+            Separator = ';'
         };
-        using var csv = new CsvReader(reader, config);
+        using var csv = CsvReader.Create(reader, options);
         var transactions = csv.GetRecords<TransactionDto>();
 
-        return transactions.Select(t => new TransactionDto
-            {
-                BookingDate = DateTime.SpecifyKind(t.BookingDate, DateTimeKind.Utc),
-                SenderReceiver = t.SenderReceiver,
-                CounterPartyBIC = t.CounterPartyBIC,
-                CounterPartyIBAN = t.CounterPartyIBAN,
-                Comment = t.Comment,
-                Amount = t.Amount / 100
-            }
-        ).ToArray();
+        var retVaue = transactions.Select(t => new TransactionDto
+                                  {
+                                      BookingDate = DateTime.SpecifyKind(t.BookingDate, DateTimeKind.Utc),
+                                      SenderReceiver = t.SenderReceiver,
+                                      CounterPartyBIC = t.CounterPartyBIC,
+                                      CounterPartyIBAN = t.CounterPartyIBAN,
+                                      Comment = t.Comment,
+                                      Amount = t.Amount / 100
+                                  }
+                              ).ToArray();
+
+        return retVaue;
     }
 
     public async Task<MemoryStream> CreateCsvFileAsync(DateOnly yearMonth)
@@ -39,7 +42,7 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             DateTime.DaysInMonth(yearMonth.Year, yearMonth.Month), 0, 0, 0, DateTimeKind.Utc);
 
         var transactions = await taxFilerContext
-            .Transactions.Include(t => t.Document)
+            .Transactions.Include(t => t.TransactionDocuments).ThenInclude(td => td.Document)
             .Where(t => t.TransactionDateTime >= startOfMonth && t.TransactionDateTime <= endOfMonth
                                                               && (t.IsSalesTaxRelevant == true ||
                                                                   t.IsIncomeTaxRelevant == true))
@@ -60,8 +63,8 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                 IsIncomeTaxRelevant = t.IsIncomeTaxRelevant ?? false,
                 IsSalesTaxRelevant = t.IsSalesTaxRelevant ?? false,
                 DocumentName = t.IsOutgoing
-                    ? $"Rechnungseingang/{t.Document?.Name}"
-                    : $"Rechnungsausgang/{t.Document?.Name}",
+                    ? $"Rechnungseingang/{PrimaryDocument(t)?.Name}"
+                    : $"Rechnungsausgang/{PrimaryDocument(t)?.Name}",
                 SenderReceiver = t.SenderReceiver
             }
         ).ToList();
@@ -70,13 +73,7 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 
         await using var writer = new StreamWriter(memoryStream, leaveOpen: true);
 
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = ",",
-            Encoding = Encoding.UTF8
-        };
-
-        await using var csv = new CsvWriter(writer, config);
+        await using var csv = CsvWriter.Create(writer);
 
         await csv.WriteRecordsAsync(transactionReportDtos);
         await writer.FlushAsync();
@@ -121,6 +118,13 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
         var transaction = await taxFilerContext.Transactions.FindAsync(id);
         if (transaction != null)
         {
+            // Remove the many-to-many links first so the transaction can be deleted
+            // cleanly (the FK cascade also handles this at the database level).
+            var links = await taxFilerContext.TransactionDocuments
+                .Where(td => td.TransactionId == id)
+                .ToListAsync();
+            taxFilerContext.TransactionDocuments.RemoveRange(links);
+
             taxFilerContext.Transactions.Remove(transaction);
             await taxFilerContext.SaveChangesAsync();
         }
@@ -132,7 +136,7 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
     {
         var query = taxFilerContext
             .Transactions
-            .Include(t => t.Document)
+            .Include(t => t.TransactionDocuments).ThenInclude(td => td.Document)
             .Include(t => t.Account)
             .Where(t => t.TransactionDateTime.Year == yearMonth.Year && t.TransactionDateTime.Month == yearMonth.Month);
 
@@ -147,34 +151,16 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 
     public async Task<modelDto.TransactionDto> GetTransactionAsync(int transactionId)
     {
-        var transaction = await taxFilerContext.Transactions.Include(a => a.Account).SingleAsync(t => t.Id == transactionId);
+        var transaction = await taxFilerContext.Transactions
+            .Include(t => t.TransactionDocuments).ThenInclude(td => td.Document)
+            .Include(a => a.Account)
+            .SingleAsync(t => t.Id == transactionId);
         return transaction.TransactionDto();
     }
 
     public async Task UpdateTransactionAsync(modelDto.UpdateTransactionDto updateTransactionDto)
     {
         var transaction = await taxFilerContext.Transactions.SingleAsync(t => t.Id == updateTransactionDto.Id);
-
-        if (transaction.DocumentId != updateTransactionDto.DocumentId && updateTransactionDto.DocumentId > 0)
-        {
-            var document = await taxFilerContext.Documents.SingleAsync(d => d.Id == updateTransactionDto.DocumentId);
-
-            if (document.Skonto is > 0)
-            {
-                var netAmountSkonto = document.SubTotal.GetValueOrDefault() *
-                    (100 - document.Skonto.GetValueOrDefault()) / 100;
-
-                updateTransactionDto.NetAmount = Math.Round(netAmountSkonto, 2);
-                updateTransactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
-                updateTransactionDto.TaxAmount = updateTransactionDto.GrossAmount - updateTransactionDto.NetAmount;
-            }
-            else
-            {
-                updateTransactionDto.NetAmount = document.SubTotal.GetValueOrDefault();
-                updateTransactionDto.TaxAmount = document.TaxAmount.GetValueOrDefault();
-                updateTransactionDto.TaxRate = document.TaxRate.GetValueOrDefault();
-            }
-        }
 
         TransactionMapper.UpdateTransaction(transaction, updateTransactionDto);
         await taxFilerContext.SaveChangesAsync();
@@ -186,13 +172,112 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             .Where(t => t.TaxYear == yearMonth.Year && t.TaxMonth == yearMonth.Month)
             .ExecuteDeleteAsync();
 
+    /// <inheritdoc />
+    public async Task<Result<modelDto.TransactionDocumentDto>> AddDocumentToTransactionAsync(
+        int transactionId,
+        modelDto.AddDocumentToTransactionDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var transaction = await taxFilerContext.Transactions
+            .Include(t => t.TransactionDocuments)
+            .FirstOrDefaultAsync(t => t.Id == transactionId, cancellationToken);
+
+        if (transaction == null)
+        {
+            return Result.Fail($"Transaction {transactionId} not found");
+        }
+
+        var document = await taxFilerContext.Documents
+            .FirstOrDefaultAsync(d => d.Id == dto.DocumentId, cancellationToken);
+
+        if (document == null)
+        {
+            return Result.Fail($"Document {dto.DocumentId} not found");
+        }
+
+        if (transaction.TransactionDocuments.Any(td => td.DocumentId == dto.DocumentId))
+        {
+            return Result.Fail($"Document {dto.DocumentId} is already linked to transaction {transactionId}");
+        }
+
+        var existing = transaction.TransactionDocuments
+            .OrderBy(td => td.Sequence)
+            .ToList();
+
+        var maxSequence = existing.Count == 0 ? 0 : existing.Max(td => td.Sequence);
+
+        // Append by default. An explicit sequence is honored only when it sits beyond
+        // the current end of the collection, which avoids renumbering collisions with
+        // the per-transaction unique (TransactionId, Sequence) constraint.
+        var sequence = dto.Sequence is > 0 && dto.Sequence > maxSequence
+            ? dto.Sequence.Value
+            : maxSequence + 1;
+
+        var association = new TransactionDocument
+        {
+            TransactionId = transactionId,
+            DocumentId = document.Id,
+            Sequence = sequence,
+            AssignedAt = DateTime.UtcNow,
+            Notes = dto.Notes
+        };
+
+        taxFilerContext.TransactionDocuments.Add(association);
+
+        // When the document becomes the primary (first) document, mirror its tax
+        // data onto the transaction, matching the legacy single-document behavior.
+        if (sequence == 1)
+        {
+            ApplyDocumentTaxData(transaction, document.SubTotal, document.TaxAmount, document.TaxRate, document.Skonto);
+        }
+
+        await taxFilerContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok(association.ToDto());
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> RemoveDocumentFromTransactionAsync(
+        int transactionId,
+        int documentId,
+        CancellationToken cancellationToken = default)
+    {
+        var link = await taxFilerContext.TransactionDocuments
+            .FirstOrDefaultAsync(td => td.TransactionId == transactionId && td.DocumentId == documentId, cancellationToken);
+
+        if (link == null)
+        {
+            return Result.Fail($"Document {documentId} is not linked to transaction {transactionId}");
+        }
+
+        taxFilerContext.TransactionDocuments.Remove(link);
+        await taxFilerContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok();
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<modelDto.TransactionDocumentDto>> GetTransactionDocumentsAsync(
+        int transactionId,
+        CancellationToken cancellationToken = default)
+    {
+        var links = await taxFilerContext.TransactionDocuments
+            .Include(td => td.Document)
+            .Where(td => td.TransactionId == transactionId)
+            .OrderBy(td => td.Sequence)
+            .ToListAsync(cancellationToken);
+
+        return links.Select(td => td.ToDto()).ToList();
+    }
+
     public async Task<modelDto.AutoAssignResult> AutoAssignDocumentsAsync(DateOnly yearMonth, CancellationToken cancellationToken = default)
     {
         // 1. Query unmatched transactions for the month
         var unmatchedTransactions = await taxFilerContext.Transactions
+            .Include(t => t.TransactionDocuments)
             .Where(t => t.TransactionDateTime.Year == yearMonth.Year 
                      && t.TransactionDateTime.Month == yearMonth.Month
-                     && t.DocumentId == null)
+                     && !t.TransactionDocuments.Any())
             .OrderBy(t => t.TransactionDateTime)
             .ToListAsync(cancellationToken);
         
@@ -218,7 +303,19 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
                     
                     if (bestMatch != null && bestMatch.MatchScore >= 0.5)
                     {
-                        transaction.DocumentId = bestMatch.Document.Id;
+                        var document = bestMatch.Document;
+                        var association = new TransactionDocument
+                        {
+                            TransactionId = transaction.Id,
+                            DocumentId = document.Id,
+                            Sequence = 1,
+                            AssignedAt = DateTime.UtcNow
+                        };
+                        taxFilerContext.TransactionDocuments.Add(association);
+
+                        // Copy tax data from document to transaction (same logic as AddDocumentToTransactionAsync)
+                        ApplyDocumentTaxData(transaction, document.SubTotal, document.TaxAmount, document.TaxRate, document.Skonto);
+                        
                         assignedCount++;
                     }
                     else
@@ -253,5 +350,44 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
             SkippedCount = skippedCount,
             Errors = errors
         };
+    }
+
+    /// <summary>
+    /// Returns the first (primary) document linked to the transaction, or null.
+    /// </summary>
+    private static Document? PrimaryDocument(Transaction transaction)
+    {
+        return transaction.TransactionDocuments?
+            .OrderBy(td => td.Sequence)
+            .Select(td => td.Document)
+            .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Mirrors a document's tax-relevant fields onto the transaction, applying the
+    /// Skonto discount when present. Mirrors the legacy single-document behavior.
+    /// </summary>
+    private static void ApplyDocumentTaxData(
+        Transaction transaction,
+        decimal? subTotal,
+        decimal? taxAmount,
+        decimal? taxRate,
+        decimal? skonto)
+    {
+        if (skonto is > 0)
+        {
+            var netAmountSkonto = subTotal.GetValueOrDefault() *
+                (100 - skonto.GetValueOrDefault()) / 100;
+
+            transaction.NetAmount = Math.Round(netAmountSkonto, 2);
+            transaction.TaxRate = taxRate.GetValueOrDefault();
+            transaction.TaxAmount = transaction.GrossAmount - transaction.NetAmount;
+        }
+        else
+        {
+            transaction.NetAmount = subTotal.GetValueOrDefault();
+            transaction.TaxAmount = taxAmount.GetValueOrDefault();
+            transaction.TaxRate = taxRate.GetValueOrDefault();
+        }
     }
 }
