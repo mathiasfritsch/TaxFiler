@@ -1,52 +1,44 @@
-using CsvHelper.Configuration.Attributes;
+using CsvHelper;
 
 namespace TaxFiler.Model.Csv;
 
-public class TranactionReportDto
+[CsvRecord]
+public partial class TranactionReportDto
 {
-    [Name("Nettobetrag")]
-    [Ignore]
+    [CsvIgnore]
     public decimal NetAmount { get; set; }
-    
-    [Index(3)]
-    [Name("Zahlungsbetrag")]
+
+    [CsvColumn("Zahlungsbetrag", Index = 3)]
     public decimal GrossAmount { get; set; }
-    
-    [Index(6)]
-    [Name("UST")]
+
+    [CsvColumn("UST", Index = 6)]
     public decimal TaxAmount { get; set; }
-    
-    [Index(5)]
-    [Name("Mwst Satz")]
+
+    [CsvColumn("Mwst Satz", Index = 5)]
     public decimal TaxRate { get; set; }
-    
-    [Index(7)]
-    [Name("Transaktionsreferenz")]
+
+    [CsvColumn("Transaktionsreferenz", Index = 7)]
     public required string TransactionReference { get; set; }
-    
-    [Index(0)]
-    [Name("Buchungsdatum")]
-    [Format("yyyy-MM-dd")]
+
+    [CsvColumn("Buchungsdatum", Index = 0)]
+    [CsvFormat("yyyy-MM-dd")]
     public DateTime TransactionDateTime { get; set; }
-    
-    [Index(2)]
-    [Name("Beschreibung")]
+
+    [CsvColumn("Beschreibung", Index = 2)]
     public required string TransactionNote { get; set; }
-    
-    [Name("Ausgehend")]
-    
+
+    [CsvColumn("Ausgehend")]
     public bool IsOutgoing { get; set; }
-    [Name("Ust relevant")]
-    
+
+    [CsvColumn("Ust relevant")]
     public bool IsIncomeTaxRelevant { get; set; }
-    [Name("Einkommenssteuer relevant")]
+
+    [CsvColumn("Einkommenssteuer relevant")]
     public bool IsSalesTaxRelevant { get; set; }
-    
-    [Index(4)]
-    [Name("Begleitende Dokumente")]
+
+    [CsvColumn("Begleitende Dokumente", Index = 4)]
     public required string DocumentName { get; set; }
-    
-    [Index(1)]
-    [Name("Auftraggeber/Empfaenger")]
+
+    [CsvColumn("Auftraggeber/Empfaenger", Index = 1)]
     public required string SenderReceiver { get; set; }
 }

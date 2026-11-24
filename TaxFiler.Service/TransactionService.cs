@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text;
 using CsvHelper;
-using CsvHelper.Configuration;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using TaxFiler.DB;
@@ -15,11 +14,11 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 {
     public IEnumerable<TransactionDto> ParseTransactions(TextReader reader)
     {
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        var options = new CsvReaderOptions
         {
-            Delimiter = ";"
+            Separator = ';'
         };
-        using var csv = new CsvReader(reader, config);
+        using var csv = CsvReader.Create(reader, options);
         var transactions = csv.GetRecords<TransactionDto>();
 
         var retVaue = transactions.Select(t => new TransactionDto
@@ -74,13 +73,7 @@ public class TransactionService(TaxFilerContext taxFilerContext, IDocumentMatchi
 
         await using var writer = new StreamWriter(memoryStream, leaveOpen: true);
 
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = ",",
-            Encoding = Encoding.UTF8
-        };
-
-        await using var csv = new CsvWriter(writer, config);
+        await using var csv = CsvWriter.Create(writer);
 
         await csv.WriteRecordsAsync(transactionReportDtos);
         await writer.FlushAsync();
