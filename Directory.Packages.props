@@ -23,6 +23,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="CsvHelper" Version="34.1.0" />
+    <PackageVersion Include="ClosedXML" Version="0.105.1" />
     <PackageVersion Include="FluentResults" Version="4.0.0" />
     <PackageVersion Include="Google.Apis.Drive.v3" Version="1.78.0.4327" />
     <PackageVersion Include="coverlet.collector" Version="10.1.1">

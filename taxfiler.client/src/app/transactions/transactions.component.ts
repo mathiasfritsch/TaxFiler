@@ -270,7 +270,7 @@ export class TransactionsComponent  implements  OnInit{
   }
 
   downloadReport() {
-    let url = `/api/transactions/download?yearMonth=${this.yearMonth}`;
+    let url = `/api/transactions/downloadExcel?yearMonth=${this.yearMonth}`;
     if (this.accountId) {
       url += `&accountId=${this.accountId}`;
     }

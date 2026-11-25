@@ -41,4 +41,7 @@ public partial class TranactionReportDto
 
     [CsvColumn("Auftraggeber/Empfaenger", Index = 1)]
     public required string SenderReceiver { get; set; }
+
+    [CsvIgnore]
+    public string? AccountName { get; set; }
 }
