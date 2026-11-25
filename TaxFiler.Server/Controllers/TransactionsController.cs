@@ -31,6 +31,16 @@ public class TransactionsController(ITransactionService transactionService) : Co
 
         return File(memoryStream, "text/csv", fileName);
     }
+
+    [HttpGet("DownloadExcel")]
+    public async Task<FileResult> DownloadExcel(DateOnly yearMonth)
+    {
+        var memoryStream = await transactionService.CreateExcelFileAsync(yearMonth);
+
+        var fileName = $"Umsätze-{yearMonth:MM-yyyy}.xlsx";
+
+        return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
     
     
     [SwaggerIgnore]
